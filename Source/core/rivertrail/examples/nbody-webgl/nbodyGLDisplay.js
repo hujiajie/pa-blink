@@ -26,6 +26,8 @@
  */
 
 "use strict";
+var requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+
 NBody.display = {
     "gl": null,
     "colorFloat32": null,
@@ -389,7 +391,7 @@ NBody.display = {
         NBody.display.drawScene();
         NBody.display.animateViewPoint();
         NBody.display.animate();
-        window.mozRequestAnimationFrame(NBody.display.tick); // window.setTimeout(tick, 1000/60);
+        requestAnimationFrame(NBody.display.tick); // window.setTimeout(tick, 1000/60);
     },
 
     "currentlyPressedKeys": {},

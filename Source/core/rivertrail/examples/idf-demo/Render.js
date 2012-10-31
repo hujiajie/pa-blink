@@ -334,11 +334,11 @@ function onResize() {
 // initial Field of View 
 var tFov = 3;
 var cameraEaseIn = 0;
-
+var requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
 
 // kickoff the render loop
 function animateThree() {
-    window.mozRequestAnimationFrame(animateThree);    
+    requestAnimationFrame(animateThree);    
     NBody.display.tick();
     render();
 }
