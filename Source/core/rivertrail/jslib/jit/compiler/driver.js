@@ -38,6 +38,9 @@ if (RiverTrail === undefined) {
     var RiverTrail = {};
 }
 
+var useFF4Interface;
+var useCrInterface;
+
 RiverTrail.compiler = (function () {
     // This is the compiler driver proper. 
     
@@ -52,10 +55,32 @@ RiverTrail.compiler = (function () {
     var suppressOpenCL = false;
 
     var openCLContext; 
-    var dpoInterface; 
+    var dpoInterface;
     var dpoPlatform;
     try {
-        dpoInterface = new DPOInterface();
+        var Sys = {};
+        var ua = navigator.userAgent.toLowerCase();
+        var s;
+        var chrome = false;
+        var firefox = false;
+        (s = ua.match(/firefox\/([\d.]+)/)) ? firefox = true :
+        (s = ua.match(/chrome\/([\d.]+)/)) ? chrome = true : 0;
+
+        if (firefox && Components.interfaces.dpoIInterface !== undefined) {
+            useFF4Interface = true;
+        }else if (chrome && CInterface !== undefined) {
+            useCrInterface = true;
+        }
+    } catch (e) {
+        console.log("Cannot initialise OpenCL interface. Please check the whether the extension was installed and try again.");
+        throw Error("Cannot initialise OpenCL Interface: " + JSON.stringify(e));
+   }
+
+    try {
+        if (useFF4Interface)
+            dpoInterface = new DPOInterface();
+        else if (useCrInterface)
+            dpoInterface = new CInterface();
         dpoPlatform = dpoInterface.getPlatform(); 
         openCLContext = dpoPlatform.createContext();
     } catch (e) {

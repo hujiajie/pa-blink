@@ -32,7 +32,7 @@ if (RiverTrail === undefined) {
 
 // Executes the kernel function with the ParallelArray this and the args for the elemental function
 // paSource     - 'this' inside the kernel
-// kernelString - either a JavaScript code string or a precompiled kernel (dpoIKernel object)
+// kernelString - either a JavaScript code string or a precompiled kernel (dpoIKernel/CKernel object)
 // ast          - result from parsing
 // f            - function to compile
 // construct    - outer construct in {combine,,map,comprehension,comprehensionScalar}
@@ -44,7 +44,7 @@ RiverTrail.compiler.runOCL = function () {
 
     // Executes the kernel function with the ParallelArray this and the args for the elemental function
     // paSource     - 'this' inside the kernel
-    // kernelString - either a JavaScript code string or a precompiled kernel (dpoIKernel object)
+    // kernelString - either a JavaScript code string or a precompiled kernel (dpoIKernel/CKernel object)
     // ast          - result from parsing
     // f            - function to compile
     // construct    - outer construct in {combine,map,comprehension,comprehensionScalar}
@@ -63,6 +63,25 @@ RiverTrail.compiler.runOCL = function () {
         if (!kernelName) {
             throw new Error("Invalid ast: Function expected at top level");
         }
+
+
+        var Sys = {};
+        var ua = navigator.userAgent.toLowerCase();
+        var s;
+        var chrome = false;
+        var firefox = false;
+        (s = ua.match(/firefox\/([\d.]+)/)) ? firefox = true :
+        (s = ua.match(/chrome\/([\d.]+)/)) ? chrome = true : 0;
+        var InterfaceData;
+        var InterfaceKernel;
+        if (firefox) {
+            InterfaceData = Components.interfaces.dpoIData;
+            InterfaceKernel = Components.interfaces.dpoIKernel;
+        } else if (chrome) {
+            InterfaceData = CData;
+            InterfaceKernel = CKernel;
+        }
+
         if ((construct === "comprehension") || (construct === "comprehensionScalar")) {
             // comprehensions do not have a source, so we derive the required information
             // from rank and the ast
@@ -77,7 +96,7 @@ RiverTrail.compiler.runOCL = function () {
         // construct kernel arguments
         var jsObjectToKernelArg = function (args, object) {
             if (object instanceof ParallelArray) {
-                if (object.data instanceof Components.interfaces.dpoIData) {
+                if (object.data instanceof InterfaceData) {
                     // we already have an OpenCL value
                     args.push(object.data);
                 } else if (RiverTrail.Helper.isTypedArray(object.data)) {
@@ -152,10 +171,10 @@ RiverTrail.compiler.runOCL = function () {
             if (++paSource.updateInPlaceUses !== 1) {
                 throw new Error("preallocated memory used more than once!");
             }
-            if (!(paSource.updateInPlacePA.data instanceof Components.interfaces.dpoIData)) {
+            if (!(paSource.updateInPlacePA.data instanceof InterfaceData)) {
                 paSource.updateInPlacePA.data = RiverTrail.compiler.openCLContext.mapData(paSource.updateInPlacePA.data);
             }
-            resultMem = {mem: paSource.updateInPlacePA.data, shape: resShape, type: RiverTrail.Helper.stripToBaseType(type.OpenCLType)};
+            resultMem = { mem: paSource.updateInPlacePA.data, shape: resShape, type: RiverTrail.Helper.stripToBaseType(type.OpenCLType) };
             kernelArgs.push(resultMem);
             kernelArgs.push(new RiverTrail.Helper.Integer(paSource.updateInPlaceOffset));
         } else {
@@ -172,7 +191,7 @@ RiverTrail.compiler.runOCL = function () {
                 var memObj = RiverTrail.compiler.openCLContext.allocateData(new template(1), shapeToLength(resShape));
                 kernelArgs.push(memObj);
                 kernelArgs.push(new RiverTrail.Helper.Integer(0));
-                return {mem: memObj, shape: resShape, type: resultElemType};
+                return { mem: memObj, shape: resShape, type: resultElemType };
             };
 
             // We allocate whatever the result type says. To ensure portability of 
@@ -189,7 +208,7 @@ RiverTrail.compiler.runOCL = function () {
             }
         }
         // build kernel
-        if (kernelString instanceof Components.interfaces.dpoIKernel) {
+        if (kernelString instanceof InterfaceKernel) {
             kernel = kernelString;
         } else {
             try {
@@ -241,7 +260,7 @@ RiverTrail.compiler.runOCL = function () {
                     // console.log("index: ", index, " arg.value: ", arg.value);
                     kernel.setScalarArgument(index, arg.value, true, false);
                     // console.log("good");
-                } else if (arg instanceof Components.interfaces.dpoIData) {
+                } else if (arg instanceof InterfaceData) {
                     kernel.setArgument(index, arg);
                 } else {
                     throw new Error("unexpected kernel argument type!");
@@ -271,7 +290,7 @@ RiverTrail.compiler.runOCL = function () {
         } else {
             alert("runOCL only deals with comprehensions, map and combine (so far).");
         }
-        if (resultMem.mem && (resultMem.mem instanceof Components.interfaces.dpoIData)) {
+        if (resultMem.mem && (resultMem.mem instanceof InterfaceData)) {
             // single result
             paResult = new ParallelArray(resultMem.mem, resultMem.shape, resultMem.type);
         } else {

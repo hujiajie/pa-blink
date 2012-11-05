@@ -119,22 +119,45 @@ var ParallelArray = function () {
 
     // check whether the new extension is installed.
     var useFF4Interface = false;
+    var useCrInterface = false;
+    var Sys = {};
+    var ua = navigator.userAgent.toLowerCase();
+    var s;
+    var chrome = false;
+    var firefox = false;
+    (s = ua.match(/firefox\/([\d.]+)/)) ? firefox = true :
+    (s = ua.match(/chrome\/([\d.]+)/)) ? chrome = true : 0;
+
     try {
-        if (Components.interfaces.dpoIInterface !== undefined) {
+        if (firefox && Components.interfaces.dpoIInterface !== undefined) {
             useFF4Interface = true;
+        } else if (chrome && CInterface !== undefined) {
+            useCrInterface = true;
         }
     } catch (ignore) {
         // useFF4Interface = false;
+        // useCrInterface = false;
     }
+
+    var InterfaceData;
+    if (useFF4Interface)
+        InterfaceData = Components.interfaces.dpoIData;
+    else if (useCrInterface)
+        InterfaceData = CData;
+    var useInterface = useCrInterface || useFF4Interface;
+
     // check whether the OpenCL implementation supports double
     var enable64BitFloatingPoint = false;
-    if (useFF4Interface) { 
+    if (useInterface) {
         var dpoI; 
         var dpoP; 
         try {
-            dpoI = new DPOInterface();
+            if (useFF4Interface)
+              dpoI = new DPOInterface();
+            else if (useCrInterface)
+              dpoI = new CInterface();
         } catch (e) {
-            console.log("Unable to create new DPOInterface(): "+e);
+            console.log("Unable to create new DPOInterface()/CInterface(): "+e);
         }
 
         try {
@@ -147,10 +170,11 @@ var ParallelArray = function () {
             // eat the problem after you announce it to the console log.
         }
     }
+
     // this is the storage that is used by default when converting arrays 
     // to typed arrays.
     var defaultTypedArrayConstructor 
-    = useFF4Interface ? (enable64BitFloatingPoint ? Float64Array : Float32Array)
+    = useInterface ? (enable64BitFloatingPoint ? Float64Array : Float32Array)
                     : Array;
     // the default type assigned to JavaScript numbers
     var defaultNumberType = enable64BitFloatingPoint ? "double" : "float";
@@ -205,7 +229,7 @@ var ParallelArray = function () {
     // If this.data is a OpenCL memory object, grab the values and store the OpenCL memory 
     // object in the cache for later use.
     var materialize = function materialize() {
-        if (useFF4Interface && (this.data instanceof Components.interfaces.dpoIData)) {
+        if (useInterface && (this.data instanceof InterfaceData)) {
             // we have to first materialise the values on the JavaScript side
             var cachedOpenCLMem = this.data;
             this.data = cachedOpenCLMem.getValue();
@@ -1129,7 +1153,7 @@ var ParallelArray = function () {
                 privateThis = this.get(1);
                 callArguments[0] = rawResult[0];
                 rawResult[1] = f.apply(privateThis, callArguments);
-                if ((rawResult[1].data instanceof Components.interfaces.dpoIData) && 
+                if ((rawResult[1].data instanceof InterfaceData) &&
                     equalsShape(rawResult[0].getShape(), rawResult[1].getShape())) {
                     // this was computed by openCL and the function is shape preserving.
                     // Try to preallocate and compute the result in place!
@@ -1475,7 +1499,7 @@ var ParallelArray = function () {
             var currImage = context.getImageData(0, 0, canvas.width, canvas.height);
             var imageData = context.createImageData(currImage.width, currImage.height);
             var data = imageData.data;
-            if (useFF4Interface && (this.data instanceof Components.interfaces.dpoIData)) {
+            if (useInterface && (this.data instanceof InterfaceData)) {
                 this.data.writeTo(data);
             } else {
                 for (var i = 0; i < this.data.length; i++) {
@@ -1924,7 +1948,7 @@ var ParallelArray = function () {
             result.elementalType = arguments[1].elementalType;
             result.data = arguments[1].data;
             result.flat = arguments[1].flat;
-        } else if (useFF4Interface && (arguments[0] instanceof Components.interfaces.dpoIData)) {
+        } else if (useInterface && (arguments[0] instanceof InterfaceData)) {
             result = createOpenCLMemParallelArray.apply(this, arguments);
         } else if (typeof(arguments[1]) === 'function') {    
             var extraArgs;
@@ -1962,7 +1986,7 @@ var ParallelArray = function () {
             } catch (ignore) {}
         }
 
-        if (useFF4Interface && (result.data instanceof Components.interfaces.dpoIData)) {
+        if (useInterface && (result.data instanceof InterfaceData)) {
             if (useLazyCommunication) {
                 // wrap all functions that need access to the data
                 requiresData(result, "get");
