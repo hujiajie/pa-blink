@@ -187,7 +187,7 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
     unsigned result;
 
     //sourceStr = (char*) source.ascii().data();
-    CString temp1 = source.ascii();//FIX ME
+    CString temp1 = source.utf8();//FIX ME
     sourceStr = temp1.data();
 
     DEBUG_LOG_STATUS("compileKernel", "Source: " << sourceStr);
@@ -198,7 +198,7 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
     }
 
     //optionsStr = (char*) options.
-    CString temp2 = options.ascii();//FIX ME
+    CString temp2 = options.utf8();//FIX ME
     optionsStr = temp2.data();
 
     err_code = clBuildProgram(program, 0, 0, optionsStr, 0, 0);
@@ -251,7 +251,7 @@ DONE:
         free(devices);
 
     //kernelNameStr = (char*) kernelName.ascii().data();
-    CString temp3 = kernelName.ascii();//FIX ME
+    CString temp3 = kernelName.utf8();//FIX ME
     kernelNameStr = temp3.data();
 
     kernel = clCreateKernel(program, kernelNameStr, &err_code);
