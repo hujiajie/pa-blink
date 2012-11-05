@@ -31,23 +31,17 @@
       var arr_2 = arg2.getValue();
       document.write(arr_2[2]);
       
-      document.write("<br />allocateData:   vec3[2]: ");
       var templ = new Float32Array([1]);
       var arg3 = co.allocateData(templ, 3);
-      var arr_3 = arg3.getValue();
-      document.write(arr_3[2]);
       
-      document.write("<br />allocateData2:   arr_4[3]: ");
       var arg4 = co.allocateData2(arg1, 4);
-      var arr_4 = arg4.getValue();
-      document.write(arr_4[3]);
       
       document.write("<br />canBeMapped: ");
       var can = co.canBeMapped(arr1);
       document.write(can);
       document.write("<br />");
       
-      ke = co.compileKernel("__kernel void add_vector( __global const float *vec1, __global const float *vec2, const int dims, __global float *vec3 ) { int idx; idx = get_global_id( 0 ); if( idx < dims ) vec3[ idx ] = vec1[ idx ] + vec2[ idx ]; }","add_vector","-cl-opt-disable");
+      ke = co.compileKernel("__kernel void add_vector( __global const float *vec1, __global const float *vec2, const int dims, __global float *vec3 ) { int idx; idx = get_global_id( 0 ); if( idx < dims ) vec3[ idx ] = vec1[ idx ] + vec2[ idx ]; }","add_vector");
       //kernelStr = "__kernel void add_vector( __global const float *vec1, __global const float *vec2, const int dims, __global float *vec3 ) { int idx; idx = get_global_id( 0 ); if( idx < dims ) vec3[ idx ] = vec1[ idx ] + vec2[ idx ]; }" 
       //kernelStr = "__kernel void add( const int dims, const double x ) { int a = 0 ; int idx; idx = get_global_id( 0 ); if( idx == dims ) a=a+x; }";
       //nameStr = "add";
@@ -79,7 +73,6 @@
       var out2 = arg2.getValue();
       document.write("<br/>vec2: "+out2[0]+","+out2[1]+","+out2[2]);
       
-      document.write("<br/>TRY refreshing the page, and vec3 will change . NEED FIXING");
       var out3 = arg3.getValue();
       document.write("<br/>vec3=vec1+vec2: "+out3[0]+","+out3[1]+","+out3[2]);
       document.write("<br />");
