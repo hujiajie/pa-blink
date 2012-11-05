@@ -263,6 +263,11 @@
 #if defined(ENABLE_ORIENTATION_EVENTS) && ENABLE_ORIENTATION_EVENTS
     attribute EventListener onorientationchange;
 #endif
+    attribute CContextConstructor CContext;
+    attribute CDataConstructor CData;
+    attribute CInterfaceConstructor CInterface;
+    attribute CKernelConstructor CKernel;
+  
     [EnabledAtRuntime=touch] attribute EventListener ontouchstart;
     [EnabledAtRuntime=touch] attribute EventListener ontouchmove;
     [EnabledAtRuntime=touch] attribute EventListener ontouchend;
@@ -316,6 +321,5 @@
 
     [ImplementedAs=anonymousIndexedGetter, NotEnumerable] getter Window(unsigned long index);
     [Custom, NotEnumerable] getter Window (DOMString name);
-    attribute CInterfaceConstructor CInterface;
 };
 

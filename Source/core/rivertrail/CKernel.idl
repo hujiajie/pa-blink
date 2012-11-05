@@ -1,7 +1,8 @@
-module window {
+module rivertrail {
 
     interface [
-        OmitConstructor
+        V8CustomConstructor,
+        ConstructorParameters=1
     ] CKernel {
         boolean setArgument( in unsigned long number, in CData argument);
         [V8Custom] boolean setScalarArgument( in unsigned long number, in DOMObject argument, in DOMObject isInteger, in DOMObject highPrecision);

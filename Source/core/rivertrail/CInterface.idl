@@ -1,4 +1,4 @@
-module window {
+module rivertrail {
  
     interface [
         CustomConstructor

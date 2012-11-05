@@ -1,11 +1,35 @@
 #include "config.h"
 #include "V8CKernel.h"
 
+#include "CContext.h"
 #include "CKernel.h"
 #include "V8Binding.h"
+#include "V8CContext.h"
 #include "V8Proxy.h"
 
 namespace WebCore {
+
+v8::Handle<v8::Value> V8CKernel::constructorCallback(const v8::Arguments& args)
+{
+    INC_STATS("DOM.CKernel.Constructor");
+
+    if (!args.IsConstructCall())
+        return V8Proxy::throwTypeError("DOM object constructor cannot be called as a function.", args.GetIsolate());
+
+    if (ConstructorMode::current() == ConstructorMode::WrapExistingObject)
+        return args.Holder();
+
+    if (args.Length() != 1)
+        return V8Proxy::throwError(V8Proxy::GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
+    if (!V8CContext::HasInstance(args[0]))
+        return V8Proxy::throwError(V8Proxy::GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
+
+    CContext* parent = V8CContext::toNative(v8::Handle<v8::Object>::Cast(args[0]));
+    RefPtr<CKernel> cKernel = CKernel::create(parent);
+    V8DOMWrapper::setDOMWrapper(args.Holder(), &info, cKernel.get());
+    V8DOMWrapper::setJSWrapperForDOMObject(cKernel.release(), v8::Persistent<v8::Object>::New(args.Holder()));
+    return args.Holder();
+}
 
 v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& args)
 {
