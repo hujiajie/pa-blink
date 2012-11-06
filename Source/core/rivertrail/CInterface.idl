@@ -1,7 +1,7 @@
 module rivertrail {
  
     interface [
-        CustomConstructor
+        V8CustomConstructor
     ] CInterface {
         CPlatform getPlatform();
 
