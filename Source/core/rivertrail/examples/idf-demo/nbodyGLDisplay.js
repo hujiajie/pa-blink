@@ -39,7 +39,7 @@ var displayInit = false;
 var justSwitched = true;
 var switchedCount = 0;
 
-"use strict";
+// "use strict";
 NBody.display = {
     "gl": null,
     "colorFloat32": null,

@@ -25,7 +25,7 @@
  *
  */
 
-"use strict";
+// "use strict";
 var requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
 
 NBody.display = {

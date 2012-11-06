@@ -86,7 +86,7 @@ RiverTrail.compiler.codeGen = (function() {
     // If you are working inside the top level of actual kernel function then scope is empty.
     // If you generating code for a called function then this will be true.
     var calledScope = function () {
-        "use strict";
+        // "use strict";
         // state is private.
         var state = false;
         var enter = function enter(name) {
@@ -131,7 +131,7 @@ RiverTrail.compiler.codeGen = (function() {
     //
 
     var genFormalParams = function (formalsAst, construct) {
-        "use strict";
+        // "use strict";
         if (calledScope.inCalledScope()) {
             return genNonKernelFormalParams(formalsAst);
         } else {
@@ -140,7 +140,7 @@ RiverTrail.compiler.codeGen = (function() {
     };
     // This is for called functions, not the top level kernel function.
     var genNonKernelFormalParams = function (formalsAst) {
-        "use strict";
+        // "use strict";
         var i;
         var s = "";
         var formalsNames = formalsAst.params;
@@ -162,7 +162,7 @@ RiverTrail.compiler.codeGen = (function() {
     };
 
     var genKernelFormalParams = function (formalsAst, construct) {
-        "use strict";
+        // "use strict";
         var i;
         var s = "";
         var formalsNames = formalsAst.params;
@@ -206,7 +206,7 @@ RiverTrail.compiler.codeGen = (function() {
     };
 
     var adjustFormalsWithOffsets = function (formalsAst, construct) {
-        "use strict";
+        // "use strict";
         var i;
         var s = "";
         var start = 0;
@@ -243,7 +243,7 @@ RiverTrail.compiler.codeGen = (function() {
     // Some kernel function formals are calculated in the body, for example index argument to combine and the value
     // argument to map.
     var genFormalRelativeArg = function (funDecl, construct) { //formalsName, formalsType, formalsTypeProperties, construct) {
-        "use strict";
+        // "use strict";
         var i;
         var dimSizes;
         var s = " ";
@@ -299,7 +299,7 @@ RiverTrail.compiler.codeGen = (function() {
         // 
         //
         function genCalledFunctionHeader(ast) {
-            "use strict";
+            // "use strict";
             var s = "";
             var formals = "";
 
@@ -342,7 +342,7 @@ RiverTrail.compiler.codeGen = (function() {
         };
 
         function genCalledFunction(ast) {
-            "use strict";
+            // "use strict";
             var s = "";
 
             var previousCalledScope = calledScope.inCalledScope();
@@ -503,7 +503,7 @@ RiverTrail.compiler.codeGen = (function() {
         var boilerplate = null; // Set to the template based on the construct being compiled. 
 
         function genKernel (ast, pa, rank, construct) {
-            "use strict";
+            // "use strict";
             var kernelCode;
             try {        
                 kernelCode = prelude + genKernelHelper(ast, pa, rank, construct);
@@ -558,7 +558,7 @@ RiverTrail.compiler.codeGen = (function() {
         //    rankOrShape - rank of iteration space, or in the case of comprehensions the shape of the iteration space
         //    construct   - construct to be compiled
         function genKernelHelper (ast, pa, rankOrShape, construct) {
-            "use strict";
+            // "use strict";
 
             var s = ""; // The kernel string
             var name = ast.name;
@@ -748,7 +748,7 @@ RiverTrail.compiler.codeGen = (function() {
 
 
         function genReturn (ast) {
-            "use strict";
+            // "use strict";
             if (calledScope.inCalledScope()) {
                 return genSimpleReturn(ast);
             } else {
@@ -759,7 +759,7 @@ RiverTrail.compiler.codeGen = (function() {
         // Generate a return from a function the kernel calls.
         // This function is obsolete. It is here only for reference - JS
         function genSimpleReturn_old (ast) {
-            "use strict";
+            // "use strict";
             var s = " ";
             var rhs;
             var i;
@@ -806,7 +806,7 @@ RiverTrail.compiler.codeGen = (function() {
         var isArrayLiteral = RiverTrail.Helper.isArrayLiteral;
 
         function genSimpleReturn(ast) {
-            "use strict";
+            // "use strict";
             var s = " ";
             var elements;
             var rhs;    // right-hand-side
@@ -964,7 +964,7 @@ RiverTrail.compiler.codeGen = (function() {
         // it in retval.
 
         function genKernelReturn(ast) {
-            "use strict";
+            // "use strict";
             var s = " ";
             var elements;
             var rhs;    // right-hand-side
@@ -1083,14 +1083,14 @@ RiverTrail.compiler.codeGen = (function() {
         //-------------------------------------------------------------------------------------------------
 
     function genOCL(ast) {
-       "use strict";
+       // "use strict";
         var s = "";
         console.log("Call to genOCL line 1456 that probable shouldn't be there");
         return s;
     }
 
     function oclStatements(statements) {
-        "use strict";
+        // "use strict";
         var i;
         var x;
         var s = "";
@@ -1221,7 +1221,7 @@ RiverTrail.compiler.codeGen = (function() {
     //
 
     var compileSelectionOperation = function (ast, source, arrayOfIndices) {
-        "use strict";
+        // "use strict";
 
         var s = "";
         var i;
@@ -1321,7 +1321,7 @@ RiverTrail.compiler.codeGen = (function() {
     //
 
     var mathOCLMethod = function mathOCLMethod (ast) {
-        "use strict";
+        // "use strict";
         var jsMethod = (ast.children[0].children[1].value).toLowerCase();
         if (jsMethod === "abs") { // There is an int abs so we probable should check type here.
             if ((ast.children[1].typeInfo[0].OpenCLType !== "float") &&
@@ -1358,7 +1358,7 @@ RiverTrail.compiler.codeGen = (function() {
     //This is the next thing to do..... Deal today with return this.get(iv); The return calls oclExpression 
 
     function oclExpression(ast) {
-        "use strict";
+        // "use strict";
         var s = " ";
         var i, ii;
         var arrayOfIndices;
@@ -1568,7 +1568,7 @@ RiverTrail.compiler.codeGen = (function() {
 
 
     function pp(n, d, inLetHead) {
-        "use strict";
+        // "use strict";
         console.log("Get rid of this call line 1750.");
         return oclStatement(n);
     }
@@ -1579,7 +1579,7 @@ RiverTrail.compiler.codeGen = (function() {
     //
 
     function oclStatement(ast) {
-        "use strict";
+        // "use strict";
 
         var s = "";
         if (!ast) {

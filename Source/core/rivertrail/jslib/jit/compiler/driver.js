@@ -25,7 +25,7 @@
  *
  */
 
-"use strict";
+// "use strict";
 //
 // Create top level compiler object
 //

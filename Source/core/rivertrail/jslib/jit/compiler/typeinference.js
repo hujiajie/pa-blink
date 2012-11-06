@@ -818,7 +818,7 @@ RiverTrail.Typeinference = function () {
 
     TOp.registry["ParallelArray"] = {
         methodCall : function(thisType, name, tEnv, fEnv, ast) {
-            "use strict";
+            // "use strict";
             var type;
             ast.children[1] = drive(ast.children[1], tEnv, fEnv);
             var argTypes = tEnv.accu;
@@ -976,7 +976,7 @@ RiverTrail.Typeinference = function () {
     // main analysis driver
     //
     function drive(ast, tEnv, fEnv) {
-        "use strict";
+        // "use strict";
 
         var left, right;
 
@@ -1634,7 +1634,7 @@ RiverTrail.Typeinference = function () {
     }
 
     function typeOracle(val) {
-            "use strict";
+            // "use strict";
         var type;
 
         switch (typeof(val)) {

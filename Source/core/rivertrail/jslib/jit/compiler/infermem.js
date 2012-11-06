@@ -239,7 +239,7 @@ RiverTrail.InferMem = function () {
     }
 
     function infer(ast, memVars, ins, outs) {
-        "use strict";
+        // "use strict";
 
         switch (ast.type) {
             case SCRIPT:
