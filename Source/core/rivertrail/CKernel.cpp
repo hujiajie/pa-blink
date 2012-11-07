@@ -57,7 +57,7 @@ unsigned long CKernel::numberOfArgs()
     err_code = clGetKernelInfo(m_kernel, CL_KERNEL_NUM_ARGS, sizeof(cl_uint), &result, NULL);
     if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("GetNumberOfArgs", err_code);
-        return -1;
+        return 10000;
     }
 
     /* skip internal arguments when counting */

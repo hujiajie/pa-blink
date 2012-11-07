@@ -8,6 +8,6 @@ module rivertrail {
         [V8Custom] boolean setScalarArgument( in unsigned long number, in DOMObject argument, in DOMObject isInteger, in DOMObject highPrecision);
         [V8Custom] unsigned long run( in unsigned long rank, in Array shape, in [Optional=DefaultIsUndefined] Array tile);
         
-        readonly attribute unsigned long numberOfArgs;
+        readonly attribute [V8CustomGetter] unsigned long numberOfArgs;
     };
 }

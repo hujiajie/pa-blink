@@ -58,32 +58,32 @@ PassRefPtr<CContext> CPlatform::createContext()
 
 String CPlatform::version()
 {
-    char* aVersion="";
+    char* aVersion="Cannot get version";
     getPlatformPropertyHelper(CL_PLATFORM_VERSION, aVersion);
     return String(aVersion);
 }
 String CPlatform::name()
 {
-    char* aName="";
+    char* aName="Cannot get name";
     getPlatformPropertyHelper(CL_PLATFORM_NAME, aName);
     return String(aName);
     
 }
 String CPlatform::vendor()
 {
-    char* aVendor="";
+    char* aVendor="Cannot get vendor";
     getPlatformPropertyHelper(CL_PLATFORM_VENDOR, aVendor);
     return String(aVendor);
 }       
 String CPlatform::profile()
 {
-    char* aProfile="";
+    char* aProfile="Cannot get profile";
     getPlatformPropertyHelper(CL_PLATFORM_PROFILE, aProfile);
     return String(aProfile);
 }
 String CPlatform::extensions()
 {
-    char* aExtensions="";
+    char* aExtensions="Cannot get extensions";
     getPlatformPropertyHelper(CL_PLATFORM_EXTENSIONS, aExtensions);
     return String(aExtensions);
 }

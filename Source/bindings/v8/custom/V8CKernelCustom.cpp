@@ -85,4 +85,14 @@ v8::Handle<v8::Value> V8CKernel::runCallback(const v8::Arguments& args)
     return v8UnsignedInteger(imp->run(rank, shape, tile), args.GetIsolate());
 }
 
+v8::Handle<v8::Value> V8CKernel::numberOfArgsAccessorGetter(v8::Local<v8::String> name, const v8::AccessorInfo& info)
+{
+    INC_STATS("DOM.CKernel.numberOfArgs._get");
+    CKernel* imp = V8CKernel::toNative(info.Holder());
+    unsigned long number = imp->numberOfArgs();
+    if (number == 10000)
+        return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot get numberOfArgs.", info.GetIsolate());
+    return v8UnsignedInteger(number, info.GetIsolate());
+}
+
 } // namespace WebCore

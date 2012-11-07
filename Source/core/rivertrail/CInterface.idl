@@ -3,7 +3,7 @@ module rivertrail {
     interface [
         V8CustomConstructor
     ] CInterface {
-        CPlatform getPlatform();
+        [V8Custom] CPlatform getPlatform();
 
         readonly attribute unsigned long version;
     };
