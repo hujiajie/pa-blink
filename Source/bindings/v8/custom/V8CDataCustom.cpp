@@ -10,9 +10,11 @@
 #include "V8Float32Array.h"
 #include "V8Float64Array.h"
 #include "V8Proxy.h"
+#include "V8Uint8ClampedArray.h"
 #include <wtf/Float32Array.h>
 #include <wtf/Float64Array.h>
 #include <wtf/RefPtr.h>
+#include <wtf/Uint8ClampedArray.h>
 
 namespace WebCore {
 
@@ -59,6 +61,14 @@ v8::Handle<v8::Value> V8CData::getValueCallback(const v8::Arguments& args)
         return toV8(theArray, args.GetIsolate());
         break;
 		}
+    case TYPE_UINT8_CLAMPED:
+		{
+        Uint8ClampedArray* theArray = imp->getValueUint8ClampedArray();
+        if (!theArray)
+            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray, args.GetIsolate());
+        break;
+		}
     default:
 		{
         return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
@@ -85,6 +95,13 @@ v8::Handle<v8::Value> V8CData::writeToCallback(const v8::Arguments& args)
 		{
         EXCEPTION_BLOCK(Float64Array*, dest, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         imp->writeToFloat64Array(dest);
+        return v8Undefined();
+        break;
+		}
+    case TYPE_UINT8_CLAMPED:
+		{
+        EXCEPTION_BLOCK(Uint8ClampedArray*, dest, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
+        imp->writeToUint8ClampedArray(dest);
         return v8Undefined();
         break;
 		}

@@ -129,6 +129,35 @@ unsigned CData::initCDataFloat64Array(cl_command_queue aQueue, cl_mem aMemObj, u
     return RT_OK;
 }
 
+unsigned CData::initCDataUint8ClampedArray(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray)
+{
+    cl_int err_code;
+
+    m_type = aType;
+    m_length = aLength;
+    m_size = aSize;
+    m_memObj = aMemObj;
+
+    if (anArray.get())
+        m_theUint8ClampedArray = anArray;
+    else
+        m_theUint8ClampedArray.clear();
+
+    DEBUG_LOG_STATUS("initCData", "queue is " << aQueue << " buffer is " << aMemObj);
+
+    err_code = clRetainCommandQueue(m_queue);
+    if (err_code != CL_SUCCESS) {
+        DEBUG_LOG_ERROR("initCData", err_code);
+        // We should really fail here but a bug in the whatif OpenCL
+        // makes the above retain operation always fail.
+        m_isRetained = false;
+    } else
+        m_isRetained = true;
+    m_queue = aQueue;
+
+    return RT_OK;
+}
+
 Float32Array* CData::getValueFloat32Array()
 {
     cl_int err_code;
@@ -231,11 +260,66 @@ Float64Array* CData::getValueFloat64Array()
     }
 }
 
+Uint8ClampedArray* CData::getValueUint8ClampedArray()
+{
+    cl_int err_code;
+#ifdef PREALLOCATE_IN_JS_HEAP
+    void* mem;
+#endif // PREALLOCATE_IN_JS_HEAP
+
+    if (m_theUint8ClampedArray.get()) {
+#ifdef PREALLOCATE_IN_JS_HEAP
+        if (false && !m_isMapped) {
+            DEBUG_LOG_STATUS("getValue", "memory is " << m_theUint8ClampedArray.get());
+            void* mem = clEnqueueMapBuffer(m_queue, m_memObj, CL_TRUE, CL_MAP_READ, 0, m_size, 0, 0, 0, &err_code);
+
+            if (err_code != CL_SUCCESS) {
+                DEBUG_LOG_ERROR("getValue", err_code);
+                return 0;
+            }
+#ifndef DEBUG_OFF
+            if (mem != m_theUint8ClampedArray->data())
+                DEBUG_LOG_STATUS("getValue", "EnqueueMap returned wrong pointer");
+#endif // DEBUG_OFF
+            m_isMapped = true;
+        }
+#endif // PREALLOCATE_IN_JS_HEAP
+        return m_theUint8ClampedArray.get();
+    } else {
+#ifdef INCREMENTAL_MEM_RELEASE
+        checkFree();
+#endif // INCREMENTAL_MEM_RELEASE
+
+        if (m_parent->createAlignedTAUint8ClampedArray(m_type, m_length, m_theUint8ClampedArray) != RT_OK)
+            return 0;
+
+        if (!m_theUint8ClampedArray) {
+            DEBUG_LOG_STATUS("getValue", "Cannot create typed array");
+            return 0;
+        }
+
+        err_code = enqueueReadBuffer(m_size, m_theUint8ClampedArray->data());
+
+        if (err_code != CL_SUCCESS) {
+            DEBUG_LOG_ERROR("getValue", err_code);
+            return 0;
+        }
+
+        DEBUG_LOG_STATUS("getValue", "materialized typed array");
+
+        return m_theUint8ClampedArray.get();
+    }
+}
+
 void CData::writeToFloat32Array(Float32Array* dest)
 {
 }
 
 void CData::writeToFloat64Array(Float64Array* dest)
+{
+}
+
+void CData::writeToUint8ClampedArray(Uint8ClampedArray* dest)
 {
 }
 

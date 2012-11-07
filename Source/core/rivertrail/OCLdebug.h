@@ -32,6 +32,7 @@
 #define RT_ERROR_OUT_OF_MEMORY 3
 #define TYPE_FLOAT32 10
 #define TYPE_FLOAT64 11
+#define TYPE_UINT8_CLAMPED 12
 
 #ifndef DEBUG_OFF
 #include <iostream>

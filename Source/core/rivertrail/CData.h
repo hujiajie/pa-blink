@@ -7,6 +7,7 @@
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
+#include <wtf/Uint8ClampedArray.h>
 
 #include "OCLconfig.h"
 #include "opencl_compat.h"
@@ -22,14 +23,17 @@ public:
 
     unsigned initCDataFloat32Array(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float32Array> anArray);
     unsigned initCDataFloat64Array(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float64Array> anArray);
+    unsigned initCDataUint8ClampedArray(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray);
     cl_mem getContainedBuffer();
     unsigned getType();
     unsigned getSize();
     unsigned getLength();
     Float32Array* getValueFloat32Array();
     Float64Array* getValueFloat64Array();
+    Uint8ClampedArray* getValueUint8ClampedArray();
     void writeToFloat32Array(Float32Array* dest);
     void writeToFloat64Array(Float64Array* dest);
+    void writeToUint8ClampedArray(Uint8ClampedArray* dest);
 
 private:
     CData(CContext* aParent);
@@ -41,6 +45,7 @@ private:
     unsigned m_size;
     RefPtr<Float32Array> m_theFloat32Array;
     RefPtr<Float64Array> m_theFloat64Array;
+    RefPtr<Uint8ClampedArray> m_theUint8ClampedArray;
     bool m_isRetained;
 #ifdef PREALLOCATE_IN_JS_HEAP
     bool m_isMapped;
