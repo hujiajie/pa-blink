@@ -58,33 +58,47 @@ PassRefPtr<CContext> CPlatform::createContext()
 
 String CPlatform::version()
 {
-    char* aVersion="Cannot get version";
-    getPlatformPropertyHelper(CL_PLATFORM_VERSION, aVersion);
-    return String(aVersion);
+    char* aVersion;
+    if (getPlatformPropertyHelper(CL_PLATFORM_VERSION, aVersion) != CL_SUCCESS)
+        return String::fromUTF8("Cannot get version");
+    String ret(aVersion);
+    delete [] aVersion;
+    return ret;
 }
 String CPlatform::name()
 {
-    char* aName="Cannot get name";
-    getPlatformPropertyHelper(CL_PLATFORM_NAME, aName);
-    return String(aName);
-    
+    char* aName;
+    if (getPlatformPropertyHelper(CL_PLATFORM_NAME, aName) != CL_SUCCESS)
+        return String::fromUTF8("Cannot get name");
+    String ret(aName);
+    delete [] aName;
+    return ret;  
 }
 String CPlatform::vendor()
 {
-    char* aVendor="Cannot get vendor";
-    getPlatformPropertyHelper(CL_PLATFORM_VENDOR, aVendor);
-    return String(aVendor);
+    char* aVendor;
+    if (getPlatformPropertyHelper(CL_PLATFORM_VENDOR, aVendor) != CL_SUCCESS)
+        return String::fromUTF8("Cannot get vendor");
+    String ret(aVendor);
+    delete [] aVendor;
+    return ret;  
 }       
 String CPlatform::profile()
 {
-    char* aProfile="Cannot get profile";
-    getPlatformPropertyHelper(CL_PLATFORM_PROFILE, aProfile);
-    return String(aProfile);
+    char* aProfile;
+    if (getPlatformPropertyHelper(CL_PLATFORM_PROFILE, aProfile) != CL_SUCCESS)
+        return String::fromUTF8("Cannot get profile");
+    String ret(aProfile);
+    delete [] aProfile;
+    return ret; 
 }
 String CPlatform::extensions()
 {
-    char* aExtensions="Cannot get extensions";
-    getPlatformPropertyHelper(CL_PLATFORM_EXTENSIONS, aExtensions);
-    return String(aExtensions);
+    char* aExtensions;
+    if (getPlatformPropertyHelper(CL_PLATFORM_EXTENSIONS, aExtensions) != CL_SUCCESS)
+        return String::fromUTF8("Cannot get extensions");
+    String ret(aExtensions);
+    delete [] aExtensions;
+    return ret; 
 }
 } // namespace WebCore
