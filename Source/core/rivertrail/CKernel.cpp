@@ -3,6 +3,7 @@
 #include "OCLdebug.h"
 
 #include "CContext.h"
+#include <limits>
 
 #ifdef WINDOWS_ROUNDTRIP
 #include "windows.h"
@@ -57,7 +58,7 @@ unsigned long CKernel::numberOfArgs()
     err_code = clGetKernelInfo(m_kernel, CL_KERNEL_NUM_ARGS, sizeof(cl_uint), &result, NULL);
     if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("GetNumberOfArgs", err_code);
-        return 10000;
+        return std::numeric_limits<unsigned long>::max();//We never get max value if eveything goes OK, since NUMBER_OF_ARTIFICIAL_ARGS > 0  
     }
 
     /* skip internal arguments when counting */

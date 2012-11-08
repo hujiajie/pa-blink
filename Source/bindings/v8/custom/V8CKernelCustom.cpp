@@ -6,6 +6,7 @@
 #include "V8Binding.h"
 #include "V8CContext.h"
 #include "V8Proxy.h"
+#include <limits>
 
 namespace WebCore {
 
@@ -90,7 +91,7 @@ v8::Handle<v8::Value> V8CKernel::numberOfArgsAccessorGetter(v8::Local<v8::String
     INC_STATS("DOM.CKernel.numberOfArgs._get");
     CKernel* imp = V8CKernel::toNative(info.Holder());
     unsigned long number = imp->numberOfArgs();
-    if (number == 10000)
+    if (number == std::numeric_limits<unsigned long>::max())
         return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot get numberOfArgs.", info.GetIsolate());
     return v8UnsignedInteger(number, info.GetIsolate());
 }
