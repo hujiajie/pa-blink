@@ -34,6 +34,8 @@ namespace WebCore {
 
 WTFLogChannel LogNotYetImplemented = { 0x00000001, "WebCoreLogLevel", WTFLogChannelOff };
 
+WTFLogChannel LogRiverTrail =        { 0x00000002, "WebCoreLogLevel", WTFLogChannelOn };
+
 WTFLogChannel LogFrames =            { 0x00000010, "WebCoreLogLevel", WTFLogChannelOff };
 WTFLogChannel LogLoading =           { 0x00000020, "WebCoreLogLevel", WTFLogChannelOff };
 WTFLogChannel LogPopupBlocking =     { 0x00000040, "WebCoreLogLevel", WTFLogChannelOff };
@@ -72,6 +74,9 @@ WTFLogChannel* getChannelFromName(const String& channelName)
 {
     if (!(channelName.length() >= 2))
         return 0;
+
+    if (equalIgnoringCase(channelName, String("RiverTrail")))
+        return &LogRiverTrail;
 
     if (equalIgnoringCase(channelName, String("BackForward")))
         return &LogBackForward;

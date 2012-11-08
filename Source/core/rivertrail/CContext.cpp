@@ -185,8 +185,8 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
     RefPtr<CKernel> ret;
     unsigned result;
 
-    //sourceStr = (char*) source.ascii().data();
-    CString temp1 = source.utf8();//FIX ME
+    //sourceStr = source.utf8().data();
+    CString temp1 = source.utf8();//FIX ME: only work with 2 statements
     sourceStr = temp1.data();
 
     DEBUG_LOG_STATUS("compileKernel", "Source: " << sourceStr);
@@ -196,7 +196,7 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
         return ret.release();
     }
 
-    //optionsStr = (char*) options.
+    //optionsStr = options.utf8().data();
     CString temp2 = options.utf8();//FIX ME
     optionsStr = temp2.data();
 
@@ -249,7 +249,7 @@ DONE:
     if (devices)
         free(devices);
 
-    //kernelNameStr = (char*) kernelName.ascii().data();
+    //kernelNameStr = kernelName.utf8().data();
     CString temp3 = kernelName.utf8();//FIX ME
     kernelNameStr = temp3.data();
 

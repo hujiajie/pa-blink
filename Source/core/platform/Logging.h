@@ -38,6 +38,7 @@
 namespace WebCore {
 
     extern WTFLogChannel LogNotYetImplemented;
+    extern WTFLogChannel LogRiverTrail;
     extern WTFLogChannel LogFrames;
     extern WTFLogChannel LogLoading;
     extern WTFLogChannel LogPopupBlocking;
