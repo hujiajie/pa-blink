@@ -185,10 +185,8 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
     RefPtr<CKernel> ret;
     unsigned result;
 
-    //sourceStr = source.utf8().data();
-    CString temp1 = source.utf8();//FIX ME: only work with 2 statements
-    sourceStr = temp1.data();
-
+    CString sourceCString = source.utf8();
+    sourceStr = sourceCString.data();
     DEBUG_LOG_STATUS("compileKernel", "Source: " << sourceStr);
     program = clCreateProgramWithSource(m_context, 1, (const char**)&sourceStr, 0, &err_code);
     if (err_code != CL_SUCCESS) {
@@ -196,10 +194,8 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
         return ret.release();
     }
 
-    //optionsStr = options.utf8().data();
-    CString temp2 = options.utf8();//FIX ME
-    optionsStr = temp2.data();
-
+    CString optionsCString = options.utf8();
+    optionsStr = optionsCString.data();
     err_code = clBuildProgram(program, 0, 0, optionsStr, 0, 0);
     if (err_code != CL_SUCCESS)
         DEBUG_LOG_ERROR("compileKernel", err_code);
@@ -249,10 +245,8 @@ DONE:
     if (devices)
         free(devices);
 
-    //kernelNameStr = kernelName.utf8().data();
-    CString temp3 = kernelName.utf8();//FIX ME
-    kernelNameStr = temp3.data();
-
+    CString kernelNameCString = kernelName.utf8();
+    kernelNameStr = kernelNameCString.data();
     kernel = clCreateKernel(program, kernelNameStr, &err_code);
     clReleaseProgram(program);
     if (err_code != CL_SUCCESS) {
