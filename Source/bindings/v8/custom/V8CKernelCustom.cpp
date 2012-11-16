@@ -50,10 +50,10 @@ v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& 
     
     if (args[1]->IsInt32()) {
         int value = args[1]->Int32Value();
-        return v8Boolean(imp->setScalarArgumentInt(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
+        return v8Boolean(imp->setScalarArgument<int>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
     } else if (args[1]->IsNumber()) {
         double value = args[1]->NumberValue();
-        return v8Boolean(imp->setScalarArgumentDouble(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
+        return v8Boolean(imp->setScalarArgument<double>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
     } else 
         return V8Proxy::throwTypeError(0, args.GetIsolate());
 }

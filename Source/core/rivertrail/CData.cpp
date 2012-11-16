@@ -1,6 +1,5 @@
 #include "config.h"
 #include "CData.h"
-#include "OCLdebug.h"
 
 #include "CContext.h"
 
@@ -71,7 +70,7 @@ cl_int CData::enqueueReadBuffer(size_t size, void* ptr)
 #endif // INCREMENTAL_MEM_RELEASE
 }
 
-unsigned CData::initCDataFloat32Array(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float32Array> anArray)
+template<> unsigned CData::initCData<Float32Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float32Array> anArray)
 {
     cl_int err_code;
 
@@ -100,7 +99,7 @@ unsigned CData::initCDataFloat32Array(cl_command_queue aQueue, cl_mem aMemObj, u
     return RT_OK;
 }
 
-unsigned CData::initCDataFloat64Array(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float64Array> anArray)
+template<> unsigned CData::initCData<Float64Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float64Array> anArray)
 {
     cl_int err_code;
 
@@ -129,7 +128,7 @@ unsigned CData::initCDataFloat64Array(cl_command_queue aQueue, cl_mem aMemObj, u
     return RT_OK;
 }
 
-unsigned CData::initCDataUint8ClampedArray(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray)
+template<> unsigned CData::initCData<Uint8ClampedArray>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray)
 {
     cl_int err_code;
 
@@ -158,7 +157,7 @@ unsigned CData::initCDataUint8ClampedArray(cl_command_queue aQueue, cl_mem aMemO
     return RT_OK;
 }
 
-Float32Array* CData::getValueFloat32Array()
+template<> Float32Array* CData::getValue<Float32Array>()
 {
     cl_int err_code;
 #ifdef PREALLOCATE_IN_JS_HEAP
@@ -188,7 +187,7 @@ Float32Array* CData::getValueFloat32Array()
         checkFree();
 #endif // INCREMENTAL_MEM_RELEASE
 
-        if (m_parent->createAlignedTAFloat32Array(m_type, m_length, m_theFloat32Array) != RT_OK)
+        if (m_parent->createAlignedTA<Float32Array, float>(m_type, m_length, m_theFloat32Array) != RT_OK)
             return 0;
 
         if (!m_theFloat32Array) {
@@ -209,7 +208,7 @@ Float32Array* CData::getValueFloat32Array()
     }
 }
 
-Float64Array* CData::getValueFloat64Array()
+template<> Float64Array* CData::getValue<Float64Array>()
 {
     cl_int err_code;
 #ifdef PREALLOCATE_IN_JS_HEAP
@@ -239,7 +238,7 @@ Float64Array* CData::getValueFloat64Array()
         checkFree();
 #endif // INCREMENTAL_MEM_RELEASE
 
-        if (m_parent->createAlignedTAFloat64Array(m_type, m_length, m_theFloat64Array) != RT_OK)
+        if (m_parent->createAlignedTA<Float64Array, double>(m_type, m_length, m_theFloat64Array) != RT_OK)
             return 0;
 
         if (!m_theFloat64Array) {
@@ -260,7 +259,7 @@ Float64Array* CData::getValueFloat64Array()
     }
 }
 
-Uint8ClampedArray* CData::getValueUint8ClampedArray()
+template<> Uint8ClampedArray* CData::getValue<Uint8ClampedArray>()
 {
     cl_int err_code;
 #ifdef PREALLOCATE_IN_JS_HEAP
@@ -290,7 +289,7 @@ Uint8ClampedArray* CData::getValueUint8ClampedArray()
         checkFree();
 #endif // INCREMENTAL_MEM_RELEASE
 
-        if (m_parent->createAlignedTAUint8ClampedArray(m_type, m_length, m_theUint8ClampedArray) != RT_OK)
+        if (m_parent->createAlignedTA<Uint8ClampedArray, unsigned char>(m_type, m_length, m_theUint8ClampedArray) != RT_OK)
             return 0;
 
         if (!m_theUint8ClampedArray) {
@@ -311,17 +310,13 @@ Uint8ClampedArray* CData::getValueUint8ClampedArray()
     }
 }
 
-void CData::writeToFloat32Array(Float32Array* dest)
+template<class ArrayClass> void CData::writeTo(ArrayClass* dest)
 {
 }
 
-void CData::writeToFloat64Array(Float64Array* dest)
-{
-}
-
-void CData::writeToUint8ClampedArray(Uint8ClampedArray* dest)
-{
-}
+template void CData::writeTo<Float32Array>(Float32Array* dest);
+template void CData::writeTo<Float64Array>(Float64Array* dest);
+template void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest);
 
 cl_mem CData::getContainedBuffer()
 {

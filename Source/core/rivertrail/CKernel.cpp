@@ -86,24 +86,24 @@ bool CKernel::setArgument( unsigned int number, CData* argument)
     return true;
 }
 
-bool CKernel::setScalarArgumentInt(unsigned int number, const int value, const bool isIntegerB, const bool isHighPrecisionB)
+template<class ArgClass> bool CKernel::setScalarArgument(unsigned int number, const ArgClass value, const bool isIntegerB, const bool isHighPrecisionB)
 {
     cl_int err_code;
     /* skip internal arguments */
     number = number + NUMBER_OF_ARTIFICIAL_ARGS;
 
-    DEBUG_LOG_STATUS("SetScalarArgument", "(argument->IsInt32()) isIntegerB: " << isIntegerB  << " isHighPrecisionB " << isHighPrecisionB);
+    DEBUG_LOG_STATUS("SetScalarArgument", " isIntegerB: " << isIntegerB  << " isHighPrecisionB " << isHighPrecisionB);
 
     if (isIntegerB) {
-        DEBUG_LOG_STATUS("SetScalarArgument", "(argument->IsInt32()) setting integer argument " << number << " to integer value " << value);
+        DEBUG_LOG_STATUS("SetScalarArgument", " setting integer argument " << number << " to value " << value);
         cl_int intVal = (cl_int) value;
         err_code = clSetKernelArg(m_kernel, number, sizeof(cl_int), &intVal);
     } else if (isHighPrecisionB) {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting double argument " << number << " to integer value " << value);
+        DEBUG_LOG_STATUS("SetScalarArgument", "setting double argument " << number << " to value " << value);
         cl_double doubleVal = (cl_double) value;
         err_code = clSetKernelArg(m_kernel, number, sizeof(cl_double), &doubleVal);
     } else {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting float argument " << number << " to integer value " << value);
+        DEBUG_LOG_STATUS("SetScalarArgument", "setting float argument " << number << " to value " << value);
         cl_float floatVal = (cl_float) value;
         err_code = clSetKernelArg(m_kernel, number, sizeof(cl_float), &floatVal);
     }
@@ -114,35 +114,8 @@ bool CKernel::setScalarArgumentInt(unsigned int number, const int value, const b
     }
     return true;
 }
-
-bool CKernel::setScalarArgumentDouble(unsigned int number, const double value, const bool isIntegerB, const bool isHighPrecisionB)
-{
-    cl_int err_code;
-    /* skip internal arguments */
-    number = number + NUMBER_OF_ARTIFICIAL_ARGS;
-
-    DEBUG_LOG_STATUS("SetScalarArgument", "(argument->IsNumber()) isIntegerB: " << isIntegerB  << " isHighPrecisionB " << isHighPrecisionB);
-
-    if (isIntegerB) {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting int formal argument " << number << " using double value " << value);
-        cl_int intVal = (cl_int) value;
-        err_code = clSetKernelArg(m_kernel, number, sizeof(cl_int), &intVal);
-    } else if (isHighPrecisionB) {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting double formal argument " << number << " using double value " << value);
-        cl_double doubleVal = (cl_double) value;
-        err_code = clSetKernelArg(m_kernel, number, sizeof(cl_double), &doubleVal);
-    } else {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting float formal argument " << number << " using double value " << value);
-        cl_float floatVal = (cl_float) value;
-        err_code = clSetKernelArg(m_kernel, number, sizeof(cl_float), &floatVal);
-    }
-
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("SetScalarArgument", err_code);
-        return false;
-    }
-    return true;
-}
+template bool CKernel::setScalarArgument<int>(unsigned int number, const int value, const bool isIntegerB, const bool isHighPrecisionB);
+template bool CKernel::setScalarArgument<double>(unsigned int number, const double value, const bool isIntegerB, const bool isHighPrecisionB);
 
 unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* tile)
 {

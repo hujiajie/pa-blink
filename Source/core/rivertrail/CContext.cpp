@@ -1,6 +1,5 @@
 #include "config.h"
 #include "CContext.h"
-#include "OCLdebug.h"
 
 #include "CanvasRenderingContext2D.h"
 #include "CData.h"
@@ -10,6 +9,9 @@
 #include "IntSize.h"
 #include <stdlib.h>
 #include <wtf/ArrayBuffer.h>
+#include <wtf/Float32Array.h>
+#include <wtf/Float64Array.h>
+#include <wtf/Uint8ClampedArray.h>
 
 namespace WebCore {
 
@@ -295,62 +297,36 @@ cl_mem CContext::createBuffer(cl_mem_flags flags, size_t size, void* ptr, cl_int
 #endif // INCREMENTAL_MEM_RELEASE
 }
 
-inline unsigned char* CContext::getPointerFromTAFloat32Array(Float32Array* ta)
+template<class ArrayClass> inline unsigned char* CContext::getPointerFromTA(ArrayClass* ta)
 {
     return (unsigned char*)ta->data();
 }
 
-inline unsigned char* CContext::getPointerFromTAFloat64Array(Float64Array* ta)
-{
-    return (unsigned char*)ta->data();
-}
+template inline unsigned char* CContext::getPointerFromTA<Float32Array>(Float32Array* ta);
+template inline unsigned char* CContext::getPointerFromTA<Float64Array>(Float64Array* ta);
+template inline unsigned char* CContext::getPointerFromTA<Uint8ClampedArray>(Uint8ClampedArray* ta);
 
-inline unsigned char* CContext::getPointerFromTAUint8ClampedArray(Uint8ClampedArray* ta)
-{
-    return (unsigned char*)ta->data();
-}
-
-unsigned CContext::createAlignedTAFloat32Array(unsigned type, size_t length, RefPtr<Float32Array>& res)
+template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA(unsigned type, size_t length, RefPtr<ArrayClass>& res)
 {
     RefPtr<ArrayBuffer> buffer;
     uintptr_t offset;
-    buffer = ArrayBuffer::create(sizeof(float) * length + m_alignmentSize, 1);
+    buffer = ArrayBuffer::create(sizeof(ElementType) * length + m_alignmentSize, 1);
     offset = (uintptr_t)buffer->data();
     offset = (offset + m_alignmentSize) / m_alignmentSize * m_alignmentSize - offset;
-    res = Float32Array::create(buffer, offset, length);
+    res = ArrayClass::create(buffer, offset, length);
 
     return RT_OK;
 }
 
-unsigned CContext::createAlignedTAFloat64Array(unsigned type, size_t length, RefPtr<Float64Array>& res)
-{
-    RefPtr<ArrayBuffer> buffer;
-    uintptr_t offset;
-    buffer = ArrayBuffer::create(sizeof(double) * length + m_alignmentSize, 1);
-    offset = (uintptr_t)buffer->data();
-    offset = (offset + m_alignmentSize) / m_alignmentSize * m_alignmentSize - offset;
-    res = Float64Array::create(buffer, offset, length);
+template unsigned CContext::createAlignedTA<Float32Array, float>(unsigned type, size_t length, RefPtr<Float32Array>& res);
+template unsigned CContext::createAlignedTA<Float64Array, double>(unsigned type, size_t length, RefPtr<Float64Array>& res);
+template unsigned CContext::createAlignedTA<Uint8ClampedArray, unsigned char>(unsigned type, size_t length, RefPtr<Uint8ClampedArray>& res);
 
-    return RT_OK;
-}
-
-unsigned CContext::createAlignedTAUint8ClampedArray(unsigned type, size_t length, RefPtr<Uint8ClampedArray>& res)
-{
-    RefPtr<ArrayBuffer> buffer;
-    uintptr_t offset;
-    buffer = ArrayBuffer::create(sizeof(unsigned char) * length + m_alignmentSize, 1);
-    offset = (uintptr_t)buffer->data();
-    offset = (offset + m_alignmentSize) / m_alignmentSize * m_alignmentSize - offset;
-    res = Uint8ClampedArray::create(buffer, offset, length);
-
-    return RT_OK;
-}
-
-PassRefPtr<CData> CContext::mapDataFloat32Array(PassRefPtr<Float32Array> source)
+template<class ArrayClass, unsigned type> PassRefPtr<CData> CContext::mapData(PassRefPtr<ArrayClass> source)
 {
     cl_int err_code;
     unsigned result;
-    RefPtr<Float32Array> tArray;
+    RefPtr<ArrayClass> tArray;
     RefPtr<CData> data;
 
     tArray = source;
@@ -368,7 +344,7 @@ PassRefPtr<CData> CContext::mapDataFloat32Array(PassRefPtr<Float32Array> source)
     if (arrayByteLength == 0)
         arrayByteLength = 1;
     else {
-        tArrayBuffer = getPointerFromTAFloat32Array(tArray.get());
+        tArrayBuffer = getPointerFromTA<ArrayClass>(tArray.get());
         flags |= CL_MEM_USE_HOST_PTR;
     }
 
@@ -379,7 +355,7 @@ PassRefPtr<CData> CContext::mapDataFloat32Array(PassRefPtr<Float32Array> source)
         return data.release();
     }
 
-    result = data->initCDataFloat32Array(m_cmdQueue, memObj, TYPE_FLOAT32, tArray->length(), tArray->byteLength(), tArray);
+    result = data->initCData<ArrayClass>(m_cmdQueue, memObj, type, tArray->length(), tArray->byteLength(), tArray);
     if (result == RT_OK)
         return data.release();
 
@@ -387,114 +363,26 @@ PassRefPtr<CData> CContext::mapDataFloat32Array(PassRefPtr<Float32Array> source)
     return data.release();
 }
 
-PassRefPtr<CData> CContext::mapDataFloat64Array(PassRefPtr<Float64Array> source)
+template PassRefPtr<CData> CContext::mapData<Float32Array, TYPE_FLOAT32>(PassRefPtr<Float32Array> source);
+template PassRefPtr<CData> CContext::mapData<Float64Array, TYPE_FLOAT64>(PassRefPtr<Float64Array> source);
+template PassRefPtr<CData> CContext::mapData<Uint8ClampedArray, TYPE_UINT8_CLAMPED>(PassRefPtr<Uint8ClampedArray> source);
+
+template<class ArrayClass> PassRefPtr<CData> CContext::cloneData(ArrayClass* source)
+{
+    RefPtr<CData> data;
+
+    return data.release();
+}
+
+template PassRefPtr<CData> CContext::cloneData<Float32Array>(Float32Array* source);
+template PassRefPtr<CData> CContext::cloneData<Float64Array>(Float64Array* source);
+template PassRefPtr<CData> CContext::cloneData<Uint8ClampedArray>(Uint8ClampedArray* source);
+
+template<class ArrayClass, class ElementType, unsigned type> PassRefPtr<CData> CContext::allocateData(ArrayClass* templ, unsigned length)
 {
     cl_int err_code;
     unsigned result;
-    RefPtr<Float64Array> tArray;
-    RefPtr<CData> data;
-
-    tArray = source;
-    data = CData::create(this);
-    if (!data) {
-        DEBUG_LOG_STATUS("mapData", "Cannot create new CData object");
-        return data.release();
-    }
-
-    // USE_HOST_PTR is save as the CData object will keep the associated typed array alive as long as the
-    // memory buffer lives.
-    cl_mem_flags flags = CL_MEM_READ_ONLY;
-    void* tArrayBuffer = 0;
-    size_t arrayByteLength = tArray->byteLength();
-    if (arrayByteLength == 0)
-        arrayByteLength = 1;
-    else {
-        tArrayBuffer = getPointerFromTAFloat64Array(tArray.get());
-        flags |= CL_MEM_USE_HOST_PTR;
-    }
-
-    cl_mem memObj = createBuffer(flags, arrayByteLength, tArrayBuffer, &err_code);
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("mapData", err_code);
-        data.clear();
-        return data.release();
-    }
-
-    result = data->initCDataFloat64Array(m_cmdQueue, memObj, TYPE_FLOAT64, tArray->length(), tArray->byteLength(), tArray);
-    if (result == RT_OK)
-        return data.release();
-
-    data.clear();
-    return data.release();
-}
-
-PassRefPtr<CData> CContext::mapDataUint8ClampedArray(PassRefPtr<Uint8ClampedArray> source)
-{
-    cl_int err_code;
-    unsigned result;
-    RefPtr<Uint8ClampedArray> tArray;
-    RefPtr<CData> data;
-
-    tArray = source;
-    data = CData::create(this);
-    if (!data) {
-        DEBUG_LOG_STATUS("mapData", "Cannot create new CData object");
-        return data.release();
-    }
-
-    // USE_HOST_PTR is save as the CData object will keep the associated typed array alive as long as the
-    // memory buffer lives.
-    cl_mem_flags flags = CL_MEM_READ_ONLY;
-    void* tArrayBuffer = 0;
-    size_t arrayByteLength = tArray->byteLength();
-    if (arrayByteLength == 0)
-        arrayByteLength = 1;
-    else {
-        tArrayBuffer = getPointerFromTAUint8ClampedArray(tArray.get());
-        flags |= CL_MEM_USE_HOST_PTR;
-    }
-
-    cl_mem memObj = createBuffer(flags, arrayByteLength, tArrayBuffer, &err_code);
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("mapData", err_code);
-        data.clear();
-        return data.release();
-    }
-
-    result = data->initCDataUint8ClampedArray(m_cmdQueue, memObj, TYPE_UINT8_CLAMPED, tArray->length(), tArray->byteLength(), tArray);
-    if (result == RT_OK)
-        return data.release();
-
-    data.clear();
-    return data.release();
-}
-
-PassRefPtr<CData> CContext::cloneDataFloat32Array(Float32Array* source)
-{
-    RefPtr<CData> data;
-
-    return data.release();
-}
-
-PassRefPtr<CData> CContext::cloneDataFloat64Array(Float64Array* source)
-{
-    RefPtr<CData> data;
-
-    return data.release();
-}
-
-PassRefPtr<CData> CContext::cloneDataUint8ClampedArray(Uint8ClampedArray* source)
-{
-    RefPtr<CData> data;
-
-    return data.release();
-}
-
-PassRefPtr<CData> CContext::allocateDataFloat32Array(Float32Array* templ, unsigned length)
-{
-    cl_int err_code;
-    unsigned result;
-    Float32Array* tArray;
+    ArrayClass* tArray;
     size_t bytePerElements;
     RefPtr<CData> data;
 
@@ -516,8 +404,8 @@ PassRefPtr<CData> CContext::allocateDataFloat32Array(Float32Array* templ, unsign
     DEBUG_LOG_STATUS("allocateData", "length " << length << " bytePerElements " << bytePerElements);
 
 #ifdef PREALLOCATE_IN_JS_HEAP
-    RefPtr<Float32Array> jsArray;
-    if (createAlignedTAFloat32Array(TYPE_FLOAT32, length, jsArray) != RT_OK) {
+    RefPtr<ArrayClass> jsArray;
+    if (createAlignedTA<ArrayClass, ElementType>(type, length, jsArray) != RT_OK) {
         data.clear();
         return data.release();
     }
@@ -527,9 +415,9 @@ PassRefPtr<CData> CContext::allocateDataFloat32Array(Float32Array* templ, unsign
         return data.release();
     }
 
-    cl_mem memObj = createBuffer(CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, jsArray->byteLength(), getPointerFromTAFloat32Array(jsArray.get()), &err_code);
+    cl_mem memObj = createBuffer(CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, jsArray->byteLength(), getPointerFromTA<ArrayClass>(jsArray.get()), &err_code);
 #else // PREALLOCATE_IN_JS_HEAP
-    RefPtr<Float32Array> jsArray;
+    RefPtr<ArrayClass> jsArray;
     cl_mem memObj = createBuffer(CL_MEM_READ_WRITE, length * bytePerElements, 0, &err_code);
 #endif // PREALLOCATE_IN_JS_HEAP
     if (err_code != CL_SUCCESS) {
@@ -538,7 +426,7 @@ PassRefPtr<CData> CContext::allocateDataFloat32Array(Float32Array* templ, unsign
         return data.release();
     }
 
-    result = data->initCDataFloat32Array(m_cmdQueue, memObj, TYPE_FLOAT32, length, length * bytePerElements, jsArray);
+    result = data->initCData<ArrayClass>(m_cmdQueue, memObj, type, length, length * bytePerElements, jsArray);
 
     if (result == RT_OK)
         return data.release();
@@ -547,119 +435,9 @@ PassRefPtr<CData> CContext::allocateDataFloat32Array(Float32Array* templ, unsign
     return data.release();
 }
 
-PassRefPtr<CData> CContext::allocateDataFloat64Array(Float64Array* templ, unsigned length)
-{
-    cl_int err_code;
-    unsigned result;
-    Float64Array* tArray;
-    size_t bytePerElements;
-    RefPtr<CData> data;
-
-    tArray = templ;
-
-    data = CData::create(this);
-    if (!data) {
-        DEBUG_LOG_STATUS("allocateData", "Cannot create new CData object");
-        return data.release();
-    }
-
-    if (length == 0) {
-        DEBUG_LOG_STATUS("allocateData", "size not provided, assuming template's size");
-        length = tArray->length();
-    }
-
-    bytePerElements = tArray->byteLength() / tArray->length();
-
-    DEBUG_LOG_STATUS("allocateData", "length " << length << " bytePerElements " << bytePerElements);
-
-#ifdef PREALLOCATE_IN_JS_HEAP
-    RefPtr<Float64Array> jsArray;
-    if (createAlignedTAFloat64Array(TYPE_FLOAT64, length, jsArray) != RT_OK) {
-        data.clear();
-        return data.release();
-    }
-    if (!jsArray) {
-        DEBUG_LOG_STATUS("allocateData", "Cannot create typed array");
-        data.clear();
-        return data.release();
-    }
-
-    cl_mem memObj = createBuffer(CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, jsArray->byteLength(), getPointerFromTAFloat64Array(jsArray.get()), &err_code);
-#else // PREALLOCATE_IN_JS_HEAP
-    RefPtr<Float64Array> jsArray;
-    cl_mem memObj = createBuffer(CL_MEM_READ_WRITE, length * bytePerElements, 0, &err_code);
-#endif // PREALLOCATE_IN_JS_HEAP
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("allocateData", err_code);
-        data.clear();
-        return data.release();
-    }
-
-    result = data->initCDataFloat64Array(m_cmdQueue, memObj, TYPE_FLOAT64, length, length * bytePerElements, jsArray);
-
-    if (result == RT_OK)
-        return data.release();
-
-    data.clear();
-    return data.release();
-}
-
-PassRefPtr<CData> CContext::allocateDataUint8ClampedArray(Uint8ClampedArray* templ, unsigned length)
-{
-    cl_int err_code;
-    unsigned result;
-    Uint8ClampedArray* tArray;
-    size_t bytePerElements;
-    RefPtr<CData> data;
-
-    tArray = templ;
-
-    data = CData::create(this);
-    if (!data) {
-        DEBUG_LOG_STATUS("allocateData", "Cannot create new CData object");
-        return data.release();
-    }
-
-    if (length == 0) {
-        DEBUG_LOG_STATUS("allocateData", "size not provided, assuming template's size");
-        length = tArray->length();
-    }
-
-    bytePerElements = tArray->byteLength() / tArray->length();
-
-    DEBUG_LOG_STATUS("allocateData", "length " << length << " bytePerElements " << bytePerElements);
-
-#ifdef PREALLOCATE_IN_JS_HEAP
-    RefPtr<Uint8ClampedArray> jsArray;
-    if (createAlignedTAUint8ClampedArray(TYPE_UINT8_CLAMPED, length, jsArray) != RT_OK) {
-        data.clear();
-        return data.release();
-    }
-    if (!jsArray) {
-        DEBUG_LOG_STATUS("allocateData", "Cannot create typed array");
-        data.clear();
-        return data.release();
-    }
-
-    cl_mem memObj = createBuffer(CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, jsArray->byteLength(), getPointerFromTAUint8ClampedArray(jsArray.get()), &err_code);
-#else // PREALLOCATE_IN_JS_HEAP
-    RefPtr<Uint8ClampedArray> jsArray;
-    cl_mem memObj = createBuffer(CL_MEM_READ_WRITE, length * bytePerElements, 0, &err_code);
-#endif // PREALLOCATE_IN_JS_HEAP
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("allocateData", err_code);
-        data.clear();
-        return data.release();
-    }
-
-    result = data->initCDataUint8ClampedArray(m_cmdQueue, memObj, TYPE_UINT8_CLAMPED, length, length * bytePerElements, jsArray);
-
-    if (result == RT_OK)
-        return data.release();
-
-    data.clear();
-    return data.release();
-}
+template PassRefPtr<CData> CContext::allocateData<Float32Array, float, TYPE_FLOAT32>(Float32Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Float64Array, double, TYPE_FLOAT64>(Float64Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Uint8ClampedArray, unsigned char, TYPE_UINT8_CLAMPED>(Uint8ClampedArray* templ, unsigned length);
 
 PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 {
@@ -689,7 +467,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Float32Array> jsArray;
-        if (createAlignedTAFloat32Array(cData->getType(), length, jsArray) != RT_OK) {
+        if (createAlignedTA<Float32Array, float>(cData->getType(), length, jsArray) != RT_OK) {
             data.clear();
             return data.release();
         }
@@ -710,7 +488,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
             return data.release();
         }
 
-        result = data->initCDataFloat32Array(m_cmdQueue, memObj, cData->getType(), length, length * bytePerElements, jsArray);
+        result = data->initCData<Float32Array>(m_cmdQueue, memObj, cData->getType(), length, length * bytePerElements, jsArray);
 
         if (result == RT_OK)
             return data.release();
@@ -724,7 +502,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Float64Array> jsArray;
-        if (createAlignedTAFloat64Array(cData->getType(), length, jsArray) != RT_OK) {
+        if (createAlignedTA<Float64Array, double>(cData->getType(), length, jsArray) != RT_OK) {
             data.clear();
             return data.release();
         }
@@ -745,7 +523,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
             return data.release();
         }
 
-        result = data->initCDataFloat64Array(m_cmdQueue, memObj, cData->getType(), length, length * bytePerElements, jsArray);
+        result = data->initCData<Float64Array>(m_cmdQueue, memObj, cData->getType(), length, length * bytePerElements, jsArray);
 
         if (result == RT_OK)
             return data.release();
@@ -759,7 +537,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint8ClampedArray> jsArray;
-        if (createAlignedTAUint8ClampedArray(cData->getType(), length, jsArray) != RT_OK) {
+        if (createAlignedTA<Uint8ClampedArray, unsigned char>(cData->getType(), length, jsArray) != RT_OK) {
             data.clear();
             return data.release();
         }
@@ -780,7 +558,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
             return data.release();
         }
 
-        result = data->initCDataUint8ClampedArray(m_cmdQueue, memObj, cData->getType(), length, length * bytePerElements, jsArray);
+        result = data->initCData<Uint8ClampedArray>(m_cmdQueue, memObj, cData->getType(), length, length * bytePerElements, jsArray);
 
         if (result == RT_OK)
             return data.release();
@@ -800,7 +578,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
     }
 }
 
-bool CContext::canBeMappedFloat32Array(Float32Array* source)
+template<> bool CContext::canBeMapped<Float32Array>(Float32Array* source)
 {
 #ifdef SUPPORT_MAPPING_ARRAYS
     return true;
@@ -809,7 +587,7 @@ bool CContext::canBeMappedFloat32Array(Float32Array* source)
 #endif
 }
 
-bool CContext::canBeMappedFloat64Array(Float64Array* source)
+template<> bool CContext::canBeMapped<Float64Array>(Float64Array* source)
 {
 #ifdef SUPPORT_MAPPING_ARRAYS
     return true;
@@ -818,10 +596,10 @@ bool CContext::canBeMappedFloat64Array(Float64Array* source)
 #endif
 }
 
-bool CContext::canBeMappedUint8ClampedArray(Uint8ClampedArray* source)
+template<> bool CContext::canBeMapped<Uint8ClampedArray>(Uint8ClampedArray* source)
 {
 #ifdef SUPPORT_MAPPING_ARRAYS
-    return true;
+    return false;
 #else
     return false;
 #endif
@@ -884,7 +662,7 @@ void CContext::recordEndOfRoundTrip(CContext* parent)
 }
 #endif // WINDOWS_ROUNDTRIP
 
-void CContext::writeToContext2DFloat32Array(CanvasRenderingContext2D* ctx, Float32Array* source, int width, int height)
+template<> void CContext::writeToContext2D<Float32Array>(CanvasRenderingContext2D* ctx, Float32Array* source, int width, int height)
 {
     Float32Array* srcArray;
     RefPtr<Uint8ClampedArray> uint8ClampedArray;
@@ -907,16 +685,20 @@ void CContext::writeToContext2DFloat32Array(CanvasRenderingContext2D* ctx, Float
         data[i] = val > 0 ? (val < 255 ? ((int)val) : 255) : 0;
     }
     uint8ClampedArray = Uint8ClampedArray::create(data, size);
-    if (!uint8ClampedArray)
+    if (!uint8ClampedArray) {
+        free(data);
         return;
+    }
     imageData = ImageData::create(intSize, uint8ClampedArray);
-    if (!imageData)
+    if (!imageData) {
+        free(data);
         return;
+    }
     ctx->putImageData(imageData.get(), width, height, exceptionCode);
     free(data);
 }
 
-void CContext::writeToContext2DFloat64Array(CanvasRenderingContext2D* ctx, Float64Array* source, int width, int height)
+template<> void CContext::writeToContext2D<Float64Array>(CanvasRenderingContext2D* ctx, Float64Array* source, int width, int height)
 {
     Float64Array* srcArray;
     RefPtr<Uint8ClampedArray> uint8ClampedArray;
@@ -939,16 +721,20 @@ void CContext::writeToContext2DFloat64Array(CanvasRenderingContext2D* ctx, Float
         data[i] = val > 0 ? (val < 255 ? ((int)val) : 255) : 0;
     }
     uint8ClampedArray = Uint8ClampedArray::create(data, size);
-    if (!uint8ClampedArray)
+    if (!uint8ClampedArray) {
+        free(data);
         return;
+    }
     imageData = ImageData::create(intSize, uint8ClampedArray);
-    if (!imageData)
+    if (!imageData) {
+        free(data);
         return;
+    }
     ctx->putImageData(imageData.get(), width, height, exceptionCode);
     free(data);
 }
 
-void CContext::writeToContext2DUint8ClampedArray(CanvasRenderingContext2D* ctx, Uint8ClampedArray* source, int width, int height)
+template<> void CContext::writeToContext2D<Uint8ClampedArray>(CanvasRenderingContext2D* ctx, Uint8ClampedArray* source, int width, int height)
 {
     Uint8ClampedArray* srcArray;
     RefPtr<Uint8ClampedArray> uint8ClampedArray;
@@ -979,37 +765,19 @@ unsigned CContext::alignmentSize()
     return m_alignmentSize;
 }
 
-unsigned CContext::getAlignmentOffsetFloat32Array(Float32Array* source)
+template<class ArrayClass> unsigned CContext::getAlignmentOffset(ArrayClass* source)
 {
-    Float32Array* object;
+    ArrayClass* object;
     unsigned char* data;
 
     object = source;
-    data = getPointerFromTAFloat32Array(object);
+    data = getPointerFromTA<ArrayClass>(object);
 
     return (((uintptr_t)data) + m_alignmentSize) / m_alignmentSize * m_alignmentSize - ((uintptr_t)data);
 }
 
-unsigned CContext::getAlignmentOffsetFloat64Array(Float64Array* source)
-{
-    Float64Array* object;
-    unsigned char* data;
-
-    object = source;
-    data = getPointerFromTAFloat64Array(object);
-
-    return (((uintptr_t)data) + m_alignmentSize) / m_alignmentSize * m_alignmentSize - ((uintptr_t)data);
-}
-
-unsigned CContext::getAlignmentOffsetUint8ClampedArray(Uint8ClampedArray* source)
-{
-    Uint8ClampedArray* object;
-    unsigned char* data;
-
-    object = source;
-    data = getPointerFromTAUint8ClampedArray(object);
-
-    return (((uintptr_t)data) + m_alignmentSize) / m_alignmentSize * m_alignmentSize - ((uintptr_t)data);
-}
+template unsigned CContext::getAlignmentOffset<Float32Array>(Float32Array* source);
+template unsigned CContext::getAlignmentOffset<Float64Array>(Float64Array* source);
+template unsigned CContext::getAlignmentOffset<Uint8ClampedArray>(Uint8ClampedArray* source);
 
 } // namespace WebCore

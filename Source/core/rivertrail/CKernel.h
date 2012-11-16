@@ -24,8 +24,7 @@ public:
 
     unsigned long numberOfArgs();
     bool setArgument( unsigned int number, CData* argument);
-    bool setScalarArgumentInt(unsigned int number, const int value, const bool isIntegerB, const bool isHighPrecisionB);
-    bool setScalarArgumentDouble(unsigned int number, const double value, const bool isIntegerB, const bool isHighPrecisionB);
+    template<class ArgClass> bool setScalarArgument(unsigned int number, const ArgClass value, const bool isIntegerB, const bool isHighPrecisionB);
     unsigned int run(unsigned int rank, unsigned int* shape, unsigned int* tile);
     
     int initKernel(cl_command_queue aCmdQueue, cl_kernel aKernel, cl_mem failureMem);

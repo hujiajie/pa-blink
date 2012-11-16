@@ -10,6 +10,7 @@
 #include <wtf/Uint8ClampedArray.h>
 
 #include "OCLconfig.h"
+#include "OCLdebug.h"
 #include "opencl_compat.h"
 
 namespace WebCore {
@@ -21,19 +22,13 @@ public:
     static PassRefPtr<CData> create(CContext* aParent) { return adoptRef(new CData(aParent)); }
     ~CData();
 
-    unsigned initCDataFloat32Array(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float32Array> anArray);
-    unsigned initCDataFloat64Array(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float64Array> anArray);
-    unsigned initCDataUint8ClampedArray(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray);
+    template<class ArrayClass> unsigned initCData(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<ArrayClass> anArray);
     cl_mem getContainedBuffer();
     unsigned getType();
     unsigned getSize();
     unsigned getLength();
-    Float32Array* getValueFloat32Array();
-    Float64Array* getValueFloat64Array();
-    Uint8ClampedArray* getValueUint8ClampedArray();
-    void writeToFloat32Array(Float32Array* dest);
-    void writeToFloat64Array(Float64Array* dest);
-    void writeToUint8ClampedArray(Uint8ClampedArray* dest);
+    template<class ArrayClass> ArrayClass* getValue();
+    template<class ArrayClass> void writeTo(ArrayClass* dest);
 
 private:
     CData(CContext* aParent);

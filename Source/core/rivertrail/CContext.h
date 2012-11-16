@@ -3,14 +3,12 @@
 
 #include "CL/opencl.h"
 #include "PlatformString.h"
-#include <wtf/Float32Array.h>
-#include <wtf/Float64Array.h>
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
-#include <wtf/Uint8ClampedArray.h>
 
 #include "OCLconfig.h"
+#include "OCLdebug.h"
 #include "opencl_compat.h"
 
 #ifdef WINDOWS_ROUNDTRIP
@@ -35,12 +33,8 @@ public:
     static void CL_CALLBACK collectTimings(cl_event event, cl_int status, void* data);
 #endif // CLPROFILE
     static void CL_CALLBACK reportCLError(const char* err_info, const void* private_info, size_t cb, void* user_data);
-    static unsigned char* getPointerFromTAFloat32Array(Float32Array* ta);
-    static unsigned char* getPointerFromTAFloat64Array(Float64Array* ta);
-    static unsigned char* getPointerFromTAUint8ClampedArray(Uint8ClampedArray* ta);
-    unsigned createAlignedTAFloat32Array(unsigned type, size_t length, RefPtr<Float32Array>& retval);
-    unsigned createAlignedTAFloat64Array(unsigned type, size_t length, RefPtr<Float64Array>& retval);
-    unsigned createAlignedTAUint8ClampedArray(unsigned type, size_t length, RefPtr<Uint8ClampedArray>& retval);
+    template<class ArrayClass> static unsigned char* getPointerFromTA(ArrayClass* ta);
+    template<class ArrayClass, class ElementType> unsigned createAlignedTA(unsigned type, size_t length, RefPtr<ArrayClass>& retval);
 #ifdef WINDOWS_ROUNDTRIP
     static void recordBeginOfRoundTrip(CContext* parent);
     static void recordEndOfRoundTrip(CContext* parent);
@@ -53,28 +47,16 @@ public:
 
     PassRefPtr<CKernel> compileKernel(const String& source, const String& kernelName, const String& options);
     String buildLog();
-    PassRefPtr<CData> mapDataFloat32Array(PassRefPtr<Float32Array> source);
-    PassRefPtr<CData> mapDataFloat64Array(PassRefPtr<Float64Array> source);
-    PassRefPtr<CData> mapDataUint8ClampedArray(PassRefPtr<Uint8ClampedArray> source);
-    PassRefPtr<CData> cloneDataFloat32Array(Float32Array* source);
-    PassRefPtr<CData> cloneDataFloat64Array(Float64Array* source);
-    PassRefPtr<CData> cloneDataUint8ClampedArray(Uint8ClampedArray* source);
-    PassRefPtr<CData> allocateDataFloat32Array(Float32Array* templ, unsigned length);
-    PassRefPtr<CData> allocateDataFloat64Array(Float64Array* templ, unsigned length);
-    PassRefPtr<CData> allocateDataUint8ClampedArray(Uint8ClampedArray* templ, unsigned length);
+    template<class ArrayClass, unsigned type> PassRefPtr<CData> mapData(PassRefPtr<ArrayClass> source);
+    template<class ArrayClass> PassRefPtr<CData> cloneData(ArrayClass* source);
+    template<class ArrayClass, class ElementType, unsigned type> PassRefPtr<CData> allocateData(ArrayClass* templ, unsigned length);
     PassRefPtr<CData> allocateData2(CData* templ, unsigned length);
-    bool canBeMappedFloat32Array(Float32Array* source);
-    bool canBeMappedFloat64Array(Float64Array* source);
-    bool canBeMappedUint8ClampedArray(Uint8ClampedArray* source);
+    template<class ArrayClass> bool canBeMapped(ArrayClass* source);
     unsigned long long lastExecutionTime();
     unsigned long long lastRoundTripTime();
-    void writeToContext2DFloat32Array(CanvasRenderingContext2D* ctx, Float32Array* source, int width, int height);
-    void writeToContext2DFloat64Array(CanvasRenderingContext2D* ctx, Float64Array* source, int width, int height);
-    void writeToContext2DUint8ClampedArray(CanvasRenderingContext2D* ctx, Uint8ClampedArray* source, int width, int height);
+    template<class ArrayClass> void writeToContext2D(CanvasRenderingContext2D* ctx, ArrayClass* source, int width, int height);
     unsigned alignmentSize();
-    unsigned getAlignmentOffsetFloat32Array(Float32Array* source);
-    unsigned getAlignmentOffsetFloat64Array(Float64Array* source);
-    unsigned getAlignmentOffsetUint8ClampedArray(Uint8ClampedArray* source);
+    template<class ArrayClass> unsigned getAlignmentOffset(ArrayClass* source);
 
 private:
     CContext(CPlatform* parent);

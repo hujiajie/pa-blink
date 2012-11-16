@@ -69,7 +69,7 @@ v8::Handle<v8::Value> V8CContext::mapDataCallback(const v8::Arguments& args)
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float32Array*, source, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Float32Array> float32Array = source;
-        RefPtr<CData> cData = imp->mapDataFloat32Array(float32Array);
+        RefPtr<CData> cData = imp->mapData<Float32Array, TYPE_FLOAT32>(float32Array);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -77,7 +77,7 @@ v8::Handle<v8::Value> V8CContext::mapDataCallback(const v8::Arguments& args)
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float64Array*, source, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Float64Array> float64Array = source;
-        RefPtr<CData> cData = imp->mapDataFloat64Array(float64Array);
+        RefPtr<CData> cData = imp->mapData<Float64Array, TYPE_FLOAT64>(float64Array);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -85,7 +85,7 @@ v8::Handle<v8::Value> V8CContext::mapDataCallback(const v8::Arguments& args)
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Uint8ClampedArray*, source, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Uint8ClampedArray> uint8ClampedArray = source;
-        RefPtr<CData> cData = imp->mapDataUint8ClampedArray(uint8ClampedArray);
+        RefPtr<CData> cData = imp->mapData<Uint8ClampedArray, TYPE_UINT8_CLAMPED>(uint8ClampedArray);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -101,21 +101,21 @@ v8::Handle<v8::Value> V8CContext::cloneDataCallback(const v8::Arguments& args)
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float32Array*, source, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        RefPtr<CData> cData = imp->cloneDataFloat32Array(source);
+        RefPtr<CData> cData = imp->cloneData<Float32Array>(source);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
     }
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float64Array*, source, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        RefPtr<CData> cData = imp->cloneDataFloat64Array(source);
+        RefPtr<CData> cData = imp->cloneData<Float64Array>(source);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
     }
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Uint8ClampedArray*, source, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        RefPtr<CData> cData = imp->cloneDataUint8ClampedArray(source);
+        RefPtr<CData> cData = imp->cloneData<Uint8ClampedArray>(source);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -132,7 +132,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataCallback(const v8::Arguments& args
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float32Array*, templ, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         EXCEPTION_BLOCK(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateDataFloat32Array(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Float32Array, float, TYPE_FLOAT32>(templ, length);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -140,7 +140,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataCallback(const v8::Arguments& args
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float64Array*, templ, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         EXCEPTION_BLOCK(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateDataFloat64Array(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Float64Array, double, TYPE_FLOAT64>(templ, length);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -148,7 +148,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataCallback(const v8::Arguments& args
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Uint8ClampedArray*, templ, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         EXCEPTION_BLOCK(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateDataUint8ClampedArray(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Uint8ClampedArray, unsigned char, TYPE_UINT8_CLAMPED>(templ, length);
         if (!cData)
             return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.release(), args.GetIsolate());
@@ -178,15 +178,15 @@ v8::Handle<v8::Value> V8CContext::canBeMappedCallback(const v8::Arguments& args)
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float32Array*, source, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        return v8Boolean(imp->canBeMappedFloat32Array(source), args.GetIsolate());
+        return v8Boolean(imp->canBeMapped<Float32Array>(source), args.GetIsolate());
     }
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float64Array*, source, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        return v8Boolean(imp->canBeMappedFloat64Array(source), args.GetIsolate());
+        return v8Boolean(imp->canBeMapped<Float64Array>(source), args.GetIsolate());
     }
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Uint8ClampedArray*, source, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        return v8Boolean(imp->canBeMappedUint8ClampedArray(source), args.GetIsolate());
+        return v8Boolean(imp->canBeMapped<Uint8ClampedArray>(source), args.GetIsolate());
     }
     return v8Boolean(false, args.GetIsolate());
 }
@@ -202,7 +202,7 @@ v8::Handle<v8::Value> V8CContext::writeToContext2DCallback(const v8::Arguments& 
         EXCEPTION_BLOCK(Float32Array*, source, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) : 0);
         EXCEPTION_BLOCK(int, width, toInt32(MAYBE_MISSING_PARAMETER(args, 2, DefaultIsUndefined)));
         EXCEPTION_BLOCK(int, height, toInt32(MAYBE_MISSING_PARAMETER(args, 3, DefaultIsUndefined)));
-        imp->writeToContext2DFloat32Array(ctx, source, width, height);
+        imp->writeToContext2D<Float32Array>(ctx, source, width, height);
         return v8Undefined();
     }
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) {
@@ -210,7 +210,7 @@ v8::Handle<v8::Value> V8CContext::writeToContext2DCallback(const v8::Arguments& 
         EXCEPTION_BLOCK(Float64Array*, source, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) : 0);
         EXCEPTION_BLOCK(int, width, toInt32(MAYBE_MISSING_PARAMETER(args, 2, DefaultIsUndefined)));
         EXCEPTION_BLOCK(int, height, toInt32(MAYBE_MISSING_PARAMETER(args, 3, DefaultIsUndefined)));
-        imp->writeToContext2DFloat64Array(ctx, source, width, height);
+        imp->writeToContext2D<Float64Array>(ctx, source, width, height);
         return v8Undefined();
     }
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) {
@@ -218,7 +218,7 @@ v8::Handle<v8::Value> V8CContext::writeToContext2DCallback(const v8::Arguments& 
         EXCEPTION_BLOCK(Uint8ClampedArray*, source, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) : 0);
         EXCEPTION_BLOCK(int, width, toInt32(MAYBE_MISSING_PARAMETER(args, 2, DefaultIsUndefined)));
         EXCEPTION_BLOCK(int, height, toInt32(MAYBE_MISSING_PARAMETER(args, 3, DefaultIsUndefined)));
-        imp->writeToContext2DUint8ClampedArray(ctx, source, width, height);
+        imp->writeToContext2D<Uint8ClampedArray>(ctx, source, width, height);
         return v8Undefined();
     }
     return v8Undefined();
@@ -232,15 +232,15 @@ v8::Handle<v8::Value> V8CContext::getAlignmentOffsetCallback(const v8::Arguments
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float32Array*, source, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        return v8UnsignedInteger(imp->getAlignmentOffsetFloat32Array(source), args.GetIsolate());
+        return v8UnsignedInteger(imp->getAlignmentOffset<Float32Array>(source), args.GetIsolate());
     }
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Float64Array*, source, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        return v8UnsignedInteger(imp->getAlignmentOffsetFloat64Array(source), args.GetIsolate());
+        return v8UnsignedInteger(imp->getAlignmentOffset<Float64Array>(source), args.GetIsolate());
     }
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) {
         EXCEPTION_BLOCK(Uint8ClampedArray*, source, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
-        return v8UnsignedInteger(imp->getAlignmentOffsetUint8ClampedArray(source), args.GetIsolate());
+        return v8UnsignedInteger(imp->getAlignmentOffset<Uint8ClampedArray>(source), args.GetIsolate());
     }
     return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot get alignment offset.", args.GetIsolate());
 }
