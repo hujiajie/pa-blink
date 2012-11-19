@@ -115,6 +115,7 @@ template<class ArgClass> bool CKernel::setScalarArgument(unsigned int number, co
     return true;
 }
 template bool CKernel::setScalarArgument<int>(unsigned int number, const int value, const bool isIntegerB, const bool isHighPrecisionB);
+template bool CKernel::setScalarArgument<unsigned int>(unsigned int number, const unsigned int value, const bool isIntegerB, const bool isHighPrecisionB);
 template bool CKernel::setScalarArgument<double>(unsigned int number, const double value, const bool isIntegerB, const bool isHighPrecisionB);
 
 unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* tile)

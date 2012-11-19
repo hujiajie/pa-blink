@@ -4,9 +4,15 @@
 #include "CL/opencl.h"
 #include <wtf/Float32Array.h>
 #include <wtf/Float64Array.h>
+#include <wtf/Int16Array.h>
+#include <wtf/Int32Array.h>
+#include <wtf/Int8Array.h>
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
+#include <wtf/Uint16Array.h>
+#include <wtf/Uint32Array.h>
+#include <wtf/Uint8Array.h>
 #include <wtf/Uint8ClampedArray.h>
 
 #include "OCLconfig.h"
@@ -38,6 +44,12 @@ private:
     unsigned m_type;
     unsigned m_length;
     unsigned m_size;
+    RefPtr<Int8Array> m_theInt8Array;
+    RefPtr<Uint8Array> m_theUint8Array;
+    RefPtr<Int16Array> m_theInt16Array;
+    RefPtr<Uint16Array> m_theUint16Array;
+    RefPtr<Int32Array> m_theInt32Array;
+    RefPtr<Uint32Array> m_theUint32Array;
     RefPtr<Float32Array> m_theFloat32Array;
     RefPtr<Float64Array> m_theFloat64Array;
     RefPtr<Uint8ClampedArray> m_theUint8ClampedArray;

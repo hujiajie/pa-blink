@@ -51,6 +51,9 @@ v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& 
     if (args[1]->IsInt32()) {
         int value = args[1]->Int32Value();
         return v8Boolean(imp->setScalarArgument<int>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
+    } else if (args[1]->IsUint32()) {
+        unsigned int value = args[1]->Uint32Value();
+        return v8Boolean(imp->setScalarArgument<unsigned int>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
     } else if (args[1]->IsNumber()) {
         double value = args[1]->NumberValue();
         return v8Boolean(imp->setScalarArgument<double>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());

@@ -54,7 +54,7 @@ public:
     template<class ArrayClass> bool canBeMapped(ArrayClass* source);
     unsigned long long lastExecutionTime();
     unsigned long long lastRoundTripTime();
-    template<class ArrayClass> void writeToContext2D(CanvasRenderingContext2D* ctx, ArrayClass* source, int width, int height);
+    template<class ArrayClass, class ElementType> void writeToContext2D(CanvasRenderingContext2D* ctx, ArrayClass* source, int width, int height);
     unsigned alignmentSize();
     template<class ArrayClass> unsigned getAlignmentOffset(ArrayClass* source);
 
