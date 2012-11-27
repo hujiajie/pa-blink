@@ -22,12 +22,12 @@
 namespace WebCore {
 
 CContext::CContext(CPlatform* aParent)
+    : m_parent(aParent)
+    , m_buildLog(0)
+    , m_buildLogSize(0)
+    , m_cmdQueue(0)
 {
     DEBUG_LOG_CREATE("CContext", this);
-    m_parent = aParent;
-    m_buildLog = 0;
-    m_buildLogSize = 0;
-    m_cmdQueue = 0;
 #ifdef CLPROFILE
     m_clpExecStart = 0;
     m_clpExecEnd = 0;
@@ -394,7 +394,7 @@ template<class ArrayClass, unsigned type> PassRefPtr<CData> CContext::mapData(Pa
     cl_mem_flags flags = CL_MEM_READ_ONLY;
     void* tArrayBuffer = 0;
     size_t arrayByteLength = tArray->byteLength();
-    if (arrayByteLength == 0)
+    if (!arrayByteLength)
         arrayByteLength = 1;
     else {
         tArrayBuffer = getPointerFromTA<ArrayClass>(tArray.get());
@@ -459,7 +459,7 @@ template<class ArrayClass, class ElementType, unsigned type> PassRefPtr<CData> C
         return data.release();
     }
 
-    if (length == 0) {
+    if (!length) {
         DEBUG_LOG_STATUS("allocateData", "size not provided, assuming template's size");
         length = tArray->length();
     }
@@ -524,7 +524,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
     }
 
-    if (length == 0) {
+    if (!length) {
         DEBUG_LOG_STATUS("allocateData2", "length not provided, assuming template's size");
         length = cData->getLength();
     }
@@ -909,7 +909,7 @@ template<> bool CContext::canBeMapped<Uint8ClampedArray>(Uint8ClampedArray* sour
 unsigned long long CContext::lastExecutionTime()
 {
 #ifdef CLPROFILE
-    if ((m_clpExecEnd == 0) || (m_clpExecStart == 0))
+    if (!m_clpExecEnd || !m_clpExecStart)
         return 0;
     else
         return m_clpExecEnd - m_clpExecStart;
@@ -980,7 +980,7 @@ template<class ArrayClass, class ElementType> void CContext::writeToContext2D(Ca
 
     unsigned char* data = (unsigned char*)malloc(size);
     ElementType* src = srcArray->data();
-    for (unsigned int i = 0; i < size; i++) {
+    for (unsigned i = 0; i < size; i++) {
         ElementType val = src[i];
         data[i] = val > 0 ? (val < 255 ? ((int)val) : 255) : 0;
     }

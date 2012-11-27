@@ -1,11 +1,10 @@
 #pragma once
 #include "config.h"
 #include "CPlatform.h"
-#include "OCLdebug.h"
 
 namespace WebCore {
 
-cl_platform_id CPlatform::s_platforms = NULL;
+cl_platform_id CPlatform::s_platforms = 0;
 CPlatform::CPlatform(cl_platform_id aPlatform)
 {
     DEBUG_LOG_CREATE("CPlatform", this);  
@@ -20,7 +19,7 @@ CPlatform::~CPlatform()
 int CPlatform::numberOfDevices()
 {
     cl_uint devices;
-    cl_int err_code = clGetDeviceIDs(s_platforms, CL_DEVICE_TYPE_ALL, 0, NULL, &devices);
+    cl_int err_code = clGetDeviceIDs(s_platforms, CL_DEVICE_TYPE_ALL, 0, 0, &devices);
     
     if (err_code != CL_SUCCESS)
         return -1;
@@ -28,18 +27,18 @@ int CPlatform::numberOfDevices()
     return devices;
 }
 
-int CPlatform::getPlatformPropertyHelper(cl_platform_info param, char* & out)
+int CPlatform::getPlatformPropertyHelper(cl_platform_info param, char*& out)
 {
-    char* rString = NULL;
+    char* rString = 0;
     size_t length;
     cl_int err;
     int result;
 
-    err = clGetPlatformInfo(s_platforms, param, 0, NULL, &length);
+    err = clGetPlatformInfo(s_platforms, param, 0, 0, &length);
 
     if (err == CL_SUCCESS) {
         rString = new char[length+1];
-        err = clGetPlatformInfo(s_platforms, param, length, rString, NULL);
+        err = clGetPlatformInfo(s_platforms, param, length, rString, 0);
         out = rString;  
         result = CL_SUCCESS;
     } else
@@ -82,7 +81,7 @@ String CPlatform::vendor()
     String ret(aVendor);
     delete [] aVendor;
     return ret;  
-}       
+}
 String CPlatform::profile()
 {
     char* aProfile;
@@ -101,4 +100,5 @@ String CPlatform::extensions()
     delete [] aExtensions;
     return ret; 
 }
+
 } // namespace WebCore

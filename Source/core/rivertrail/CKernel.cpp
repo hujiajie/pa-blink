@@ -1,6 +1,5 @@
 #include "config.h"
 #include "CKernel.h"
-#include "OCLdebug.h"
 
 #include "CContext.h"
 #include <limits>
@@ -12,9 +11,9 @@
 namespace WebCore {
 
 CKernel::CKernel(CContext* aParent)
-    :m_kernel(NULL)
-    ,m_cmdQueue(NULL)
-    ,m_parent(aParent)
+    : m_kernel(0)
+    , m_cmdQueue(0)
+    , m_parent(aParent)
 {
     DEBUG_LOG_CREATE("CKernel", this);
 }
@@ -24,7 +23,7 @@ CKernel::~CKernel()
     DEBUG_LOG_DESTROY("CKernel", this);
     if (m_kernel)
         clReleaseKernel(m_kernel);
-    m_parent = NULL;
+    m_parent = 0;
 }
 
 int CKernel::initKernel(cl_command_queue aCmdQueue, cl_kernel aKernel, cl_mem aFailureMem)
@@ -55,17 +54,17 @@ unsigned long CKernel::numberOfArgs()
     cl_uint result;
     cl_int err_code;
 
-    err_code = clGetKernelInfo(m_kernel, CL_KERNEL_NUM_ARGS, sizeof(cl_uint), &result, NULL);
+    err_code = clGetKernelInfo(m_kernel, CL_KERNEL_NUM_ARGS, sizeof(cl_uint), &result, 0);
     if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("GetNumberOfArgs", err_code);
-        return std::numeric_limits<unsigned long>::max();//We never get max value if eveything goes OK, since NUMBER_OF_ARTIFICIAL_ARGS > 0  
+        return std::numeric_limits<unsigned long>::max(); // We never get max value if eveything goes OK, since NUMBER_OF_ARTIFICIAL_ARGS > 0
     }
 
     /* skip internal arguments when counting */
     return result - NUMBER_OF_ARTIFICIAL_ARGS;
 }
 
-bool CKernel::setArgument( unsigned int number, CData* argument)
+bool CKernel::setArgument( unsigned number, CData* argument)
 {
     cl_int err_code;
     cl_mem buffer;
@@ -86,7 +85,7 @@ bool CKernel::setArgument( unsigned int number, CData* argument)
     return true;
 }
 
-template<class ArgClass> bool CKernel::setScalarArgument(unsigned int number, const ArgClass value, const bool isIntegerB, const bool isHighPrecisionB)
+template<class ArgClass> bool CKernel::setScalarArgument(unsigned number, const ArgClass value, const bool isIntegerB, const bool isHighPrecisionB)
 {
     cl_int err_code;
     /* skip internal arguments */
@@ -114,43 +113,43 @@ template<class ArgClass> bool CKernel::setScalarArgument(unsigned int number, co
     }
     return true;
 }
-template bool CKernel::setScalarArgument<int>(unsigned int number, const int value, const bool isIntegerB, const bool isHighPrecisionB);
-template bool CKernel::setScalarArgument<unsigned int>(unsigned int number, const unsigned int value, const bool isIntegerB, const bool isHighPrecisionB);
-template bool CKernel::setScalarArgument<double>(unsigned int number, const double value, const bool isIntegerB, const bool isHighPrecisionB);
+template bool CKernel::setScalarArgument<int>(unsigned number, const int value, const bool isIntegerB, const bool isHighPrecisionB);
+template bool CKernel::setScalarArgument<unsigned>(unsigned number, const unsigned value, const bool isIntegerB, const bool isHighPrecisionB);
+template bool CKernel::setScalarArgument<double>(unsigned number, const double value, const bool isIntegerB, const bool isHighPrecisionB);
 
-unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* tile)
+unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
 {
     cl_int err_code;
     cl_event runEvent, readEvent, writeEvent;
     size_t* global_work_size;
     size_t* local_work_size;
     const int zero = 0;
-    unsigned int* retval = new unsigned int[1];
+    unsigned* retval = new unsigned[1];
 
     DEBUG_LOG_STATUS("Run", "preparing execution of kernel");
 
-    if (sizeof(size_t) == sizeof(unsigned int)) {
+    if (sizeof(size_t) == sizeof(unsigned)) {
         global_work_size = (size_t*) shape;
     } else {
         global_work_size = new size_t[rank];
-        if (global_work_size == NULL) {
+        if (!global_work_size) {
             DEBUG_LOG_STATUS("Run", "allocation of global_work_size failed");
-            return -1;//FIX ME: An open issue in many statements. What should be returned in case of error?
+            return -1;
         }
-        for (unsigned int cnt = 0; cnt < rank; cnt++) {
+        for (unsigned cnt = 0; cnt < rank; cnt++) {
             global_work_size[cnt] = shape[cnt];
         }
     }
 
 #ifdef USE_LOCAL_WORKSIZE
-    if (tile == NULL) {
-        local_work_size = NULL;
+    if (!tile) {
+        local_work_size = 0;
     } else {
-        if ((sizeof(size_t) == sizeof(unsigned int))) {
+        if ((sizeof(size_t) == sizeof(unsigned))) {
             local_work_size = (size_t*) tile;
         } else {
             local_work_size = new size_t[rank];
-            if (local_work_size == NULL) {
+            if (!local_work_size) {
                 DEBUG_LOG_STATUS("Run", "allocation of local_work_size failed");
                 return -1;
             }
@@ -160,12 +159,12 @@ unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* 
         }
     }
 #else /* USE_LOCAL_WORKSIZE */
-    local_work_size = NULL;
+    local_work_size = 0;
 #endif /* USE_LOCAL_WORKSIZE */
 
     DEBUG_LOG_STATUS("Run", "setting failure code to 0");
 
-    err_code = clEnqueueWriteBuffer(m_cmdQueue, m_failureMem, CL_FALSE, 0, sizeof(int), &zero, 0, NULL, &writeEvent);
+    err_code = clEnqueueWriteBuffer(m_cmdQueue, m_failureMem, CL_FALSE, 0, sizeof(int), &zero, 0, 0, &writeEvent);
     if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("Run", err_code);
         return -1;
@@ -177,7 +176,7 @@ unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* 
     CContext::recordBeginOfRoundTrip(m_parent);
 #endif /* WINDOWS_ROUNDTRIP */
 
-    err_code = clEnqueueNDRangeKernel(m_cmdQueue, m_kernel, rank, NULL, global_work_size, NULL, 1, &writeEvent, &runEvent);
+    err_code = clEnqueueNDRangeKernel(m_cmdQueue, m_kernel, rank, 0, global_work_size, 0, 1, &writeEvent, &runEvent);
     if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("Run", err_code);
         return -1;
@@ -195,8 +194,8 @@ unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* 
 
     DEBUG_LOG_STATUS("Run", "waiting for execution to finish");
     
-    //For now we always wait for the run to complete.
-    //In the long run, we may want to interleave this with JS execution and only sync on result read.
+    // For now we always wait for the run to complete.
+    // In the long run, we may want to interleave this with JS execution and only sync on result read.
     err_code = clWaitForEvents( 1, &readEvent);
     
     DEBUG_LOG_STATUS("Run", "first event fired");        
@@ -224,11 +223,11 @@ unsigned int CKernel::run(unsigned int rank, unsigned int* shape, unsigned int* 
         
     DEBUG_LOG_STATUS("Run", "execution completed successfully, start cleanup");
     
-    if (global_work_size != (size_t *) shape) {
+    if (global_work_size != (size_t*) shape) {
         delete global_work_size;
     }
 #ifdef USE_LOCAL_WORKSIZE
-    if (local_work_size != (size_t *) tile) {
+    if (local_work_size != (size_t*) tile) {
         delete local_work_size;
     }
 #endif /* USE_LOCAL_WORKSIZE */

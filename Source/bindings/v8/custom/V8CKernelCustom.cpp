@@ -51,14 +51,16 @@ v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& 
     if (args[1]->IsInt32()) {
         int value = args[1]->Int32Value();
         return v8Boolean(imp->setScalarArgument<int>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
-    } else if (args[1]->IsUint32()) {
-        unsigned int value = args[1]->Uint32Value();
-        return v8Boolean(imp->setScalarArgument<unsigned int>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
-    } else if (args[1]->IsNumber()) {
+    }
+    if (args[1]->IsUint32()) {
+        unsigned value = args[1]->Uint32Value();
+        return v8Boolean(imp->setScalarArgument<unsigned>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
+    }
+    if (args[1]->IsNumber()) {
         double value = args[1]->NumberValue();
         return v8Boolean(imp->setScalarArgument<double>(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
-    } else 
-        return V8Proxy::throwTypeError(0, args.GetIsolate());
+    } 
+    return V8Proxy::throwTypeError(0, args.GetIsolate());
 }
 
 v8::Handle<v8::Value> V8CKernel::runCallback(const v8::Arguments& args)
@@ -72,17 +74,17 @@ v8::Handle<v8::Value> V8CKernel::runCallback(const v8::Arguments& args)
     if (args[1].IsEmpty() || !args[1]->IsArray())
         return V8Proxy::throwTypeError(0, args.GetIsolate());
     v8::Handle<v8::Array> ashape = v8::Handle<v8::Array>::Cast(args[1]->ToObject());
-    unsigned int* shape = new unsigned int[ashape->Length()];
-    for(uint32_t i=0; i<ashape->Length(); i++)
+    unsigned* shape = new unsigned[ashape->Length()];
+    for(uint32_t i = 0; i < ashape->Length(); i++)
         shape[i] = ashape->Get(i)->Int32Value();
     
-    unsigned int* tile = NULL;
+    unsigned* tile = 0;
     if (!isUndefinedOrNull(args[2])){
         if (args[2].IsEmpty() || !args[2]->IsArray())
             return V8Proxy::throwTypeError(0, args.GetIsolate());
         v8::Handle<v8::Array> atile = v8::Handle<v8::Array>::Cast(args[2]->ToObject());   
-        tile = new unsigned int[atile->Length()];
-        for(uint32_t i=0; i<atile->Length(); i++)
+        tile = new unsigned[atile->Length()];
+        for(uint32_t i = 0; i < atile->Length(); i++)
             tile[i] = atile->Get(i)->Int32Value();
     }
         

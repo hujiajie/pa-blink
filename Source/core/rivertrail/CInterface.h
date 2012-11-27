@@ -1,16 +1,14 @@
-#ifndef CINTERFACE_H
-#define CINTERFACE_H
+#ifndef CInterface_h
+#define CInterface_h
 
 #include "CPlatform.h"
-
-#include <wtf/Forward.h>
-#include <wtf/PassRefPtr.h>
-#include <wtf/RefPtr.h>
-#include <wtf/RefCounted.h>
-#include <wtf/text/WTFString.h>
-
 #include "OCLconfig.h"
+#include "OCLdebug.h"
 #include "opencl_compat.h"
+#include <wtf/PassRefPtr.h>
+#include <wtf/RefCounted.h>
+#include <wtf/RefPtr.h>
+#include <wtf/text/WTFString.h>
 
 namespace WebCore {
    
@@ -24,16 +22,16 @@ public:
     
     PassRefPtr<CPlatform> getPlatform();
     unsigned long version();
-    //static CInterface *getInstance();
+    // static PassRefPtr<CInterface> getInstance(bool& hasSingleton);
 
 private:
     CInterface();
-    //static  CInterface* singleton;
+    // static  CInterface* s_singleton;
     cl_platform_id* m_platforms;
     cl_uint m_noOfPlatforms;
-    int InitPlatformInfo();
+    int initPlatformInfo();
 };
 
 } // namespace WebCore
  
-#endif
+#endif // CInterface_h

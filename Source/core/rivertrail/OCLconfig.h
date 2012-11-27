@@ -24,8 +24,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OCL_CONFIG_H_
-#define OCL_CONFIG_H_
+#ifndef OCLconfig_h
+#define OCLconfig_h
 
 #define INTERFACE_VERSION           2   /* running version number of the interface */
 #define NUMBER_OF_ARTIFICIAL_ARGS   1   /* number of internal kernel arguments used by runtime */
@@ -44,4 +44,4 @@
 #define DPO_PREFERENCE_BRANCH "extensions.dpointerface."    /* preference branch to use */
 #define DPO_DEFAULT_PLATFORM_PREFNAME "defaultPlatform"     /* preference name for default platform */
 
-#endif /* OCL_CONFIG_H_ */
+#endif /* OCLconfig_h */

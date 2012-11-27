@@ -1,18 +1,17 @@
-#ifndef CKERNEL_H
-#define CKERNEL_H
+#ifndef CKernel_h
+#define CKernel_h
 
 #include "CData.h"
-
-#include <wtf/Forward.h>
+#include "OCLconfig.h"
+#include "OCLdebug.h"
+#include "opencl_compat.h"
 #include <wtf/PassRefPtr.h>
-#include <wtf/RefPtr.h>
 #include <wtf/RefCounted.h>
+#include <wtf/RefPtr.h>
 #include <wtf/text/WTFString.h>
 
-#include "OCLconfig.h"
-#include "opencl_compat.h"
-
 namespace WebCore {
+
 class CContext;
 class CKernel: public RefCounted<CKernel> {
 public:
@@ -23,11 +22,11 @@ public:
     ~CKernel();
 
     unsigned long numberOfArgs();
-    bool setArgument( unsigned int number, CData* argument);
-    template<class ArgClass> bool setScalarArgument(unsigned int number, const ArgClass value, const bool isIntegerB, const bool isHighPrecisionB);
-    unsigned int run(unsigned int rank, unsigned int* shape, unsigned int* tile);
+    bool setArgument( unsigned number, CData* argument);
+    template<class ArgClass> bool setScalarArgument(unsigned number, const ArgClass value, const bool isIntegerB, const bool isHighPrecisionB);
+    unsigned run(unsigned rank, unsigned* shape, unsigned* tile);
     
-    int initKernel(cl_command_queue aCmdQueue, cl_kernel aKernel, cl_mem failureMem);
+    int initKernel(cl_command_queue, cl_kernel, cl_mem failureMem);
 
 private:
     CKernel(CContext* aParent);
@@ -37,5 +36,6 @@ private:
     CContext* m_parent;
     
 };
+
 } // namespace WebCore
-#endif
+#endif // CKernel_h

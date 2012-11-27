@@ -2,8 +2,8 @@
 #include "V8CPlatform.h"
 
 #include "CPlatform.h"
-#include "V8CContext.h"
 #include "V8Binding.h"
+#include "V8CContext.h"
 #include "V8Proxy.h"
 
 namespace WebCore {

@@ -2,8 +2,8 @@
 #include "V8CInterface.h"
 
 #include "CInterface.h"
-#include "V8CPlatform.h"
 #include "V8Binding.h"
+#include "V8CPlatform.h"
 #include "V8Proxy.h"
 
 namespace WebCore {
@@ -33,4 +33,5 @@ v8::Handle<v8::Value> V8CInterface::getPlatformCallback(const v8::Arguments& arg
         return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CPlatform object.", args.GetIsolate());
     return toV8(cPlatform.release(), args.GetIsolate());
 }
+
 } // namespace WebCore

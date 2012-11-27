@@ -1,7 +1,9 @@
 #ifndef CData_h
 #define CData_h
 
-#include "CL/opencl.h"
+#include "OCLconfig.h"
+#include "OCLdebug.h"
+#include "opencl_compat.h"
 #include <wtf/Float32Array.h>
 #include <wtf/Float64Array.h>
 #include <wtf/Int16Array.h>
@@ -14,10 +16,6 @@
 #include <wtf/Uint32Array.h>
 #include <wtf/Uint8Array.h>
 #include <wtf/Uint8ClampedArray.h>
-
-#include "OCLconfig.h"
-#include "OCLdebug.h"
-#include "opencl_compat.h"
 
 namespace WebCore {
 

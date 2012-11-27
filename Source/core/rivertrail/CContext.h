@@ -1,15 +1,13 @@
 #ifndef CContext_h
 #define CContext_h
 
-#include "CL/opencl.h"
+#include "OCLconfig.h"
+#include "OCLdebug.h"
+#include "opencl_compat.h"
 #include "PlatformString.h"
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
-
-#include "OCLconfig.h"
-#include "OCLdebug.h"
-#include "opencl_compat.h"
 
 #ifdef WINDOWS_ROUNDTRIP
 #include <windows.h>

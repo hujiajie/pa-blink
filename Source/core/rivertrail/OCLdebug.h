@@ -24,8 +24,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OCL_DEBUG_H_
-#define OCL_DEBUG_H_
+#ifndef OCLdebug_h
+#define OCLdebug_h
 
 #define RT_OK 0
 #define RT_ERROR_NOT_IMPLEMENTED 0x80004001
@@ -72,4 +72,4 @@
 #define DEBUG_LOG_DESTROY( src, ptr) 
 
 #endif /* DEBUG_OFF */
-#endif /* OCL_DEBUG_H_ */
+#endif /* OCLdebug_h */

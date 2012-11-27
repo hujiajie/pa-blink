@@ -1,16 +1,14 @@
-#ifndef CPLATFORM_H
-#define CPLATFORM_H
+#ifndef CPlatform_h
+#define CPlatform_h
     
 #include "CContext.h"
-
-#include <wtf/Forward.h>
-#include <wtf/PassRefPtr.h>
-#include <wtf/RefPtr.h>
-#include <wtf/RefCounted.h>
-#include <wtf/text/WTFString.h>
-
 #include "OCLconfig.h"
+#include "OCLdebug.h"
 #include "opencl_compat.h"
+#include <wtf/PassRefPtr.h>
+#include <wtf/RefCounted.h>
+#include <wtf/RefPtr.h>
+#include <wtf/text/WTFString.h>
 
 namespace WebCore {
 
@@ -36,11 +34,12 @@ public:
     
 private:
     CPlatform(){};
-    CPlatform(cl_platform_id platform);
-    int getPlatformPropertyHelper(cl_platform_info param, char* & out);
+    CPlatform(cl_platform_id);
+    int getPlatformPropertyHelper(cl_platform_info param, char*& out);
     
     static cl_platform_id s_platforms;
     
 };
+
 } // namespace WebCore
-#endif
+#endif // CPlatform_h

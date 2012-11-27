@@ -6,11 +6,11 @@
 namespace WebCore {
 
 CData::CData(CContext* aParent)
+    : m_parent(aParent)
+    , m_queue(0)
+    , m_memObj(0)
 {
     DEBUG_LOG_CREATE("CData", this);
-    m_parent = aParent;
-    m_queue = 0;
-    m_memObj = 0;
 #ifdef PREALLOCATE_IN_JS_HEAP
     m_isMapped = false;
 #endif // PREALLOCATE_IN_JS_HEAP
