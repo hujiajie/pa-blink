@@ -12,7 +12,6 @@
 #include "V8Int16Array.h"
 #include "V8Int32Array.h"
 #include "V8Int8Array.h"
-#include "V8Proxy.h"
 #include "V8Uint16Array.h"
 #include "V8Uint32Array.h"
 #include "V8Uint8Array.h"
@@ -35,15 +34,15 @@ v8::Handle<v8::Value> V8CData::constructorCallback(const v8::Arguments& args)
     INC_STATS("DOM.CData.Constructor");
 
     if (!args.IsConstructCall())
-        return V8Proxy::throwTypeError("DOM object constructor cannot be called as a function.", args.GetIsolate());
+        return throwTypeError("DOM object constructor cannot be called as a function.", args.GetIsolate());
 
     if (ConstructorMode::current() == ConstructorMode::WrapExistingObject)
         return args.Holder();
 
     if (args.Length() != 1)
-        return V8Proxy::throwError(V8Proxy::GeneralError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(GeneralError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
     if (!V8CContext::HasInstance(args[0]))
-        return V8Proxy::throwError(V8Proxy::GeneralError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(GeneralError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
 
     CContext* parent = V8CContext::toNative(v8::Handle<v8::Object>::Cast(args[0]));
     RefPtr<CData> cData = CData::create(parent);
@@ -61,77 +60,77 @@ v8::Handle<v8::Value> V8CData::getValueCallback(const v8::Arguments& args)
 		{
         Int8Array* theArray = imp->getValue<Int8Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
 		}
     case TYPE_UINT8:
 		{
         Uint8Array* theArray = imp->getValue<Uint8Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
 		}
     case TYPE_INT16:
 		{
         Int16Array* theArray = imp->getValue<Int16Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
 		}
     case TYPE_UINT16:
 		{
         Uint16Array* theArray = imp->getValue<Uint16Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
 		}
     case TYPE_INT32:
 		{
         Int32Array* theArray = imp->getValue<Int32Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
 		}
     case TYPE_UINT32:
 		{
         Uint32Array* theArray = imp->getValue<Uint32Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
 		}
     case TYPE_FLOAT32:
         {
         Float32Array* theArray = imp->getValue<Float32Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
         }
     case TYPE_FLOAT64:
         {
         Float64Array* theArray = imp->getValue<Float64Array>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
         }
     case TYPE_UINT8_CLAMPED:
         {
         Uint8ClampedArray* theArray = imp->getValue<Uint8ClampedArray>();
         if (!theArray)
-            return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
-        return toV8(theArray, args.GetIsolate());
+            return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return toV8(theArray);
         break;
         }
     default:
         {
-        return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
         break;
         }
     }
@@ -141,7 +140,7 @@ v8::Handle<v8::Value> V8CData::writeToCallback(const v8::Arguments& args)
 {
     INC_STATS("DOM.CData.writeTo");
     if (args.Length() < 1)
-        return V8Proxy::throwNotEnoughArgumentsError(args.GetIsolate());
+        return throwNotEnoughArgumentsError(args.GetIsolate());
     CData* imp = V8CData::toNative(args.Holder());
     switch (imp->getType()) {
     case TYPE_INT8:
@@ -209,7 +208,7 @@ v8::Handle<v8::Value> V8CData::writeToCallback(const v8::Arguments& args)
         }
     default:
         {
-        return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return throwError(GeneralError, "Cannot access typed array.", args.GetIsolate());
         break;
         }
     }

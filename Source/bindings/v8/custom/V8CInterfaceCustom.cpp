@@ -4,7 +4,6 @@
 #include "CInterface.h"
 #include "V8Binding.h"
 #include "V8CPlatform.h"
-#include "V8Proxy.h"
 
 namespace WebCore {
 
@@ -13,7 +12,7 @@ v8::Handle<v8::Value> V8CInterface::constructorCallback(const v8::Arguments& arg
     INC_STATS("DOM.CInterface.Constructor");
 
     if (!args.IsConstructCall())
-        return V8Proxy::throwTypeError("DOM object constructor cannot be called as a function.", args.GetIsolate());
+        return throwTypeError("DOM object constructor cannot be called as a function.", args.GetIsolate());
 
     if (ConstructorMode::current() == ConstructorMode::WrapExistingObject)
         return args.Holder();
@@ -30,8 +29,8 @@ v8::Handle<v8::Value> V8CInterface::getPlatformCallback(const v8::Arguments& arg
     CInterface* imp = V8CInterface::toNative(args.Holder());
     RefPtr<CPlatform> cPlatform = imp->getPlatform();
     if (!cPlatform)
-        return V8Proxy::throwError(V8Proxy::GeneralError, "Cannot create new CPlatform object.", args.GetIsolate());
-    return toV8(cPlatform.release(), args.GetIsolate());
+        return throwError(GeneralError, "Cannot create new CPlatform object.", args.GetIsolate());
+    return toV8(cPlatform.get());
 }
 
 } // namespace WebCore
