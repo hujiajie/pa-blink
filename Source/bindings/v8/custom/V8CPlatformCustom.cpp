@@ -21,7 +21,7 @@ v8::Handle<v8::Value> V8CPlatform::numberOfDevicesAccessorGetter(v8::Local<v8::S
 {
     INC_STATS("DOM.CPlatform.numberOfDevices._get");
     CPlatform* imp = V8CPlatform::toNative(info.Holder());
-    int number = imp->numberOfDevices();
+    int number = imp->openclUtil()->numberOfDevices();
     if (number == -1)
         return throwError(GeneralError, "Cannot get numberOfDevices.", info.GetIsolate());
     return v8UnsignedInteger(number, info.GetIsolate());

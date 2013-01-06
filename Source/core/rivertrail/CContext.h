@@ -3,6 +3,7 @@
 
 #include "OCLconfig.h"
 #include "OCLdebug.h"
+#include "OCLUtil.h"
 #include "opencl_compat.h"
 #include "PlatformString.h"
 #include <wtf/PassRefPtr.h>
@@ -25,12 +26,11 @@ public:
     static PassRefPtr<CContext> create(CPlatform* aParent) { return adoptRef(new CContext(aParent)); }
     ~CContext();
 
-    unsigned initContext(cl_platform_id platform);
+    unsigned initContext();
 
 #ifdef CLPROFILE
     static void CL_CALLBACK collectTimings(cl_event event, cl_int status, void* data);
 #endif // CLPROFILE
-    static void CL_CALLBACK reportCLError(const char* err_info, const void* private_info, size_t cb, void* user_data);
     template<class ArrayClass> static unsigned char* getPointerFromTA(ArrayClass* ta);
     template<class ArrayClass, class ElementType> unsigned createAlignedTA(unsigned type, size_t length, RefPtr<ArrayClass>& retval);
 #ifdef WINDOWS_ROUNDTRIP

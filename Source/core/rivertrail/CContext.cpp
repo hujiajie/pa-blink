@@ -79,81 +79,18 @@ void CL_CALLBACK CContext::collectTimings(cl_event event, cl_int status, void* d
 }
 #endif // CLPROFILE
 
-void CL_CALLBACK CContext::reportCLError(const char* err_info, const void* private_info, size_t cb, void* user_data)
-{
-    DEBUG_LOG_CLERROR(err_info);
-}
-
-unsigned CContext::initContext(cl_platform_id platform)
+unsigned CContext::initContext()
 {
     cl_int err_code;
-    cl_device_id* devices;
-    size_t cb;
-
 #ifdef INCREMENTAL_MEM_RELEASE
     m_deferList = (cl_mem*)malloc(DEFER_LIST_LENGTH * sizeof(cl_mem));
     m_deferPos = 0;
     m_deferMax = DEFER_LIST_LENGTH;
 #endif // INCREMENTAL_MEM_RELEASE
 
-    cl_context_properties context_properties[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0};
-
-    m_context = clCreateContextFromType(context_properties, CL_DEVICE_TYPE_CPU, reportCLError, this, &err_code);
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("initContext", err_code);
-        return RT_ERROR_NOT_AVAILABLE;
-    }
-
-    err_code = clGetContextInfo(m_context, CL_CONTEXT_DEVICES, 0, 0, &cb);
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("initContext", err_code);
-        return RT_ERROR_NOT_AVAILABLE;
-    }
-
-    devices = (cl_device_id*)malloc(sizeof(cl_device_id) * cb);
-    if (!devices) {
-        DEBUG_LOG_STATUS("initContext", "Cannot allocate device list");
-        return RT_ERROR_OUT_OF_MEMORY;
-    }
-
-    err_code = clGetContextInfo(m_context, CL_CONTEXT_DEVICES, cb, devices, 0);
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("initContext", err_code);
-        free(devices);
-        return RT_ERROR_NOT_AVAILABLE;
-    }
-
-    m_cmdQueue = clCreateCommandQueue(m_context, devices[0],
-#ifdef CLPROFILE
-        CL_QUEUE_PROFILING_ENABLE |
-#endif // CLPROFILE
-#ifdef OUTOFORDERQUEUE
-        CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE |
-#endif // OUTOFORDERQUEUE
-        0,
-        &err_code);
-    if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("initContext", err_code);
-        free(devices);
-        return RT_ERROR_NOT_AVAILABLE;
-    }
-
-    DEBUG_LOG_STATUS("initContext", "queue is " << m_cmdQueue);
-
-    err_code = clGetDeviceInfo(devices[0], CL_DEVICE_MEM_BASE_ADDR_ALIGN, sizeof(m_alignmentSize), &m_alignmentSize, 0);
-    if (err_code != CL_SUCCESS) {
-        // We can tolerate this, simply do not align.
-        m_alignmentSize = 8;
-    }
-    // We use byte, not bits.
-    if (m_alignmentSize % 8) {
-        // They align on sub-byte borders? Odd architecture this must be. Give up.
-        m_alignmentSize = 1;
-    } else
-        m_alignmentSize = m_alignmentSize / 8;
-
-    free(devices);
-
+    m_context = m_parent->openclUtil()->context();
+    m_cmdQueue = m_parent->openclUtil()->queue();
+    m_alignmentSize = m_parent->openclUtil()->alignmentSize();
     m_kernelFailureMem = createBuffer(CL_MEM_READ_WRITE, sizeof(int), 0, &err_code);
     if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("initContext", err_code);
