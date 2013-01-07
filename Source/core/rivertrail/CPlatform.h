@@ -18,6 +18,11 @@ public:
     ~CPlatform();
 
     PassRefPtr<CContext> createContext();
+    String version();
+    String name();
+    String vendor();
+    String profile();
+    String extensions();
     OCLUtil* openclUtil();
 
 private:

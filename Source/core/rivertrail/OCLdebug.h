@@ -41,7 +41,7 @@
 #define TYPE_FLOAT32 6
 #define TYPE_FLOAT64 7
 #define TYPE_UINT8_CLAMPED 8
-
+/*
 #ifndef DEBUG_OFF
 
 #ifdef DEBUG_WEBKIT
@@ -60,11 +60,11 @@
 #define DEBUG_LOG_CLERROR( text) std::cout << "DEBUG @ [OPENCLRUNTIME] STATUS: " << text << "\n"
 #define DEBUG_LOG_CREATE( src, ptr) std::cout << "DEBUG @ " __FILE__ << ":" << __LINE__ << " CREATION " << src << " at " << ptr << "\n"
 #define DEBUG_LOG_DESTROY( src, ptr) std::cout << "DEBUG @ " __FILE__ << ":" << __LINE__ << " DESTRUCTION " << src << " at " << ptr << "\n"
-
+/*
 #endif /* DEBUG_WEBKIT */
-
+/*
 #else /* DEBUG_OFF */
-
+/*
 #define DEBUG_LOG_ERROR( src, code) 
 #define DEBUG_LOG_STATUS( src, status) 
 #define DEBUG_LOG_CLERROR( text) 

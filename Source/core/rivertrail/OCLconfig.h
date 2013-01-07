@@ -44,4 +44,6 @@
 #define DPO_PREFERENCE_BRANCH "extensions.dpointerface."    /* preference branch to use */
 #define DPO_DEFAULT_PLATFORM_PREFNAME "defaultPlatform"     /* preference name for default platform */
 
+#define RivertrailExport   __declspec( dllexport )
+
 #endif /* OCLconfig_h */
