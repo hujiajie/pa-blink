@@ -345,14 +345,6 @@
 	        'OpenCL.lib',
 	      ],
 	    },
-	    'VCLinkerTool': {
-	      'AdditionalLibraryDirectories': [
-	        '$(INTELOCLSDKROOT)/lib/x86',
-	      ],
-	      'AdditionalDependencies': [
-	        'OpenCL.lib',
-	      ],
-	    },
 	  },
         }],
         ['OS in ("linux", "android") and "WTF_USE_WEBAUDIO_IPP=1" in feature_defines', {
@@ -439,6 +431,21 @@
         },
       },
       'conditions': [
+        ['OS=="win"', {
+          'include_dirs': [
+            '$(INTELOCLSDKROOT)/include',
+          ],
+          'msvs_settings': {
+            'VCLibrarianTool': {
+              'AdditionalLibraryDirectories': [
+                '$(INTELOCLSDKROOT)/lib/x86',
+              ],
+              'AdditionalDependencies': [
+                'OpenCL.lib',
+              ],
+            },
+          },
+        }],
         ['OS=="win" and component=="shared_library"', {
           'direct_dependent_settings': {
             'defines': [
