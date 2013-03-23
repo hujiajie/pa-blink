@@ -269,37 +269,37 @@ template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA
 
 template<> unsigned CContext::createAlignedTA<Int8Array, char>(unsigned type, size_t length, RefPtr<Int8Array>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
 template<> unsigned CContext::createAlignedTA<Uint8Array, unsigned char>(unsigned type, size_t length, RefPtr<Uint8Array>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
 template<> unsigned CContext::createAlignedTA<Int16Array, short>(unsigned type, size_t length, RefPtr<Int16Array>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
 template<> unsigned CContext::createAlignedTA<Uint16Array, unsigned short>(unsigned type, size_t length, RefPtr<Uint16Array>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
 template<> unsigned CContext::createAlignedTA<Int32Array, int>(unsigned type, size_t length, RefPtr<Int32Array>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
 template<> unsigned CContext::createAlignedTA<Uint32Array, unsigned>(unsigned type, size_t length, RefPtr<Uint32Array>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
@@ -308,7 +308,7 @@ template unsigned CContext::createAlignedTA<Float64Array, double>(unsigned type,
 
 template<> unsigned CContext::createAlignedTA<Uint8ClampedArray, unsigned char>(unsigned type, size_t length, RefPtr<Uint8ClampedArray>& res)
 {
-    // We only return float our double arrays, so fail in all other cases.
+    // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 

@@ -629,7 +629,7 @@
 	var flag=0;//ftest.toString()=="[0, 0, 0, 1, 0, 2]"
 	if(ftest.get(0)!=0 || ftest.get(1)!=0 || ftest.get(2)!=0 ||ftest.get(3)!=1||ftest.get(4)!=0||ftest.get(5)!=2) flag=1;
     if(flag==0){
-         document.getElementById("testresult").innerHTML+=("<p>After flattern:[0, 0, 0, 1, 0, 2]</p>");
+         document.getElementById("testresult").innerHTML+=("<p>After flatten:[0, 0, 0, 1, 0, 2]</p>");
 		 document.getElementById("result60").innerHTML="Passed";
 		 document.getElementById("result60").style.color="green";}
     else{document.getElementById("testresult").innerHTML+=("<p>Flatten failed.</p>");
