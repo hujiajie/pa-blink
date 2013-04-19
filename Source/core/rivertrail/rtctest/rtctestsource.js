@@ -96,7 +96,7 @@
   }
    
   var source0 = new ParallelArray([1,2,3,4,5,6]);
-  var source1 = new ParallelArray(3,function(i){return [i,i+1];});
+  var source1 = new ParallelArray(3,function(i){var ret = [0, 0]; ret[0] = i; ret[1] = i + 1; return ret;});
   var source2 = new ParallelArray([1/3,2,5]);
 
   //ParallelArray test
@@ -518,7 +518,7 @@
 	var flag=0;//"[520, [1, 2],[ 0, 1]]"
 	if(reorder.get(0)!=520||reorder.get(1,0)!=1||reorder.get(1,1)!=2||reorder.get(2,0)!=0||reorder.get(2,1)!=1) flag=1;
       if(flag==0){
-         document.getElementById("testresult").innerHTML+=("<p>Correct:</p>"+reorder);
+         document.getElementById("testresult").innerHTML+=("<p>Correct:</p>"+reorder.get(0)+", "+reorder.get(1)+", "+reorder.get(2));
 		 document.getElementById("result43").innerHTML="Passed";
 		 document.getElementById("result43").style.color="green";}
     	else{document.getElementById("testresult").innerHTML+=("<p>Scatter failed.</p>");
