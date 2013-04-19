@@ -1670,10 +1670,16 @@ var ParallelArray = function () {
     
     // toString()   Converts an array to a string, and returns the result
     var toString = function toString (arg1) {
-        var max = this.shape.reduce(function (v, p) { return v*p; }) + this.offset;
         var res = "[";
-        for (var pos = this.offset; pos < max; pos++) {
-            res += ((pos === this.offset) ? "" : ", ") + this.data[pos];
+        if (this.flat) {
+            var max = this.shape.reduce(function (v, p) { return v*p; }) + this.offset;
+            for (var pos = this.offset; pos < max; pos++) {
+                res += ((pos === this.offset) ? "" : ", ") + this.data[pos];
+            }
+        } else {
+            for (var i = 0; i < this.length; i++) {
+                res += ((i === 0) ? "" : ", ") + this.get(i);
+            }
         }
         res += "]";
         return res;

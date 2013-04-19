@@ -518,7 +518,7 @@
 	var flag=0;//"[520, [1, 2],[ 0, 1]]"
 	if(reorder.get(0)!=520||reorder.get(1,0)!=1||reorder.get(1,1)!=2||reorder.get(2,0)!=0||reorder.get(2,1)!=1) flag=1;
       if(flag==0){
-         document.getElementById("testresult").innerHTML+=("<p>Correct:</p>"+reorder.get(0)+", "+reorder.get(1)+", "+reorder.get(2));
+         document.getElementById("testresult").innerHTML+=("<p>Correct:</p>"+reorder);
 		 document.getElementById("result43").innerHTML="Passed";
 		 document.getElementById("result43").style.color="green";}
     	else{document.getElementById("testresult").innerHTML+=("<p>Scatter failed.</p>");
