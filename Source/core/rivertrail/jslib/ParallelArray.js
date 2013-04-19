@@ -1474,8 +1474,6 @@ var ParallelArray = function () {
                 for (i=0;i<arguments[0].length;i++) {
                     if (result instanceof ParallelArray && result.flat) {
                         result = result.get(arguments[0][i]);
-                    } else if (result.shape instanceof Array && result.__proto__ === _fastClasses[result.shape.length].prototype && result.flat) {
-                        result = result.get(arguments[0][i]);
                     } else {
                         result = result.data[arguments[0][i]];
                     }
@@ -1490,8 +1488,6 @@ var ParallelArray = function () {
         result = this;
         for (i=0;i<arguments.length;i++) {
             if (result instanceof ParallelArray && result.flat) {
-                result = result.get(arguments[i]);
-            } else if (result.shape instanceof Array && result.__proto__ === _fastClasses[result.shape.length].prototype && result.flat) {
                 result = result.get(arguments[i]);
             } else {
                 result = result.data[arguments[i]];
