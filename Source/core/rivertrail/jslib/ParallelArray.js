@@ -517,9 +517,6 @@ var ParallelArray = function () {
                         this.data[i] = new ParallelArray(values[i]);
                     } else {
                         this.data[i] = values[i];
-                        /**
-                        this.shape = this.shape.push(values[i].length);
-                        **/
                     }
                 }
             } else { // we have a flat array.
