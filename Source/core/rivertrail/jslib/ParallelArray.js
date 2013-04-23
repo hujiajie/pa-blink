@@ -1670,19 +1670,17 @@ var ParallelArray = function () {
     
     // toString()   Converts an array to a string, and returns the result
     var toString = function toString (arg1) {
-        var res = "[";
         if (this.flat) {
             var max = this.shape.reduce(function (v, p) { return v*p; }) + this.offset;
+            var res = "[";
             for (var pos = this.offset; pos < max; pos++) {
                 res += ((pos === this.offset) ? "" : ", ") + this.data[pos];
             }
+            res += "]";
+            return res;
         } else {
-            for (var i = 0; i < this.length; i++) {
-                res += ((i === 0) ? "" : ", ") + this.get(i);
-            }
+            return "[" + this.data.join(", ") + "]";
         }
-        res += "]";
-        return res;
     };
     
     // unshift()    Adds new elements to the beginning of an array, and returns the new length
