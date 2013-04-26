@@ -902,6 +902,7 @@ void CContext::recordEndOfRoundTrip(CContext* parent)
 
 template<class ArrayClass, class ElementType> void CContext::writeToContext2D(CanvasRenderingContext2D* ctx, ArrayClass* source, int width, int height)
 {
+#ifdef DIRECT_WRITE
     ArrayClass* srcArray;
     RefPtr<Uint8ClampedArray> uint8ClampedArray;
     IntSize intSize(width, height);
@@ -933,6 +934,7 @@ template<class ArrayClass, class ElementType> void CContext::writeToContext2D(Ca
     }
     ctx->putImageData(imageData.get(), width, height, exceptionCode);
     free(data);
+#endif // DIRECT_WRITE
 }
 
 template<> void CContext::writeToContext2D<Int8Array, char>(CanvasRenderingContext2D* ctx, Int8Array* source, int width, int height)
@@ -964,6 +966,7 @@ template void CContext::writeToContext2D<Float64Array, double>(CanvasRenderingCo
 
 template<> void CContext::writeToContext2D<Uint8ClampedArray, unsigned char>(CanvasRenderingContext2D* ctx, Uint8ClampedArray* source, int width, int height)
 {
+#ifdef DIRECT_WRITE
     Uint8ClampedArray* srcArray;
     RefPtr<Uint8ClampedArray> uint8ClampedArray;
     IntSize intSize(width, height);
@@ -985,6 +988,7 @@ template<> void CContext::writeToContext2D<Uint8ClampedArray, unsigned char>(Can
     if (!imageData)
         return;
     ctx->putImageData(imageData.get(), width, height, exceptionCode);
+#endif // DIRECT_WRITE
 }
 
 unsigned CContext::alignmentSize()
