@@ -334,18 +334,8 @@
           # Disable c4267 warnings until we fix size_t to int truncations.
           'msvs_disabled_warnings': [ 4065, 4267 ],
 	  'include_dirs': [
-	    '$(INTELOCLSDKROOT)/include',
+	    '<(opencl_sdk_path)/include',
 	  ],
-	  'msvs_settings': {
-	    'VCLibrarianTool': {
-	      'AdditionalLibraryDirectories': [
-	        '$(INTELOCLSDKROOT)/lib/x86',
-	      ],
-	      'AdditionalDependencies': [
-	        'OpenCL.lib',
-	      ],
-	    },
-	  },
         }],
         ['OS=="android"', {
           'link_settings': {
@@ -1012,18 +1002,8 @@
       'conditions': [
         ['OS=="win"', {
 	  'include_dirs': [
-	    '$(INTELOCLSDKROOT)/include',
+	    '<(opencl_sdk_path)/include',
 	  ],
-	  'msvs_settings': {
-	    'VCLibrarianTool': {
-	      'AdditionalLibraryDirectories': [
-	        '$(INTELOCLSDKROOT)/lib/x86',
-	      ],
-	      'AdditionalDependencies': [
-	        'OpenCL.lib',
-	      ],
-	    },
-	  },
 	}],
         ['OS=="android"', {
           'link_settings': {

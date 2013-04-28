@@ -32,8 +32,15 @@
 #include "OCLdebug.h"
 #include "opencl_compat.h"
 #include <string>
+#include <windows.h>
 
 namespace WebCore {
+
+/* Declare variables of function entries */
+extern bool openclFlag;
+#define DECLARE_FUNCTION_ENTRY(name) extern name##Function __##name;
+OPENCL_FUNCTION_LIST(DECLARE_FUNCTION_ENTRY)
+#undef DECLARE_FUNCTION_ENTRY
 
 static cl_platform_id platform_;
 static cl_context context_;
@@ -48,6 +55,7 @@ static cl_uint alignmentSize_;
 static std::string deviceExtensions_;
 static bool createContextSuccess;
 static bool createCommandQueueSuccess;
+static HMODULE openclModule;
 
 class RivertrailExport OCLUtil {
  public:

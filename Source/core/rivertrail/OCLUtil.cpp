@@ -31,6 +31,20 @@
 
 namespace WebCore {
 
+#define checkFunction(f)                                \
+    if ((f) == NULL) {                                  \
+        FreeLibrary(openclModule);                      \
+        openclModule = NULL;                            \
+        DEBUG_LOG_ERROR("get OpenCL function","error"); \
+        return;                                         \
+    }                                                   \
+
+// Define OpenCL function entries
+bool openclFlag = false;
+#define DEFINE_FUNCTION_ENTRY(name) name##Function __##name = NULL;
+OPENCL_FUNCTION_LIST(DEFINE_FUNCTION_ENTRY)
+#undef DEFINE_FUNCTION_ENTRY
+
 void CL_CALLBACK reportCLError(const char* err_info, const void* private_info, size_t cb, void* user_data)
 {
     DEBUG_LOG_CLERROR(err_info);
@@ -51,7 +65,21 @@ void OCLUtil::Init() {
 
   createContextSuccess = false;
   createCommandQueueSuccess = false;
+  openclModule = NULL;
 
+  // Load OpenCL library
+  openclModule = LoadLibrary(TEXT("OpenCL.dll"));
+  if (openclModule == NULL) {
+      DEBUG_LOG_ERROR("load OpenCL.dll","error");
+      return;
+  }
+
+  // Initialize function entries
+#define INITIALIZE_FUNCTION_ENTRY(name) checkFunction(__##name = (##name##Function) GetProcAddress(openclModule, #name));
+  OPENCL_FUNCTION_LIST(INITIALIZE_FUNCTION_ENTRY)
+#undef INITIALIZE_FUNCTION_ENTRY
+
+  openclFlag = true;
   // Platform
   error = clGetPlatformIDs( 0, 0, &nplatforms);
   if (error != CL_SUCCESS) {
@@ -70,9 +98,11 @@ void OCLUtil::Init() {
       if (error != CL_SUCCESS) {
           DEBUG_LOG_ERROR("Init", "Get platform name error: " << error);
       } else {
-          if (!strcmp(name, "Intel(R) OpenCL") || !strcmp(name, "Apple"))
+          if (!strcmp(name, "Intel(R) OpenCL") || !strcmp(name, "AMD Accelerated Parallel Processing")) {
               platform_ = m_platforms[i];
-	  }
+              break;
+          }
+      }
   }
   delete [] m_platforms;
 

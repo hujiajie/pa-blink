@@ -47,6 +47,8 @@ v8::Handle<v8::Value> V8CInterface::getPlatformMethodCustom(const v8::Arguments&
     RefPtr<CPlatform> cPlatform = imp->getPlatform();
     if (!cPlatform)
         return throwError(v8SyntaxError, "Cannot create new CPlatform object.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call getPlatform when OpenCL is not loaded.", args.GetIsolate());
     return toV8(cPlatform.get(), v8::Handle<v8::Object>(), args.GetIsolate());
 }
 

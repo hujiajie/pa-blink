@@ -29,9 +29,11 @@
 #include "V8CKernel.h"
 
 #include "core/rivertrail/CContext.h"
+#include "core/rivertrail/CData.h"
 #include "core/rivertrail/CKernel.h"
 #include "bindings/v8/V8Binding.h"
 #include "V8CContext.h"
+#include "V8CData.h"
 #include <limits>
 
 namespace WebCore {
@@ -49,10 +51,24 @@ v8::Handle<v8::Value> V8CKernel::constructorCustom(const v8::Arguments& args)
     return args.Holder();
 }
 
+v8::Handle<v8::Value> V8CKernel::setArgumentMethodCustom(const v8::Arguments& args)
+{
+    if (args.Length() != 2)
+        return throwNotEnoughArgumentsError(args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call setArgument when OpenCL is not loaded.", args.GetIsolate());
+    CKernel* imp = V8CKernel::toNative(args.Holder());
+    V8TRYCATCH(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
+    V8TRYCATCH(CData*, argument, V8CData::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8CData::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) : 0);
+    return v8Boolean(imp->setArgument(number, argument), args.GetIsolate());
+}
+
 v8::Handle<v8::Value> V8CKernel::setScalarArgumentMethodCustom(const v8::Arguments& args)
 {
     if (args.Length() != 4)
         return throwError(v8SyntaxError, "Cannot set scalar because of invalid number of arguments", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call setScalarArgument when OpenCL is not loaded.", args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
@@ -83,6 +99,8 @@ v8::Handle<v8::Value> V8CKernel::runMethodCustom(const v8::Arguments& args)
 {
     if (args.Length() != 3)
         return throwError(v8SyntaxError, "Cannot run because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call run when OpenCL is not loaded.", args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH(unsigned, rank, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
@@ -108,6 +126,8 @@ v8::Handle<v8::Value> V8CKernel::runMethodCustom(const v8::Arguments& args)
 
 v8::Handle<v8::Value> V8CKernel::numberOfArgsAttrGetterCustom(v8::Local<v8::String> name, const v8::AccessorInfo& info)
 {
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot get numberOfArgs when OpenCL is not loaded.", info.GetIsolate());
     CKernel* imp = V8CKernel::toNative(info.Holder());
     unsigned long number = imp->numberOfArgs();
     if (number == std::numeric_limits<unsigned long>::max())

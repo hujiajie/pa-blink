@@ -78,6 +78,8 @@ v8::Handle<v8::Value> V8CContext::compileKernelMethodCustom(const v8::Arguments&
 {
     if (args.Length() != 2)
         return throwError(v8SyntaxError, "Cannot compile the kernel because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call compileKernel when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     V8TRYCATCH_FOR_V8STRINGRESOURCE(V8StringResource<>, source, MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined));
     V8TRYCATCH_FOR_V8STRINGRESOURCE(V8StringResource<>, kernelName, MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined));
@@ -92,6 +94,8 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
 {
     if (args.Length() != 1)
         return throwError(v8SyntaxError, "Cannot map data because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call mapData when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, source, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
@@ -172,6 +176,8 @@ v8::Handle<v8::Value> V8CContext::cloneDataMethodCustom(const v8::Arguments& arg
 {
     if (args.Length() != 1)
         return throwError(v8SyntaxError, "Cannot clone data because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call cloneData when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, source, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
@@ -243,6 +249,8 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
 {
     if (args.Length() != 2)
         return throwError(v8SyntaxError, "Cannot allocate data because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call allocateData when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, templ, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
@@ -323,6 +331,8 @@ v8::Handle<v8::Value> V8CContext::allocateData2MethodCustom(const v8::Arguments&
 {
     if (args.Length() != 2)
         return throwError(v8SyntaxError, "Cannot allocate data because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call allocateData2 when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     V8TRYCATCH(CData*, templ, V8CData::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8CData::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
     V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
@@ -336,6 +346,8 @@ v8::Handle<v8::Value> V8CContext::canBeMappedMethodCustom(const v8::Arguments& a
 {
     if (args.Length() != 1)
         return throwError(v8SyntaxError, "Cannot be mapped becaused of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call canBeMapped when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, source, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
@@ -380,6 +392,8 @@ v8::Handle<v8::Value> V8CContext::writeToContext2DMethodCustom(const v8::Argumen
 {
     if (args.Length() != 4)
         return throwError(v8SyntaxError, "Cannot write because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call writeToContext2D when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(CanvasRenderingContext2D*, ctx, V8CanvasRenderingContext2D::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8CanvasRenderingContext2D::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
@@ -460,6 +474,8 @@ v8::Handle<v8::Value> V8CContext::getAlignmentOffsetMethodCustom(const v8::Argum
 {
     if (args.Length() != 1)
         return throwError(v8SyntaxError, "Cannot get alignment offset because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call getAlignmentOffset when OpenCL is not loaded.", args.GetIsolate());
     CContext* imp = V8CContext::toNative(args.Holder());
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, source, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);

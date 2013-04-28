@@ -71,6 +71,8 @@ v8::Handle<v8::Value> V8CData::constructorCustom(const v8::Arguments& args)
 
 v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 {
+   if (!openclFlag)
+       return throwError(v8SyntaxError, "Cannot call getValue when OpenCL is not loaded.", args.GetIsolate());
     CData* imp = V8CData::toNative(args.Holder());
     switch (imp->getType()) {
     case ArrayBufferView::TypeInt8: {
@@ -147,6 +149,8 @@ v8::Handle<v8::Value> V8CData::writeToMethodCustom(const v8::Arguments& args)
 {
     if (args.Length() != 1)
         return throwError(v8SyntaxError, "Cannot write because of invalid number of arguments.", args.GetIsolate());
+    if (!openclFlag)
+        return throwError(v8SyntaxError, "Cannot call writeTo when OpenCL is not loaded.", args.GetIsolate());
     CData* imp = V8CData::toNative(args.Holder());
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint8ClampedArray*, dest, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
