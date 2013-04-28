@@ -373,6 +373,7 @@ template<> Int8Array* CData::getValue<Int8Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theInt8Array.clear();
             return 0;
         }
 
@@ -424,6 +425,7 @@ template<> Uint8Array* CData::getValue<Uint8Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theUint8Array.clear();
             return 0;
         }
 
@@ -475,6 +477,7 @@ template<> Int16Array* CData::getValue<Int16Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theInt16Array.clear();
             return 0;
         }
 
@@ -526,6 +529,7 @@ template<> Uint16Array* CData::getValue<Uint16Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theUint16Array.clear();
             return 0;
         }
 
@@ -577,6 +581,7 @@ template<> Int32Array* CData::getValue<Int32Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theInt32Array.clear();
             return 0;
         }
 
@@ -628,6 +633,7 @@ template<> Uint32Array* CData::getValue<Uint32Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theUint32Array.clear();
             return 0;
         }
 
@@ -679,6 +685,7 @@ template<> Float32Array* CData::getValue<Float32Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theFloat32Array.clear();
             return 0;
         }
 
@@ -730,6 +737,7 @@ template<> Float64Array* CData::getValue<Float64Array>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theFloat64Array.clear();
             return 0;
         }
 
@@ -781,6 +789,7 @@ template<> Uint8ClampedArray* CData::getValue<Uint8ClampedArray>()
 
         if (err_code != CL_SUCCESS) {
             DEBUG_LOG_ERROR("getValue", err_code);
+            m_theUint8ClampedArray.clear();
             return 0;
         }
 

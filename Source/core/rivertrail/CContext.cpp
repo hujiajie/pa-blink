@@ -260,6 +260,8 @@ template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA
     RefPtr<ArrayBuffer> buffer;
     uintptr_t offset;
     buffer = ArrayBuffer::create(sizeof(ElementType) * length + m_alignmentSize, 1);
+    if (!buffer)
+        return RT_ERROR_OUT_OF_MEMORY;
     offset = (uintptr_t)buffer->data();
     offset = (offset + m_alignmentSize) / m_alignmentSize * m_alignmentSize - offset;
     res = ArrayClass::create(buffer, offset, length);
