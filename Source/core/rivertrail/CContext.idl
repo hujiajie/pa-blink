@@ -21,6 +21,9 @@ module rivertrail {
         readonly attribute unsigned long long lastExecutionTime;
         readonly attribute unsigned long long lastRoundTripTime;
 
+        // device property queries
+        readonly attribute DOMString extensions;
+
         // Canvas writing support.
         [V8Custom] void writeToContext2D(in CanvasRenderingContext2D ctx, in DOMObject source, in long width, in long height);
 

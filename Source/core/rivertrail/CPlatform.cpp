@@ -50,7 +50,7 @@ String CPlatform::profile()
 
 String CPlatform::extensions()
 {
-    WTF::String extensions(opencl_util->extensions().c_str(), opencl_util->extensions().length());
+    WTF::String extensions(opencl_util->platformExtensions().c_str(), opencl_util->platformExtensions().length());
     return extensions;
 }
 

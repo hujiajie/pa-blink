@@ -217,7 +217,7 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
         return NS_ERROR_ABORT;
     }
 #else /* CLPROFILE_ASYNC */
-    CContext::collectTimings(readEvent,CL_COMPLETE,m_parent);
+    CContext::collectTimings(runEvent, CL_COMPLETE, m_parent);
 #endif /* CLPROFILE_ASYNC */
 #endif /* CLPROFILE */
         

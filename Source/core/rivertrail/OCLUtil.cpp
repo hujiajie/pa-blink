@@ -18,6 +18,11 @@ void OCLUtil::Init() {
   cl_int error = 0;   // Used to handle error codes
   cl_uint numberOfPlatforms;
   cl_uint nplatforms;
+  cl_device_id device;
+  size_t length;
+
+  createContextSuccess = false;
+  createCommandQueueSuccess = false;
 
   // Platform
   error = clGetPlatformIDs( 0, 0, &nplatforms);
@@ -76,15 +81,14 @@ void OCLUtil::Init() {
       profile_ = std::string(temp);
       delete [] temp;
   }
-  // Extensions
+  // Platform Extensions
   error = getPlatformPropertyHelper(CL_PLATFORM_EXTENSIONS, temp);
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("get platform extensions: ", error);
   } else {
-      extensions_ = std::string(temp);
+      platformExtensions_ = std::string(temp);
       delete [] temp;
   }
-  temp = NULL;
 
   // Number of Device
   cl_uint number;
@@ -101,6 +105,7 @@ void OCLUtil::Init() {
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("init context", error);
   }
+  createContextSuccess = true;
 
   // Device
   size_t cb;
@@ -132,6 +137,7 @@ void OCLUtil::Init() {
       DEBUG_LOG_ERROR("get command queue", error);
       free(devices);
   }
+  createCommandQueueSuccess = true;
 
   error = clGetDeviceInfo(devices[0], CL_DEVICE_MEM_BASE_ADDR_ALIGN, sizeof(alignmentSize_), &alignmentSize_, 0);
   if (error != CL_SUCCESS) {
@@ -145,7 +151,42 @@ void OCLUtil::Init() {
   } else {
       alignmentSize_ = alignmentSize_ / 8;
   }
+
+  // Device Extensions
+  error = clGetCommandQueueInfo(queue_, CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, 0);
+  if (error != CL_SUCCESS) {
+      DEBUG_LOG_ERROR("get device extensions: ", error);
+  } else {
+      error = clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, 0, &length);
+      if (error == CL_SUCCESS) {
+          temp = new char[length+1];
+          error = clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, length, temp, 0);
+          deviceExtensions_ = std::string(temp);
+          delete [] temp;
+      } else {
+          DEBUG_LOG_ERROR("get device extensions: ", error);
+      }
+  }
+  temp = 0;
+
   free(devices);
+}
+
+void OCLUtil::Finalize() {
+    cl_int error;
+
+    if (createCommandQueueSuccess) {
+        error = clReleaseCommandQueue(queue_);
+        if (error != CL_SUCCESS) {
+            DEBUG_LOG_ERROR("release command queue: ", error);
+        }
+    }
+    if (createContextSuccess) {
+        error = clReleaseContext(context_);
+        if (error != CL_SUCCESS) {
+            DEBUG_LOG_ERROR("release context: ", error);
+        }
+    }
 }
 
 int OCLUtil::getPlatformPropertyHelper(cl_platform_info param, char*& out) {
@@ -191,8 +232,8 @@ std::string OCLUtil::profile() {
     return profile_;
 }
 
-std::string OCLUtil::extensions() {
-    return extensions_;
+std::string OCLUtil::platformExtensions() {
+    return platformExtensions_;
 }
 
 cl_platform_id OCLUtil::platform() {
@@ -205,5 +246,9 @@ cl_context OCLUtil::context() {
 
 cl_command_queue OCLUtil::queue() {
     return queue_;
+}
+
+std::string OCLUtil::deviceExtensions() {
+    return deviceExtensions_;
 }
 }  // namespace content

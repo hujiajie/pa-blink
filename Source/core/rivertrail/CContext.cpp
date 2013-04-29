@@ -51,8 +51,6 @@ CContext::~CContext()
 #endif // INCREMENTAL_MEM_RELEASE
     if (m_buildLog)
         free(m_buildLog);
-    if (m_cmdQueue)
-        clReleaseCommandQueue(m_cmdQueue);
 }
 
 #ifdef CLPROFILE
@@ -1018,5 +1016,11 @@ template unsigned CContext::getAlignmentOffset<Uint32Array>(Uint32Array* source)
 template unsigned CContext::getAlignmentOffset<Float32Array>(Float32Array* source);
 template unsigned CContext::getAlignmentOffset<Float64Array>(Float64Array* source);
 template unsigned CContext::getAlignmentOffset<Uint8ClampedArray>(Uint8ClampedArray* source);
+
+String CContext::extensions()
+{
+    WTF::String extensions(m_parent->openclUtil()->deviceExtensions().c_str(), m_parent->openclUtil()->deviceExtensions().length());
+    return extensions;
+}
 
 } // namespace WebCore

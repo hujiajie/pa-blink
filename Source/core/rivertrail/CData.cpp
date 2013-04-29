@@ -811,7 +811,53 @@ template void CData::writeTo<Int32Array>(Int32Array* dest);
 template void CData::writeTo<Uint32Array>(Uint32Array* dest);
 template void CData::writeTo<Float32Array>(Float32Array* dest);
 template void CData::writeTo<Float64Array>(Float64Array* dest);
-template void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest);
+
+template<> void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest)
+{
+#ifdef DIRECT_WRITE
+    if (dest->length() != m_length)
+        return;
+
+    switch (getType()) {
+    case TYPE_FLOAT32:
+        {
+        Float32Array* src = getValue<Float32Array>();
+        if (!src)
+            return;
+
+        // write with clamping
+        uint8_t* pDest = dest->data();
+        float* pSrc = src->data();
+
+        for (size_t pos = 0; pos < m_length; pos++) {
+            float val = pSrc[pos];
+            pDest[pos] = (val > 255) ? 255 : ((val < 0) ? 0 : val);
+        }
+
+        break;
+        }
+    case TYPE_FLOAT64:
+        {
+        Float64Array* src = getValue<Float64Array>();
+        if (!src)
+            return;
+
+        // write with clamping
+        uint8_t* pDest = dest->data();
+        double* pSrc = src->data();
+
+        for (size_t pos = 0; pos < m_length; pos++) {
+            double val = pSrc[pos];
+            pDest[pos] = (val > 255) ? 255 : ((val < 0) ? 0 : val);
+        }
+
+        break;
+        }
+    default:
+        break;
+    }
+#endif // DIRECT_WRITE
+}
 
 cl_mem CData::getContainedBuffer()
 {

@@ -15,15 +15,19 @@ static std::string version_;
 static std::string name_;
 static std::string vendor_;
 static std::string profile_;
-static std::string extensions_;
+static std::string platformExtensions_;
 static cl_uint numberOfDevices_;
 static cl_uint alignmentSize_;
+static std::string deviceExtensions_;
+static bool createContextSuccess;
+static bool createCommandQueueSuccess;
 
 class RivertrailExport OCLUtil {
  public:
-  OCLUtil(); 
+  OCLUtil();
   ~OCLUtil();
   void Init();
+  void Finalize();
   int getPlatformPropertyHelper(cl_platform_info param, char*& out);
   int numberOfDevices();
   cl_uint alignmentSize();
@@ -31,10 +35,11 @@ class RivertrailExport OCLUtil {
   std::string name();
   std::string vendor();
   std::string profile();
-  std::string extensions();
+  std::string platformExtensions();
   cl_platform_id platform();
   cl_context context();
   cl_command_queue queue();
+  std::string deviceExtensions();
 };
 
 }  // namespace webcore
