@@ -180,12 +180,16 @@ void OCLUtil::Finalize() {
         error = clReleaseCommandQueue(queue_);
         if (error != CL_SUCCESS) {
             DEBUG_LOG_ERROR("release command queue: ", error);
+        } else {
+            createCommandQueueSuccess = false;
         }
     }
     if (createContextSuccess) {
         error = clReleaseContext(context_);
         if (error != CL_SUCCESS) {
             DEBUG_LOG_ERROR("release context: ", error);
+        } else {
+            createContextSuccess = false;
         }
     }
 }
