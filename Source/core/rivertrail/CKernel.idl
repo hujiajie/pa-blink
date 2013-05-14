@@ -3,7 +3,7 @@
     ImplementationLacksVTable
 ] interface CKernel {
     boolean setArgument(unsigned long number, CData argument);
-    [Custom] boolean setScalarArgument(unsigned long number, DOMObject argument, DOMObject isInteger, DOMObject highPrecision);
+    [Custom] boolean setScalarArgument(unsigned long number, any argument, boolean isInteger, boolean highPrecision);
     [Custom] unsigned long run(unsigned long rank, Array shape, [Default=Undefined] optional Array tile);
      
     [CustomGetter] readonly attribute unsigned long numberOfArgs;

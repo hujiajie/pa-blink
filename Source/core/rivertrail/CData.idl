@@ -2,6 +2,6 @@
     CustomConstructor,
     ImplementationLacksVTable
 ] interface CData {
-    [Custom] DOMObject getValue();
-    [Custom] void writeTo(DOMObject dest);
+    [Custom] ArrayBufferView getValue();
+    [Custom] void writeTo(ArrayBufferView dest);
 };

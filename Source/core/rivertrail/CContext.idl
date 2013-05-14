@@ -9,11 +9,11 @@
     readonly attribute DOMString buildLog;
 
     // Functions for mapping data.
-    [Custom] CData mapData(DOMObject source);
-    [Custom] CData cloneData(DOMObject source);
-    [Custom] CData allocateData(DOMObject templ, [Default=Undefined] optional unsigned long length);
+    [Custom] CData mapData(ArrayBufferView source);
+    [Custom] CData cloneData(ArrayBufferView source);
+    [Custom] CData allocateData(ArrayBufferView templ, [Default=Undefined] optional unsigned long length);
     [Custom] CData allocateData2(CData templ, [Default=Undefined] optional unsigned long length);
-    [Custom] boolean canBeMapped(DOMObject source);
+    [Custom] boolean canBeMapped(ArrayBufferView source);
 
     // Profiling support.
     readonly attribute unsigned long long lastExecutionTime;
@@ -23,9 +23,9 @@
     readonly attribute DOMString extensions;
 
     // Canvas writing support.
-    [Custom] void writeToContext2D(CanvasRenderingContext2D ctx, DOMObject source, long width, long height);
+    [Custom] void writeToContext2D(CanvasRenderingContext2D ctx, ArrayBufferView source, long width, long height);
 
     // Aligning support.
     readonly attribute unsigned long alignmentSize;
-    [Custom] unsigned long getAlignmentOffset(DOMObject source);
+    [Custom] unsigned long getAlignmentOffset(ArrayBufferView source);
 };
