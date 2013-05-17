@@ -69,6 +69,9 @@ clCreateContextFromTypeFunction)(const cl_context_properties * /* properties */,
                                  void *                        /* user_data */,
                                  cl_int *                      /* errcode_ret */) CL_API_SUFFIX__VERSION_1_0;
 
+typedef CL_API_ENTRY cl_int (CL_API_CALL*
+clReleaseContextFunction)(cl_context /* context */) CL_API_SUFFIX__VERSION_1_0;
+
 typedef CL_API_ENTRY cl_int (CL_API_CALL* 
 clGetContextInfoFunction)(cl_context         /* context */, 
                           cl_context_info    /* param_name */, 
@@ -88,6 +91,13 @@ clRetainCommandQueueFunction)(cl_command_queue /* command_queue */) CL_API_SUFFI
 
 typedef CL_API_ENTRY cl_int (CL_API_CALL* 
 clReleaseCommandQueueFunction)(cl_command_queue /* command_queue */) CL_API_SUFFIX__VERSION_1_0;
+
+typedef CL_API_ENTRY cl_int (CL_API_CALL*
+clGetCommandQueueInfoFunction)(cl_command_queue      /* command_queue */,
+                               cl_command_queue_info /* param_name */,
+                               size_t                /* param_value_size */,
+                               void *                /* param_value */,
+                               size_t *              /* param_value_size_ret */) CL_API_SUFFIX__VERSION_1_0;
 
 /* Memory Object APIs */
 typedef CL_API_ENTRY cl_mem (CL_API_CALL* 
@@ -230,10 +240,12 @@ clEnqueueNDRangeKernelFunction)(cl_command_queue /* command_queue */,
     macro(clGetDeviceIDs) \
     macro(clGetDeviceInfo) \
     macro(clCreateContextFromType) \
+    macro(clReleaseContext) \
     macro(clGetContextInfo) \
     macro(clCreateCommandQueue) \
     macro(clRetainCommandQueue) \
     macro(clReleaseCommandQueue) \
+    macro(clGetCommandQueueInfo) \
     macro(clCreateBuffer) \
     macro(clReleaseMemObject) \
     macro(clCreateProgramWithSource) \
@@ -261,10 +273,12 @@ clEnqueueNDRangeKernelFunction)(cl_command_queue /* command_queue */,
 #define clGetDeviceIDs __clGetDeviceIDs
 #define clGetDeviceInfo __clGetDeviceInfo
 #define clCreateContextFromType __clCreateContextFromType
+#define clReleaseContext __clReleaseContext
 #define clGetContextInfo __clGetContextInfo
 #define clCreateCommandQueue __clCreateCommandQueue
 #define clRetainCommandQueue __clRetainCommandQueue
 #define clReleaseCommandQueue __clReleaseCommandQueue
+#define clGetCommandQueueInfo __clGetCommandQueueInfo
 #define clCreateBuffer __clCreateBuffer
 #define clReleaseMemObject __clReleaseMemObject
 #define clCreateProgramWithSource __clCreateProgramWithSource
