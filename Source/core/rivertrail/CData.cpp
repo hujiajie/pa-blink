@@ -820,8 +820,7 @@ template<> void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest)
         return;
 
     switch (getType()) {
-    case ArrayBufferView::TypeFloat32:
-        {
+    case ArrayBufferView::TypeFloat32: {
         Float32Array* src = getValue<Float32Array>();
         if (!src)
             return;
@@ -836,9 +835,8 @@ template<> void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest)
         }
 
         break;
-        }
-    case ArrayBufferView::TypeFloat64:
-        {
+    }
+    case ArrayBufferView::TypeFloat64: {
         Float64Array* src = getValue<Float64Array>();
         if (!src)
             return;
@@ -853,7 +851,7 @@ template<> void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest)
         }
 
         break;
-        }
+    }
     default:
         break;
     }

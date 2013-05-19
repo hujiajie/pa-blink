@@ -472,8 +472,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
     DEBUG_LOG_STATUS("allocateData2", "length " << length << " bytePerElements " << bytePerElements);
 
     switch (cData->getType()) {
-    case ArrayBufferView::TypeInt8:
-        {
+    case ArrayBufferView::TypeInt8: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Int8Array> jsArray;
         if (createAlignedTA<Int8Array, char>(cData->getType(), length, jsArray) != RT_OK) {
@@ -506,9 +505,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeUint8:
-        {
+    }
+    case ArrayBufferView::TypeUint8: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint8Array> jsArray;
         if (createAlignedTA<Uint8Array, unsigned char>(cData->getType(), length, jsArray) != RT_OK) {
@@ -541,9 +539,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeInt16:
-        {
+    }
+    case ArrayBufferView::TypeInt16: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Int16Array> jsArray;
         if (createAlignedTA<Int16Array, short>(cData->getType(), length, jsArray) != RT_OK) {
@@ -576,9 +573,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeUint16:
-        {
+    }
+    case ArrayBufferView::TypeUint16: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint16Array> jsArray;
         if (createAlignedTA<Uint16Array, unsigned short>(cData->getType(), length, jsArray) != RT_OK) {
@@ -611,9 +607,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeInt32:
-        {
+    }
+    case ArrayBufferView::TypeInt32: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Int32Array> jsArray;
         if (createAlignedTA<Int32Array, int>(cData->getType(), length, jsArray) != RT_OK) {
@@ -646,9 +641,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeUint32:
-        {
+    }
+    case ArrayBufferView::TypeUint32: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint32Array> jsArray;
         if (createAlignedTA<Uint32Array, unsigned>(cData->getType(), length, jsArray) != RT_OK) {
@@ -681,9 +675,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeFloat32:
-        {
+    }
+    case ArrayBufferView::TypeFloat32: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Float32Array> jsArray;
         if (createAlignedTA<Float32Array, float>(cData->getType(), length, jsArray) != RT_OK) {
@@ -716,9 +709,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeFloat64:
-        {
+    }
+    case ArrayBufferView::TypeFloat64: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Float64Array> jsArray;
         if (createAlignedTA<Float64Array, double>(cData->getType(), length, jsArray) != RT_OK) {
@@ -751,9 +743,8 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    case ArrayBufferView::TypeUint8Clamped:
-        {
+    }
+    case ArrayBufferView::TypeUint8Clamped: {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint8ClampedArray> jsArray;
         if (createAlignedTA<Uint8ClampedArray, unsigned char>(cData->getType(), length, jsArray) != RT_OK) {
@@ -786,14 +777,13 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
         return data.release();
 
         break;
-        }
-    default:
-        {
+    }
+    default: {
         data.clear();
         return data.release();
 
         break;
-        }
+    }
     }
 }
 

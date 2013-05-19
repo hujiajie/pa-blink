@@ -46,83 +46,73 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 {
     CData* imp = V8CData::toNative(args.Holder());
     switch (imp->getType()) {
-    case ArrayBufferView::TypeInt8:
-		{
+    case ArrayBufferView::TypeInt8: {
         Int8Array* theArray = imp->getValue<Int8Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-		}
-    case ArrayBufferView::TypeUint8:
-		{
+    }
+    case ArrayBufferView::TypeUint8: {
         Uint8Array* theArray = imp->getValue<Uint8Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-		}
-    case ArrayBufferView::TypeInt16:
-		{
+    }
+    case ArrayBufferView::TypeInt16: {
         Int16Array* theArray = imp->getValue<Int16Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-		}
-    case ArrayBufferView::TypeUint16:
-		{
+    }
+    case ArrayBufferView::TypeUint16: {
         Uint16Array* theArray = imp->getValue<Uint16Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-		}
-    case ArrayBufferView::TypeInt32:
-		{
+    }
+    case ArrayBufferView::TypeInt32: {
         Int32Array* theArray = imp->getValue<Int32Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-		}
-    case ArrayBufferView::TypeUint32:
-		{
+    }
+    case ArrayBufferView::TypeUint32: {
         Uint32Array* theArray = imp->getValue<Uint32Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-		}
-    case ArrayBufferView::TypeFloat32:
-        {
+    }
+    case ArrayBufferView::TypeFloat32: {
         Float32Array* theArray = imp->getValue<Float32Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-        }
-    case ArrayBufferView::TypeFloat64:
-        {
+    }
+    case ArrayBufferView::TypeFloat64: {
         Float64Array* theArray = imp->getValue<Float64Array>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-        }
-    case ArrayBufferView::TypeUint8Clamped:
-        {
+    }
+    case ArrayBufferView::TypeUint8Clamped: {
         Uint8ClampedArray* theArray = imp->getValue<Uint8ClampedArray>();
         if (!theArray)
             return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
-        }
-    default:
-        {
+    }
+    default: {
         return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         break;
-        }
+    }
     }
 }
 
