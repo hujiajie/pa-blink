@@ -246,6 +246,8 @@ void OCLUtil::Init() {
 void OCLUtil::Finalize() {
     cl_int error;
 
+    if (!openclFlag)
+        return;
     if (createCommandQueueSuccess) {
         error = clReleaseCommandQueue(queue_);
         if (error != CL_SUCCESS) {
@@ -262,6 +264,9 @@ void OCLUtil::Finalize() {
             createContextSuccess = false;
         }
     }
+    FreeLibrary(openclModule);
+    openclModule = 0;
+    openclFlag = false;
 }
 
 int OCLUtil::getPlatformPropertyHelper(cl_platform_info param, char*& out) {
