@@ -31,17 +31,17 @@
 
 namespace WebCore {
 
-#define checkFunction(f)                                \
-    if ((f) == NULL) {                                  \
-        FreeLibrary(openclModule);                      \
-        openclModule = NULL;                            \
-        DEBUG_LOG_ERROR("get OpenCL function","error"); \
-        return;                                         \
-    }                                                   \
+#define checkFunction(f)                                        \
+    if (!(f)) {                                                 \
+        FreeLibrary(openclModule);                              \
+        openclModule = 0;                                       \
+        DEBUG_LOG_ERROR("Init", "Get OpenCL function failed."); \
+        return;                                                 \
+    }
 
 // Define OpenCL function entries
 bool openclFlag = false;
-#define DEFINE_FUNCTION_ENTRY(name) name##Function __##name = NULL;
+#define DEFINE_FUNCTION_ENTRY(name) name##Function __##name = 0;
 OPENCL_FUNCTION_LIST(DEFINE_FUNCTION_ENTRY)
 #undef DEFINE_FUNCTION_ENTRY
 
@@ -65,17 +65,17 @@ void OCLUtil::Init() {
 
   createContextSuccess = false;
   createCommandQueueSuccess = false;
-  openclModule = NULL;
+  openclModule = 0;
 
   // Load OpenCL library
   openclModule = LoadLibrary(TEXT("OpenCL.dll"));
-  if (openclModule == NULL) {
-      DEBUG_LOG_ERROR("load OpenCL.dll","error");
+  if (!openclModule) {
+      DEBUG_LOG_ERROR("Init", "Load OpenCL.dll failed.");
       return;
   }
 
   // Initialize function entries
-#define INITIALIZE_FUNCTION_ENTRY(name) checkFunction(__##name = (##name##Function) GetProcAddress(openclModule, #name));
+#define INITIALIZE_FUNCTION_ENTRY(name) checkFunction(__##name = (name##Function) GetProcAddress(openclModule, #name));
   OPENCL_FUNCTION_LIST(INITIALIZE_FUNCTION_ENTRY)
 #undef INITIALIZE_FUNCTION_ENTRY
 
@@ -84,11 +84,14 @@ void OCLUtil::Init() {
   error = clGetPlatformIDs( 0, 0, &nplatforms);
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("Init", "Get platform number error: " << error);
+      return;
   }
   cl_platform_id* m_platforms = new cl_platform_id[nplatforms];
   error = clGetPlatformIDs(nplatforms, m_platforms, &numberOfPlatforms);
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("Init", "Get platform id error: " << error);
+      delete [] m_platforms;
+      return;
   }
 
   const cl_uint maxNameLength = 256;
@@ -105,6 +108,10 @@ void OCLUtil::Init() {
       }
   }
   delete [] m_platforms;
+  if (!platform_) {
+      DEBUG_LOG_ERROR("Init", "Find Intel or AMD platform failed.");
+      return;
+  }
 
   // Version
   char* temp;
@@ -162,6 +169,7 @@ void OCLUtil::Init() {
   context_ = clCreateContextFromType(context_properties, CL_DEVICE_TYPE_CPU, &reportCLError, this, &error);
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("Init", "Create context error: " << error);
+      return;
   }
   createContextSuccess = true;
 
@@ -170,15 +178,18 @@ void OCLUtil::Init() {
   error = clGetContextInfo(context_, CL_CONTEXT_DEVICES, 0, 0, &cb);
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("Init", "Get context device number error: " << error);
+      return;
   }
   cl_device_id* devices = (cl_device_id*)malloc(sizeof(cl_device_id) * cb);
   if (!devices) {
       DEBUG_LOG_STATUS("Init", "Cannot allocate device list");
+      return;
   }
   error = clGetContextInfo(context_, CL_CONTEXT_DEVICES, cb, devices, 0);
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("Init", "Get context device info error: " << error);
       free(devices);
+      return;
   }
 
   // Command Queue
@@ -194,6 +205,7 @@ void OCLUtil::Init() {
   if (error != CL_SUCCESS) {
       DEBUG_LOG_ERROR("Init", "Create command queue error: " << error);
       free(devices);
+      return;
   }
   DEBUG_LOG_STATUS("Init", "queue is " << queue_);
   createCommandQueueSuccess = true;

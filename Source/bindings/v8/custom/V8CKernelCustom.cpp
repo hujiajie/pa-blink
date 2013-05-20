@@ -54,7 +54,7 @@ v8::Handle<v8::Value> V8CKernel::constructorCustom(const v8::Arguments& args)
 v8::Handle<v8::Value> V8CKernel::setArgumentMethodCustom(const v8::Arguments& args)
 {
     if (args.Length() != 2)
-        return throwNotEnoughArgumentsError(args.GetIsolate());
+        return throwError(v8SyntaxError, "Cannot set argument because of invalid number of arguments.", args.GetIsolate());
     if (!openclFlag)
         return throwError(v8SyntaxError, "Cannot call setArgument when OpenCL is not loaded.", args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());

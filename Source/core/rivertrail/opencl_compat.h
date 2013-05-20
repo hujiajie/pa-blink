@@ -234,37 +234,37 @@ clEnqueueNDRangeKernelFunction)(cl_command_queue /* command_queue */,
                                 const cl_event * /* event_wait_list */,
                                 cl_event *       /* event */) CL_API_SUFFIX__VERSION_1_0;
 
-#define OPENCL_FUNCTION_LIST(macro) \
-    macro(clGetPlatformIDs) \
-    macro(clGetPlatformInfo) \
-    macro(clGetDeviceIDs) \
-    macro(clGetDeviceInfo) \
-    macro(clCreateContextFromType) \
-    macro(clReleaseContext) \
-    macro(clGetContextInfo) \
-    macro(clCreateCommandQueue) \
-    macro(clRetainCommandQueue) \
-    macro(clReleaseCommandQueue) \
-    macro(clGetCommandQueueInfo) \
-    macro(clCreateBuffer) \
-    macro(clReleaseMemObject) \
-    macro(clCreateProgramWithSource) \
-    macro(clReleaseProgram) \
-    macro(clBuildProgram) \
-    macro(clGetProgramInfo) \
-    macro(clGetProgramBuildInfo) \
-    macro(clCreateKernel) \
-    macro(clReleaseKernel) \
-    macro(clSetKernelArg) \
-    macro(clGetKernelInfo) \
-    macro(clWaitForEvents) \
-    macro(clReleaseEvent) \
-    macro(clSetEventCallback) \
-    macro(clGetEventProfilingInfo) \
-    macro(clEnqueueReadBuffer) \
-    macro(clEnqueueWriteBuffer) \
-    macro(clEnqueueMapBuffer) \
-    macro(clEnqueueNDRangeKernel) \
+#define OPENCL_FUNCTION_LIST(macro)   \
+    macro(clGetPlatformIDs)           \
+    macro(clGetPlatformInfo)          \
+    macro(clGetDeviceIDs)             \
+    macro(clGetDeviceInfo)            \
+    macro(clCreateContextFromType)    \
+    macro(clReleaseContext)           \
+    macro(clGetContextInfo)           \
+    macro(clCreateCommandQueue)       \
+    macro(clRetainCommandQueue)       \
+    macro(clReleaseCommandQueue)      \
+    macro(clGetCommandQueueInfo)      \
+    macro(clCreateBuffer)             \
+    macro(clReleaseMemObject)         \
+    macro(clCreateProgramWithSource)  \
+    macro(clReleaseProgram)           \
+    macro(clBuildProgram)             \
+    macro(clGetProgramInfo)           \
+    macro(clGetProgramBuildInfo)      \
+    macro(clCreateKernel)             \
+    macro(clReleaseKernel)            \
+    macro(clSetKernelArg)             \
+    macro(clGetKernelInfo)            \
+    macro(clWaitForEvents)            \
+    macro(clReleaseEvent)             \
+    macro(clSetEventCallback)         \
+    macro(clGetEventProfilingInfo)    \
+    macro(clEnqueueReadBuffer)        \
+    macro(clEnqueueWriteBuffer)       \
+    macro(clEnqueueMapBuffer)         \
+    macro(clEnqueueNDRangeKernel)
 
 /* Set alias */
 // TODO: Use OPENCL_FUNCTION_LIST to avoid the long list.
