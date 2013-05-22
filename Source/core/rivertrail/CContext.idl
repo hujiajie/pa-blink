@@ -1,0 +1,32 @@
+module rivertrail {
+
+    interface [
+        V8CustomConstructor,
+        ConstructorParameters=1
+    ] CContext {
+        // Functions for generating kernels.
+        [V8Custom] CKernel compileKernel(in DOMString source, in DOMString kernelName, in [Optional=DefaultIsNullString] DOMString options);
+
+        // Debugging the build process.
+        readonly attribute DOMString buildLog;
+
+        // Functions for mapping data.
+        [V8Custom] CData mapData(in DOMObject source);
+        [V8Custom] CData cloneData(in DOMObject source);
+        [V8Custom] CData allocateData(in DOMObject templ, in [Optional=DefaultIsUndefined] unsigned long length);
+        [V8Custom] CData allocateData2(in CData templ, in [Optional=DefaultIsUndefined] unsigned long length);
+        [V8Custom] boolean canBeMapped(in DOMObject source);
+
+        // Profiling support.
+        readonly attribute unsigned long long lastExecutionTime;
+        readonly attribute unsigned long long lastRoundTripTime;
+
+        // Canvas writing support.
+        [V8Custom] void writeToContext2D(in CanvasRenderingContext2D ctx, in DOMObject source, in long width, in long height);
+
+        // Aligning support.
+        readonly attribute unsigned long alignmentSize;
+        [V8Custom] unsigned long getAlignmentOffset(in DOMObject source);
+    };
+
+}

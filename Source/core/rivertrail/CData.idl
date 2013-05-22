@@ -1,0 +1,11 @@
+module rivertrail {
+
+    interface [
+        V8CustomConstructor,
+        ConstructorParameters=1
+    ] CData {
+        [V8Custom] DOMObject getValue();
+        [V8Custom] void writeTo(in DOMObject dest);
+    };
+
+}

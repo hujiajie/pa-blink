@@ -1,0 +1,10 @@
+module window {
+ 
+    interface [
+        CustomConstructor
+    ] CInterface {
+        CPlatform getPlatform();
+
+        readonly attribute unsigned long version;
+    };
+}

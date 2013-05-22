@@ -316,5 +316,6 @@
 
     [ImplementedAs=anonymousIndexedGetter, NotEnumerable] getter Window(unsigned long index);
     [Custom, NotEnumerable] getter Window (DOMString name);
+    attribute CInterfaceConstructor CInterface;
 };
 

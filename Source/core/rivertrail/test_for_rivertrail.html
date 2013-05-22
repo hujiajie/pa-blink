@@ -1,0 +1,93 @@
+<html>
+  <body>
+    <script>
+      aint=new CInterface();
+      document.write("CInterface: <br />version: "+aint.version+"<br />");
+      
+      pl=aint.getPlatform();
+      document.write("<br />CPlatform: <br />number of devices: "+pl.numberOfDevices);
+      document.write("<br />version: "+pl.version);
+      document.write("<br />name: "+pl.name);
+      document.write("<br />vendor: "+pl.vendor);
+      document.write("<br />profile: "+pl.profile);
+      document.write("<br />extensions: "+pl.extensions);
+      document.write("<br />");
+      
+      co = pl.createContext();
+      document.write("<br />CContext: <br />build log: "+co.buildLog);
+      document.write("<br />last excution time: "+co.lastExecutionTime);
+      document.write("<br />last roundtrip time: "+co.lastRoundTripTime);
+      document.write("<br />");
+      
+      document.write("<br />CData: <br />mapData:   vec1[2]: ");
+      var arr1 = new Float32Array([1,2,3]);
+      var arg1 = co.mapData(arr1); 
+      var arr_1 = arg1.getValue();
+      document.write(arr_1[2]);
+      
+      document.write("<br />mapData:   vec2[2]: ");
+      var arr2 = new Float32Array([4,5,6]);
+      var arg2 = co.mapData(arr2); 
+      var arr_2 = arg2.getValue();
+      document.write(arr_2[2]);
+      
+      document.write("<br />allocateData:   vec3[2]: ");
+      var templ = new Float32Array([1]);
+      var arg3 = co.allocateData(templ, 3);
+      var arr_3 = arg3.getValue();
+      document.write(arr_3[2]);
+      
+      document.write("<br />allocateData2:   arr_4[3]: ");
+      var arg4 = co.allocateData2(arg1, 4);
+      var arr_4 = arg4.getValue();
+      document.write(arr_4[3]);
+      
+      document.write("<br />canBeMapped: ");
+      var can = co.canBeMapped(arr1);
+      document.write(can);
+      document.write("<br />");
+      
+      ke = co.compileKernel("__kernel void add_vector( __global const float *vec1, __global const float *vec2, const int dims, __global float *vec3 ) { int idx; idx = get_global_id( 0 ); if( idx < dims ) vec3[ idx ] = vec1[ idx ] + vec2[ idx ]; }","add_vector","-cl-opt-disable");
+      //kernelStr = "__kernel void add_vector( __global const float *vec1, __global const float *vec2, const int dims, __global float *vec3 ) { int idx; idx = get_global_id( 0 ); if( idx < dims ) vec3[ idx ] = vec1[ idx ] + vec2[ idx ]; }" 
+      //kernelStr = "__kernel void add( const int dims, const double x ) { int a = 0 ; int idx; idx = get_global_id( 0 ); if( idx == dims ) a=a+x; }";
+      //nameStr = "add";
+      //ke = co.compileKernel(kernelStr,nameStr);
+      document.write("<br />CKernel: <br />number of args: "+(ke.numberOfArgs+1));
+      document.write("<br />build log after compileKernel: "+co.buildLog);    
+      
+      ok = ke.setArgument( 0-1, arg1);
+      document.write("<br />set arg0 to kernel: "+ok);
+      
+      ok = ke.setArgument( 1-1, arg2);
+      document.write("<br />set arg1 to kernel: "+ok);
+      
+      ok = ke.setScalarArgument( 2-1, 3, true, false);
+      document.write("<br />set arg2 to kernel: "+ok);
+      
+      ok = ke.setArgument( 3-1, arg3);
+      document.write("<br />set arg3 to kernel: "+ok);
+      
+      sizeVector = new Array(1);
+      sizeVector[0] = 3;
+      ok = ke.run(1, sizeVector);
+      //ok = ke.run(1, sizeVector, sizeVector);
+      document.write("<br />run kernel (0 means ok): "+ok);
+      
+      var out1 = arg1.getValue();
+      document.write("<br/>vec1: "+out1[0]+","+out1[1]+","+out1[2]);
+            
+      var out2 = arg2.getValue();
+      document.write("<br/>vec2: "+out2[0]+","+out2[1]+","+out2[2]);
+      
+      document.write("<br/>TRY refreshing the page, and vec3 will change . NEED FIXING");
+      var out3 = arg3.getValue();
+      document.write("<br/>vec3=vec1+vec2: "+out3[0]+","+out3[1]+","+out3[2]);
+      document.write("<br />");
+      
+      document.write("<br />last excution time: "+co.lastExecutionTime);
+      document.write("<br />last roundtrip time: "+co.lastRoundTripTime);
+      document.write("<br />");
+      
+    </script>
+  </body>
+</html>

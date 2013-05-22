@@ -333,6 +333,27 @@
           # In generated bindings code: 'switch contains default but no case'.
           # Disable c4267 warnings until we fix size_t to int truncations.
           'msvs_disabled_warnings': [ 4065, 4267 ],
+	  'include_dirs': [
+	    '$(INTELOCLSDKROOT)/include',
+	  ],
+	  'msvs_settings': {
+	    'VCLibrarianTool': {
+	      'AdditionalLibraryDirectories': [
+	        '$(INTELOCLSDKROOT)/lib/x86',
+	      ],
+	      'AdditionalDependencies': [
+	        'OpenCL.lib',
+	      ],
+	    },
+	    'VCLinkerTool': {
+	      'AdditionalLibraryDirectories': [
+	        '$(INTELOCLSDKROOT)/lib/x86',
+	      ],
+	      'AdditionalDependencies': [
+	        'OpenCL.lib',
+	      ],
+	    },
+	  },
         }],
         ['OS in ("linux", "android") and "WTF_USE_WEBAUDIO_IPP=1" in feature_defines', {
           'cflags': [

@@ -1,0 +1,64 @@
+#include "config.h"
+#include "V8CKernel.h"
+
+#include "CKernel.h"
+#include "V8Binding.h"
+#include "V8Proxy.h"
+
+namespace WebCore {
+
+v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& args)
+{
+    INC_STATS("DOM.CKernel.setScalarArgument");
+    if (args.Length() < 4)
+        return V8Proxy::throwNotEnoughArgumentsError(args.GetIsolate());
+    CKernel* imp = V8CKernel::toNative(args.Holder());
+    EXCEPTION_BLOCK(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
+    
+    if (!args[2]->IsBoolean())
+        return V8Proxy::throwTypeError(0, args.GetIsolate());
+    bool isIntegerB = args[2]->BooleanValue();
+    
+    if (!args[3]->IsBoolean())
+        return V8Proxy::throwTypeError(0, args.GetIsolate());
+    bool isHighPrecisionB = args[3]->BooleanValue();
+    
+    if (args[1]->IsInt32()) {
+        int value = args[1]->Int32Value();
+        return v8Boolean(imp->setScalarArgumentInt(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
+    } else if (args[1]->IsNumber()) {
+        double value = args[1]->NumberValue();
+        return v8Boolean(imp->setScalarArgumentDouble(number, value, isIntegerB, isHighPrecisionB), args.GetIsolate());
+    } else 
+        return V8Proxy::throwTypeError(0, args.GetIsolate());
+}
+
+v8::Handle<v8::Value> V8CKernel::runCallback(const v8::Arguments& args)
+{
+    INC_STATS("DOM.CKernel.run");
+    if (args.Length() < 2)
+        return V8Proxy::throwNotEnoughArgumentsError(args.GetIsolate());
+    CKernel* imp = V8CKernel::toNative(args.Holder());
+    EXCEPTION_BLOCK(unsigned, rank, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
+    
+    if (args[1].IsEmpty() || !args[1]->IsArray())
+        return V8Proxy::throwTypeError(0, args.GetIsolate());
+    v8::Handle<v8::Array> ashape = v8::Handle<v8::Array>::Cast(args[1]->ToObject());
+    unsigned int* shape = new unsigned int[ashape->Length()];
+    for(uint32_t i=0; i<ashape->Length(); i++)
+        shape[i] = ashape->Get(i)->Int32Value();
+    
+    unsigned int* tile = NULL;
+    if (!isUndefinedOrNull(args[2])){
+        if (args[2].IsEmpty() || !args[2]->IsArray())
+            return V8Proxy::throwTypeError(0, args.GetIsolate());
+        v8::Handle<v8::Array> atile = v8::Handle<v8::Array>::Cast(args[2]->ToObject());   
+        tile = new unsigned int[atile->Length()];
+        for(uint32_t i=0; i<atile->Length(); i++)
+            tile[i] = atile->Get(i)->Int32Value();
+    }
+        
+    return v8UnsignedInteger(imp->run(rank, shape, tile), args.GetIsolate());
+}
+
+} // namespace WebCore
