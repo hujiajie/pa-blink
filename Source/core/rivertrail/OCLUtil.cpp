@@ -1,5 +1,6 @@
 #include "config.h"
-#include "OCLUtil.h"
+
+#include "core/rivertrail/OCLUtil.h"
 
 namespace WebCore {
 

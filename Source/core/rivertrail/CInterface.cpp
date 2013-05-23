@@ -1,5 +1,6 @@
 #include "config.h"
-#include "CInterface.h"
+
+#include "core/rivertrail/CInterface.h"
 
 namespace WebCore {
 

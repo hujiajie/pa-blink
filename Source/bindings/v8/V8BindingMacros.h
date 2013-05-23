@@ -33,6 +33,11 @@
 
 namespace WebCore {
 
+enum ParameterDefaultPolicy {
+    DefaultIsUndefined,
+    DefaultIsNullString
+};
+
 #define V8TRYCATCH(type, var, value) \
     type var;                             \
     {                                     \
@@ -94,6 +99,9 @@ namespace WebCore {
     type var(value);                                                 \
     if (!var.prepare())                                              \
         return;
+
+#define MAYBE_MISSING_PARAMETER(args, index, policy) \
+    (((policy) == DefaultIsNullString && (index) >= (args).Length()) ? (v8::Local<v8::Value>()) : ((args)[(index)]))
 
 } // namespace WebCore
 

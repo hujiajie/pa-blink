@@ -1,6 +1,7 @@
-#pragma once
+//#pragma once
 #include "config.h"
-#include "CPlatform.h"
+
+#include "core/rivertrail/CPlatform.h"
 
 namespace WebCore {
 

@@ -1,12 +1,13 @@
 #include "config.h"
-#include "CContext.h"
 
-#include "CanvasRenderingContext2D.h"
-#include "CData.h"
-#include "CKernel.h"
-#include "CPlatform.h"
-#include "ImageData.h"
-#include "IntSize.h"
+#include "core/rivertrail/CContext.h"
+
+#include "core/html/canvas/CanvasRenderingContext2D.h"
+#include "core/html/ImageData.h"
+#include "core/platform/graphics/IntSize.h"
+#include "core/rivertrail/CData.h"
+#include "core/rivertrail/CKernel.h"
+#include "core/rivertrail/CPlatform.h"
 #include <stdlib.h>
 #include <wtf/ArrayBuffer.h>
 #include <wtf/Float32Array.h>

@@ -5,10 +5,10 @@
 #include "OCLdebug.h"
 #include "OCLUtil.h"
 #include "opencl_compat.h"
-#include "PlatformString.h"
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
+#include <wtf/text/WTFString.h>
 
 #ifdef WINDOWS_ROUNDTRIP
 #include <windows.h>

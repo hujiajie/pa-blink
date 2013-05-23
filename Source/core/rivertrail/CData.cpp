@@ -1,7 +1,8 @@
 #include "config.h"
-#include "CData.h"
 
-#include "CContext.h"
+#include "core/rivertrail/CData.h"
+
+#include "core/rivertrail/CContext.h"
 
 namespace WebCore {
 

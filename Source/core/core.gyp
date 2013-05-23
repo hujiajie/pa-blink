@@ -431,21 +431,6 @@
         },
       },
       'conditions': [
-        ['OS=="win"', {
-          'include_dirs': [
-            '$(INTELOCLSDKROOT)/include',
-          ],
-          'msvs_settings': {
-            'VCLibrarianTool': {
-              'AdditionalLibraryDirectories': [
-                '$(INTELOCLSDKROOT)/lib/x86',
-              ],
-              'AdditionalDependencies': [
-                'OpenCL.lib',
-              ],
-            },
-          },
-        }],
         ['OS=="win" and component=="shared_library"', {
           'direct_dependent_settings': {
             'defines': [
@@ -1018,6 +1003,21 @@
         ['exclude', '(?<!Chromium)(CF|CG|Mac|OpenType|Win)\\.(cpp|mm?)$'],
       ],
       'conditions': [
+        ['OS=="win"', {
+	  'include_dirs': [
+	    '$(INTELOCLSDKROOT)/include',
+	  ],
+	  'msvs_settings': {
+	    'VCLibrarianTool': {
+	      'AdditionalLibraryDirectories': [
+	        '$(INTELOCLSDKROOT)/lib/x86',
+	      ],
+	      'AdditionalDependencies': [
+	        'OpenCL.lib',
+	      ],
+	    },
+	  },
+	}],
         # Shard this taret into parts to work around linker limitations.
         # on link time code generation builds.
         ['OS=="win" and buildtype=="Official"', {

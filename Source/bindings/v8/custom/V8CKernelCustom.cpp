@@ -1,43 +1,33 @@
 #include "config.h"
 #include "V8CKernel.h"
 
-#include "CContext.h"
-#include "CKernel.h"
-#include "V8Binding.h"
+#include "core/rivertrail/CContext.h"
+#include "core/rivertrail/CKernel.h"
+#include "bindings/v8/V8Binding.h"
 #include "V8CContext.h"
 #include <limits>
 
 namespace WebCore {
 
-v8::Handle<v8::Value> V8CKernel::constructorCallback(const v8::Arguments& args)
+v8::Handle<v8::Value> V8CKernel::constructorCustom(const v8::Arguments& args)
 {
-    INC_STATS("DOM.CKernel.Constructor");
-
-    if (!args.IsConstructCall())
-        return throwTypeError("DOM object constructor cannot be called as a function.", args.GetIsolate());
-
-    if (ConstructorMode::current() == ConstructorMode::WrapExistingObject)
-        return args.Holder();
-
     if (args.Length() != 1)
-        return throwError(GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
-    if (!V8CContext::HasInstance(args[0]))
-        return throwError(GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(v8GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
+    if (!V8CContext::HasInstance(args[0], args.GetIsolate(), worldType(args.GetIsolate())))
+        return throwError(v8GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
 
     CContext* parent = V8CContext::toNative(v8::Handle<v8::Object>::Cast(args[0]));
     RefPtr<CKernel> cKernel = CKernel::create(parent);
-    V8DOMWrapper::setDOMWrapper(args.Holder(), &info, cKernel.get());
-    V8DOMWrapper::setJSWrapperForDOMObject(cKernel.release(), v8::Persistent<v8::Object>::New(args.Holder()));
+    V8DOMWrapper::associateObjectWithWrapper(cKernel.release(), &info, args.Holder(), args.GetIsolate(), WrapperConfiguration::Dependent);
     return args.Holder();
 }
 
-v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& args)
+v8::Handle<v8::Value> V8CKernel::setScalarArgumentMethodCustom(const v8::Arguments& args)
 {
-    INC_STATS("DOM.CKernel.setScalarArgument");
     if (args.Length() < 4)
         return throwNotEnoughArgumentsError(args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());
-    EXCEPTION_BLOCK(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
+    V8TRYCATCH(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
     if (!args[2]->IsBoolean())
         return throwTypeError(0, args.GetIsolate());
@@ -62,13 +52,12 @@ v8::Handle<v8::Value> V8CKernel::setScalarArgumentCallback(const v8::Arguments& 
     return throwTypeError(0, args.GetIsolate());
 }
 
-v8::Handle<v8::Value> V8CKernel::runCallback(const v8::Arguments& args)
+v8::Handle<v8::Value> V8CKernel::runMethodCustom(const v8::Arguments& args)
 {
-    INC_STATS("DOM.CKernel.run");
     if (args.Length() < 2)
         return throwNotEnoughArgumentsError(args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());
-    EXCEPTION_BLOCK(unsigned, rank, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
+    V8TRYCATCH(unsigned, rank, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
     if (args[1].IsEmpty() || !args[1]->IsArray())
         return throwTypeError(0, args.GetIsolate());
@@ -90,13 +79,12 @@ v8::Handle<v8::Value> V8CKernel::runCallback(const v8::Arguments& args)
     return v8UnsignedInteger(imp->run(rank, shape, tile), args.GetIsolate());
 }
 
-v8::Handle<v8::Value> V8CKernel::numberOfArgsAccessorGetter(v8::Local<v8::String> name, const v8::AccessorInfo& info)
+v8::Handle<v8::Value> V8CKernel::numberOfArgsAttrGetterCustom(v8::Local<v8::String> name, const v8::AccessorInfo& info)
 {
-    INC_STATS("DOM.CKernel.numberOfArgs._get");
     CKernel* imp = V8CKernel::toNative(info.Holder());
     unsigned long number = imp->numberOfArgs();
     if (number == std::numeric_limits<unsigned long>::max())
-        return throwError(GeneralError, "Cannot get numberOfArgs.", info.GetIsolate());
+        return throwError(v8GeneralError, "Cannot get numberOfArgs.", info.GetIsolate());
     return v8UnsignedInteger(number, info.GetIsolate());
 }
 

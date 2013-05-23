@@ -1,7 +1,8 @@
 #include "config.h"
-#include "CKernel.h"
 
-#include "CContext.h"
+#include "core/rivertrail/CKernel.h"
+
+#include "core/rivertrail/CContext.h"
 #include <limits>
 
 #ifdef WINDOWS_ROUNDTRIP

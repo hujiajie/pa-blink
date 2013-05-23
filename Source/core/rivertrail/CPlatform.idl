@@ -1,15 +1,10 @@
-module rivertrail {
- 
-    interface [
-        OmitConstructor
-    ] CPlatform {
-        [V8Custom] CContext createContext();
+interface CPlatform {
+    [Custom] CContext createContext();
 
-        readonly attribute [V8CustomGetter] unsigned long numberOfDevices; 
-        readonly attribute DOMString version; 
-        readonly attribute DOMString name; 
-        readonly attribute DOMString vendor; 
-        readonly attribute DOMString profile; 
-        readonly attribute DOMString extensions; 
-    };
-}
+    [CustomGetter] readonly attribute unsigned long numberOfDevices; 
+    readonly attribute DOMString version; 
+    readonly attribute DOMString name; 
+    readonly attribute DOMString vendor; 
+    readonly attribute DOMString profile; 
+    readonly attribute DOMString extensions; 
+};
