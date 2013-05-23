@@ -32,9 +32,9 @@ namespace WebCore {
 v8::Handle<v8::Value> V8CData::constructorCustom(const v8::Arguments& args)
 {
     if (args.Length() != 1)
-        return throwError(v8GeneralError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(v8SyntaxError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
     if (!V8CContext::HasInstance(args[0], args.GetIsolate(), worldType(args.GetIsolate())))
-        return throwError(v8GeneralError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(v8SyntaxError, "CData cannot be constructed because of wrong parameters.", args.GetIsolate());
 
     CContext* parent = V8CContext::toNative(v8::Handle<v8::Object>::Cast(args[0]));
     RefPtr<CData> cData = CData::create(parent);
@@ -50,7 +50,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 		{
         Int8Array* theArray = imp->getValue<Int8Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
@@ -58,7 +58,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 		{
         Uint8Array* theArray = imp->getValue<Uint8Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
@@ -66,7 +66,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 		{
         Int16Array* theArray = imp->getValue<Int16Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
@@ -74,7 +74,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 		{
         Uint16Array* theArray = imp->getValue<Uint16Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
@@ -82,7 +82,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 		{
         Int32Array* theArray = imp->getValue<Int32Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
@@ -90,7 +90,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 		{
         Uint32Array* theArray = imp->getValue<Uint32Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
@@ -98,7 +98,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         {
         Float32Array* theArray = imp->getValue<Float32Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
         }
@@ -106,7 +106,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         {
         Float64Array* theArray = imp->getValue<Float64Array>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
         }
@@ -114,13 +114,13 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         {
         Uint8ClampedArray* theArray = imp->getValue<Uint8ClampedArray>();
         if (!theArray)
-            return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+            return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
         }
     default:
         {
-        return throwError(v8GeneralError, "Cannot access typed array.", args.GetIsolate());
+        return throwError(v8SyntaxError, "Cannot access typed array.", args.GetIsolate());
         break;
         }
     }
@@ -128,8 +128,8 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 
 v8::Handle<v8::Value> V8CData::writeToMethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() < 1)
-        return throwNotEnoughArgumentsError(args.GetIsolate());
+    if (args.Length() != 1)
+        return throwError(v8SyntaxError, "Cannot write because of invalid number of arguments.", args.GetIsolate());
     CData* imp = V8CData::toNative(args.Holder());
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint8ClampedArray*, dest, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);

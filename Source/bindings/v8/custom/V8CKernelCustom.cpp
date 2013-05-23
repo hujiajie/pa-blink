@@ -12,9 +12,9 @@ namespace WebCore {
 v8::Handle<v8::Value> V8CKernel::constructorCustom(const v8::Arguments& args)
 {
     if (args.Length() != 1)
-        return throwError(v8GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(v8SyntaxError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
     if (!V8CContext::HasInstance(args[0], args.GetIsolate(), worldType(args.GetIsolate())))
-        return throwError(v8GeneralError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
+        return throwError(v8SyntaxError, "CKernel cannot be constructed because of wrong parameters.", args.GetIsolate());
 
     CContext* parent = V8CContext::toNative(v8::Handle<v8::Object>::Cast(args[0]));
     RefPtr<CKernel> cKernel = CKernel::create(parent);
@@ -24,8 +24,8 @@ v8::Handle<v8::Value> V8CKernel::constructorCustom(const v8::Arguments& args)
 
 v8::Handle<v8::Value> V8CKernel::setScalarArgumentMethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() < 4)
-        return throwNotEnoughArgumentsError(args.GetIsolate());
+    if (args.Length() != 4)
+        return throwError(v8SyntaxError, "Cannot set scalar because of invalid number of arguments", args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
@@ -54,8 +54,8 @@ v8::Handle<v8::Value> V8CKernel::setScalarArgumentMethodCustom(const v8::Argumen
 
 v8::Handle<v8::Value> V8CKernel::runMethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() < 2)
-        return throwNotEnoughArgumentsError(args.GetIsolate());
+    if (args.Length() != 3)
+        return throwError(v8SyntaxError, "Cannot run because of invalid number of arguments.", args.GetIsolate());
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH(unsigned, rank, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
@@ -84,7 +84,7 @@ v8::Handle<v8::Value> V8CKernel::numberOfArgsAttrGetterCustom(v8::Local<v8::Stri
     CKernel* imp = V8CKernel::toNative(info.Holder());
     unsigned long number = imp->numberOfArgs();
     if (number == std::numeric_limits<unsigned long>::max())
-        return throwError(v8GeneralError, "Cannot get numberOfArgs.", info.GetIsolate());
+        return throwError(v8SyntaxError, "Cannot get numberOfArgs.", info.GetIsolate());
     return v8UnsignedInteger(number, info.GetIsolate());
 }
 

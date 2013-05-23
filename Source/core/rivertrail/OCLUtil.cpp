@@ -28,12 +28,12 @@ void OCLUtil::Init() {
   // Platform
   error = clGetPlatformIDs( 0, 0, &nplatforms);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR( "get platform number", error);
+      DEBUG_LOG_ERROR("Init", "Get platform number error: " << error);
   }
   cl_platform_id* m_platforms = new cl_platform_id[nplatforms];
   error = clGetPlatformIDs(nplatforms, m_platforms, &numberOfPlatforms);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get platform id: ", error);
+      DEBUG_LOG_ERROR("Init", "Get platform id error: " << error);
   }
 
   const cl_uint maxNameLength = 256;
@@ -41,7 +41,7 @@ void OCLUtil::Init() {
   for (cl_uint i = 0; i < numberOfPlatforms; i++) {
       error = clGetPlatformInfo(m_platforms[i], CL_PLATFORM_NAME, maxNameLength * sizeof(char), name, 0);
       if (error != CL_SUCCESS) {
-          DEBUG_LOG_ERROR( "GetIntelPlatform Failed", error);
+          DEBUG_LOG_ERROR("Init", "Get platform name error: " << error);
       } else {
           if (!strcmp(name, "Intel(R) OpenCL") || !strcmp(name, "Apple"))
               platform_ = m_platforms[i];
@@ -53,7 +53,7 @@ void OCLUtil::Init() {
   char* temp;
   error = getPlatformPropertyHelper(CL_PLATFORM_VERSION, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get platform version: ", error);
+      DEBUG_LOG_ERROR("Init", "Get platform version error: " << error);
   } else {
       version_ =  std::string(temp);
       delete [] temp;
@@ -61,7 +61,7 @@ void OCLUtil::Init() {
   // Name
   error = getPlatformPropertyHelper(CL_PLATFORM_NAME, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get platform name: ", error);
+      DEBUG_LOG_ERROR("Init", "Get platform name error: " << error);
   } else {
       name_ = std::string(temp);
       delete [] temp;
@@ -69,7 +69,7 @@ void OCLUtil::Init() {
   // Vendor
   error = getPlatformPropertyHelper(CL_PLATFORM_VENDOR, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get platform vendor: ", error);
+      DEBUG_LOG_ERROR("Init", "Get platform vendor error: " << error);
   } else {
       vendor_ = std::string(temp);
       delete [] temp;
@@ -77,7 +77,7 @@ void OCLUtil::Init() {
   // Profile
   error = getPlatformPropertyHelper(CL_PLATFORM_PROFILE, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get platform profile: ", error);
+      DEBUG_LOG_ERROR("Init", "Get platform profile error: " << error);
   } else {
       profile_ = std::string(temp);
       delete [] temp;
@@ -85,7 +85,7 @@ void OCLUtil::Init() {
   // Platform Extensions
   error = getPlatformPropertyHelper(CL_PLATFORM_EXTENSIONS, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get platform extensions: ", error);
+      DEBUG_LOG_ERROR("Init", "Get platform extension error: " << error);
   } else {
       platformExtensions_ = std::string(temp);
       delete [] temp;
@@ -95,7 +95,7 @@ void OCLUtil::Init() {
   cl_uint number;
   error = clGetDeviceIDs(platform_, CL_DEVICE_TYPE_ALL, 0, 0, &number);
   if (error != CL_SUCCESS) {
-     DEBUG_LOG_ERROR("get the number of devices: ", error);
+     DEBUG_LOG_ERROR("Init", "Get device number error: " << error);
   } else {
      numberOfDevices_ = number;
   }
@@ -104,7 +104,7 @@ void OCLUtil::Init() {
   cl_context_properties context_properties[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platform_, 0};
   context_ = clCreateContextFromType(context_properties, CL_DEVICE_TYPE_CPU, &reportCLError, this, &error);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("init context", error);
+      DEBUG_LOG_ERROR("Init", "Create context error: " << error);
   }
   createContextSuccess = true;
 
@@ -112,15 +112,15 @@ void OCLUtil::Init() {
   size_t cb;
   error = clGetContextInfo(context_, CL_CONTEXT_DEVICES, 0, 0, &cb);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get devices from context: ", error);
+      DEBUG_LOG_ERROR("Init", "Get context device number error: " << error);
   }
   cl_device_id* devices = (cl_device_id*)malloc(sizeof(cl_device_id) * cb);
   if (!devices) {
-      DEBUG_LOG_STATUS("get devices: ", "Cannot allocate device list");
+      DEBUG_LOG_STATUS("Init", "Cannot allocate device list");
   }
   error = clGetContextInfo(context_, CL_CONTEXT_DEVICES, cb, devices, 0);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get device info: ", error);
+      DEBUG_LOG_ERROR("Init", "Get context device info error: " << error);
       free(devices);
   }
 
@@ -135,9 +135,10 @@ void OCLUtil::Init() {
       0,
       &error);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get command queue", error);
+      DEBUG_LOG_ERROR("Init", "Create command queue error: " << error);
       free(devices);
   }
+  DEBUG_LOG_STATUS("Init", "queue is " << queue_);
   createCommandQueueSuccess = true;
 
   error = clGetDeviceInfo(devices[0], CL_DEVICE_MEM_BASE_ADDR_ALIGN, sizeof(alignmentSize_), &alignmentSize_, 0);
@@ -156,7 +157,7 @@ void OCLUtil::Init() {
   // Device Extensions
   error = clGetCommandQueueInfo(queue_, CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, 0);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("get device extensions: ", error);
+      DEBUG_LOG_ERROR("Init", "Get command queue device error: " << error);
   } else {
       error = clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, 0, &length);
       if (error == CL_SUCCESS) {
@@ -165,7 +166,7 @@ void OCLUtil::Init() {
           deviceExtensions_ = std::string(temp);
           delete [] temp;
       } else {
-          DEBUG_LOG_ERROR("get device extensions: ", error);
+          DEBUG_LOG_ERROR("Init", "Get device extension error: " << error);
       }
   }
   temp = 0;
@@ -179,7 +180,7 @@ void OCLUtil::Finalize() {
     if (createCommandQueueSuccess) {
         error = clReleaseCommandQueue(queue_);
         if (error != CL_SUCCESS) {
-            DEBUG_LOG_ERROR("release command queue: ", error);
+            DEBUG_LOG_ERROR("Finalize", "Release command queue error: " << error);
         } else {
             createCommandQueueSuccess = false;
         }
@@ -187,7 +188,7 @@ void OCLUtil::Finalize() {
     if (createContextSuccess) {
         error = clReleaseContext(context_);
         if (error != CL_SUCCESS) {
-            DEBUG_LOG_ERROR("release context: ", error);
+            DEBUG_LOG_ERROR("Finalize", "Release context error: " << error);
         } else {
             createContextSuccess = false;
         }

@@ -57,7 +57,7 @@ unsigned long CKernel::numberOfArgs()
 
     err_code = clGetKernelInfo(m_kernel, CL_KERNEL_NUM_ARGS, sizeof(cl_uint), &result, 0);
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("GetNumberOfArgs", err_code);
+        DEBUG_LOG_ERROR("numberOfArgs", err_code);
         return std::numeric_limits<unsigned long>::max(); // We never get max value if eveything goes OK, since NUMBER_OF_ARTIFICIAL_ARGS > 0
     }
 
@@ -74,12 +74,12 @@ bool CKernel::setArgument( unsigned number, CData* argument)
     number = number + NUMBER_OF_ARTIFICIAL_ARGS;
 
     buffer = argument->getContainedBuffer();
-    DEBUG_LOG_STATUS("SetArgument", "buffer is " << buffer);
+    DEBUG_LOG_STATUS("setArgument", "buffer is " << buffer);
 
     err_code = clSetKernelArg(m_kernel, number, sizeof(cl_mem), &buffer);
     
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("SetArgument", err_code);
+        DEBUG_LOG_ERROR("setArgument", err_code);
         return false;
     }
 
@@ -92,24 +92,24 @@ template<class ArgClass> bool CKernel::setScalarArgument(unsigned number, const 
     /* skip internal arguments */
     number = number + NUMBER_OF_ARTIFICIAL_ARGS;
 
-    DEBUG_LOG_STATUS("SetScalarArgument", " isIntegerB: " << isIntegerB  << " isHighPrecisionB " << isHighPrecisionB);
+    DEBUG_LOG_STATUS("setScalarArgument", "isIntegerB: " << isIntegerB  << " isHighPrecisionB " << isHighPrecisionB);
 
     if (isIntegerB) {
-        DEBUG_LOG_STATUS("SetScalarArgument", " setting integer argument " << number << " to value " << value);
+        DEBUG_LOG_STATUS("setScalarArgument", "setting integer argument " << number << " to value " << value);
         cl_int intVal = (cl_int) value;
         err_code = clSetKernelArg(m_kernel, number, sizeof(cl_int), &intVal);
     } else if (isHighPrecisionB) {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting double argument " << number << " to value " << value);
+        DEBUG_LOG_STATUS("setScalarArgument", "setting double argument " << number << " to value " << value);
         cl_double doubleVal = (cl_double) value;
         err_code = clSetKernelArg(m_kernel, number, sizeof(cl_double), &doubleVal);
     } else {
-        DEBUG_LOG_STATUS("SetScalarArgument", "setting float argument " << number << " to value " << value);
+        DEBUG_LOG_STATUS("setScalarArgument", "setting float argument " << number << " to value " << value);
         cl_float floatVal = (cl_float) value;
         err_code = clSetKernelArg(m_kernel, number, sizeof(cl_float), &floatVal);
     }
 
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("SetScalarArgument", err_code);
+        DEBUG_LOG_ERROR("setScalarArgument", err_code);
         return false;
     }
     return true;
@@ -127,14 +127,14 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
     const int zero = 0;
     unsigned* retval = new unsigned[1];
 
-    DEBUG_LOG_STATUS("Run", "preparing execution of kernel");
+    DEBUG_LOG_STATUS("run", "preparing execution of kernel");
 
     if (sizeof(size_t) == sizeof(unsigned)) {
         global_work_size = (size_t*) shape;
     } else {
         global_work_size = new size_t[rank];
         if (!global_work_size) {
-            DEBUG_LOG_STATUS("Run", "allocation of global_work_size failed");
+            DEBUG_LOG_STATUS("run", "allocation of global_work_size failed");
             return -1;
         }
         for (unsigned cnt = 0; cnt < rank; cnt++) {
@@ -151,7 +151,7 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
         } else {
             local_work_size = new size_t[rank];
             if (!local_work_size) {
-                DEBUG_LOG_STATUS("Run", "allocation of local_work_size failed");
+                DEBUG_LOG_STATUS("run", "allocation of local_work_size failed");
                 return -1;
             }
             for (int cnt = 0; cnt < rank; cnt++) {
@@ -163,15 +163,15 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
     local_work_size = 0;
 #endif /* USE_LOCAL_WORKSIZE */
 
-    DEBUG_LOG_STATUS("Run", "setting failure code to 0");
+    DEBUG_LOG_STATUS("run", "setting failure code to 0");
 
     err_code = clEnqueueWriteBuffer(m_cmdQueue, m_failureMem, CL_FALSE, 0, sizeof(int), &zero, 0, 0, &writeEvent);
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("Run", err_code);
+        DEBUG_LOG_ERROR("run", err_code);
         return -1;
     }
 
-    DEBUG_LOG_STATUS("Run", "enqueing execution of kernel");
+    DEBUG_LOG_STATUS("run", "enqueing execution of kernel");
 
 #ifdef WINDOWS_ROUNDTRIP
     CContext::recordBeginOfRoundTrip(m_parent);
@@ -179,29 +179,29 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
 
     err_code = clEnqueueNDRangeKernel(m_cmdQueue, m_kernel, rank, 0, global_work_size, 0, 1, &writeEvent, &runEvent);
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("Run", err_code);
+        DEBUG_LOG_ERROR("run", err_code);
         return -1;
     }
 
-    DEBUG_LOG_STATUS("Run", "reading failure code");
+    DEBUG_LOG_STATUS("run", "reading failure code");
 
     
 
     err_code = clEnqueueReadBuffer(m_cmdQueue, m_failureMem, CL_FALSE, 0, sizeof(int), retval, 1, &runEvent, &readEvent);
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("Run", err_code);
+        DEBUG_LOG_ERROR("run", err_code);
         return -1;
     }
 
-    DEBUG_LOG_STATUS("Run", "waiting for execution to finish");
+    DEBUG_LOG_STATUS("run", "waiting for execution to finish");
     
     // For now we always wait for the run to complete.
     // In the long run, we may want to interleave this with JS execution and only sync on result read.
     err_code = clWaitForEvents( 1, &readEvent);
     
-    DEBUG_LOG_STATUS("Run", "first event fired");        
+    DEBUG_LOG_STATUS("run", "first event fired");        
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("Run", err_code);
+        DEBUG_LOG_ERROR("run", err_code);
         return -1;
     }
 #ifdef WINDOWS_ROUNDTRIP
@@ -212,9 +212,9 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
 #ifdef CLPROFILE_ASYNC
     err_code = clSetEventCallback( readEvent, CL_COMPLETE, &CContext::collectTimings, m_parent);
     
-    DEBUG_LOG_STATUS("Run", "second event fired");
+    DEBUG_LOG_STATUS("run", "second event fired");
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("Run", err_code);
+        DEBUG_LOG_ERROR("run", err_code);
         return NS_ERROR_ABORT;
     }
 #else /* CLPROFILE_ASYNC */
@@ -222,7 +222,7 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
 #endif /* CLPROFILE_ASYNC */
 #endif /* CLPROFILE */
         
-    DEBUG_LOG_STATUS("Run", "execution completed successfully, start cleanup");
+    DEBUG_LOG_STATUS("run", "execution completed successfully, start cleanup");
     
     if (global_work_size != (size_t*) shape) {
         delete global_work_size;
@@ -238,11 +238,11 @@ unsigned CKernel::run(unsigned rank, unsigned* shape, unsigned* tile)
     err_code = clReleaseEvent(writeEvent);
 
     if (err_code != CL_SUCCESS) {
-        DEBUG_LOG_ERROR("Run", err_code);
+        DEBUG_LOG_ERROR("run", err_code);
         return -1;
     }
 
-    DEBUG_LOG_STATUS("Run", "cleanup complete");
+    DEBUG_LOG_STATUS("run", "cleanup complete");
 
     return *retval;
 }

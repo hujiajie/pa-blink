@@ -12,7 +12,7 @@ v8::Handle<v8::Value> V8CPlatform::createContextMethodCustom(const v8::Arguments
     CPlatform* imp = V8CPlatform::toNative(args.Holder());
     RefPtr<CContext> cContext = imp->createContext();
     if (!cContext)
-        return throwError(v8GeneralError, "Cannot create new CContext object.", args.GetIsolate());
+        return throwError(v8SyntaxError, "Cannot create new CContext object.", args.GetIsolate());
 	return toV8(cContext.get(), v8::Handle<v8::Object>(), args.GetIsolate());
 }
 
@@ -21,7 +21,7 @@ v8::Handle<v8::Value> V8CPlatform::numberOfDevicesAttrGetterCustom(v8::Local<v8:
     CPlatform* imp = V8CPlatform::toNative(info.Holder());
     int number = imp->openclUtil()->numberOfDevices();
     if (number == -1)
-        return throwError(v8GeneralError, "Cannot get numberOfDevices.", info.GetIsolate());
+        return throwError(v8SyntaxError, "Cannot get numberOfDevices.", info.GetIsolate());
     return v8UnsignedInteger(number, info.GetIsolate());
 }
 

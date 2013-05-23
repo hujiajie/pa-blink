@@ -19,7 +19,7 @@ v8::Handle<v8::Value> V8CInterface::getPlatformMethodCustom(const v8::Arguments&
     CInterface* imp = V8CInterface::toNative(args.Holder());
     RefPtr<CPlatform> cPlatform = imp->getPlatform();
     if (!cPlatform)
-        return throwError(v8GeneralError, "Cannot create new CPlatform object.", args.GetIsolate());
+        return throwError(v8SyntaxError, "Cannot create new CPlatform object.", args.GetIsolate());
     return toV8(cPlatform.get(), v8::Handle<v8::Object>(), args.GetIsolate());
 }
 
