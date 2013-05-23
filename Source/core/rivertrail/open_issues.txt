@@ -1,4 +1,0 @@
-open issues:
-1. In CContext: compileKernel works now, but needs further check about source.ascii().data().
-2. In CData or CKernel or CContext: the return value (vec3) in test_for_rivertrail.html isn't correct now because of unknown error.
-3. potential memory leaking.
