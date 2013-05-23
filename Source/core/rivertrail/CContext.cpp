@@ -254,7 +254,7 @@ template inline unsigned char* CContext::getPointerFromTA<Float32Array>(Float32A
 template inline unsigned char* CContext::getPointerFromTA<Float64Array>(Float64Array* ta);
 template inline unsigned char* CContext::getPointerFromTA<Uint8ClampedArray>(Uint8ClampedArray* ta);
 
-template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA(unsigned type, size_t length, RefPtr<ArrayClass>& res)
+template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA(ArrayBufferView::ViewType type, size_t length, RefPtr<ArrayClass>& res)
 {
     RefPtr<ArrayBuffer> buffer;
     uintptr_t offset;
@@ -268,52 +268,52 @@ template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA
     return RT_OK;
 }
 
-template<> unsigned CContext::createAlignedTA<Int8Array, char>(unsigned type, size_t length, RefPtr<Int8Array>& res)
+template<> unsigned CContext::createAlignedTA<Int8Array, char>(ArrayBufferView::ViewType type, size_t length, RefPtr<Int8Array>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template<> unsigned CContext::createAlignedTA<Uint8Array, unsigned char>(unsigned type, size_t length, RefPtr<Uint8Array>& res)
+template<> unsigned CContext::createAlignedTA<Uint8Array, unsigned char>(ArrayBufferView::ViewType type, size_t length, RefPtr<Uint8Array>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template<> unsigned CContext::createAlignedTA<Int16Array, short>(unsigned type, size_t length, RefPtr<Int16Array>& res)
+template<> unsigned CContext::createAlignedTA<Int16Array, short>(ArrayBufferView::ViewType type, size_t length, RefPtr<Int16Array>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template<> unsigned CContext::createAlignedTA<Uint16Array, unsigned short>(unsigned type, size_t length, RefPtr<Uint16Array>& res)
+template<> unsigned CContext::createAlignedTA<Uint16Array, unsigned short>(ArrayBufferView::ViewType type, size_t length, RefPtr<Uint16Array>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template<> unsigned CContext::createAlignedTA<Int32Array, int>(unsigned type, size_t length, RefPtr<Int32Array>& res)
+template<> unsigned CContext::createAlignedTA<Int32Array, int>(ArrayBufferView::ViewType type, size_t length, RefPtr<Int32Array>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template<> unsigned CContext::createAlignedTA<Uint32Array, unsigned>(unsigned type, size_t length, RefPtr<Uint32Array>& res)
+template<> unsigned CContext::createAlignedTA<Uint32Array, unsigned>(ArrayBufferView::ViewType type, size_t length, RefPtr<Uint32Array>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template unsigned CContext::createAlignedTA<Float32Array, float>(unsigned type, size_t length, RefPtr<Float32Array>& res);
-template unsigned CContext::createAlignedTA<Float64Array, double>(unsigned type, size_t length, RefPtr<Float64Array>& res);
+template unsigned CContext::createAlignedTA<Float32Array, float>(ArrayBufferView::ViewType type, size_t length, RefPtr<Float32Array>& res);
+template unsigned CContext::createAlignedTA<Float64Array, double>(ArrayBufferView::ViewType type, size_t length, RefPtr<Float64Array>& res);
 
-template<> unsigned CContext::createAlignedTA<Uint8ClampedArray, unsigned char>(unsigned type, size_t length, RefPtr<Uint8ClampedArray>& res)
+template<> unsigned CContext::createAlignedTA<Uint8ClampedArray, unsigned char>(ArrayBufferView::ViewType type, size_t length, RefPtr<Uint8ClampedArray>& res)
 {
     // We only return float or double arrays, so fail in all other cases.
     return RT_ERROR_NOT_IMPLEMENTED;
 }
 
-template<class ArrayClass, unsigned type> PassRefPtr<CData> CContext::mapData(PassRefPtr<ArrayClass> source)
+template<class ArrayClass, ArrayBufferView::ViewType type> PassRefPtr<CData> CContext::mapData(PassRefPtr<ArrayClass> source)
 {
     cl_int err_code;
     unsigned result;
@@ -354,15 +354,15 @@ template<class ArrayClass, unsigned type> PassRefPtr<CData> CContext::mapData(Pa
     return data.release();
 }
 
-template PassRefPtr<CData> CContext::mapData<Int8Array, TYPE_INT8>(PassRefPtr<Int8Array> source);
-template PassRefPtr<CData> CContext::mapData<Uint8Array, TYPE_UINT8>(PassRefPtr<Uint8Array> source);
-template PassRefPtr<CData> CContext::mapData<Int16Array, TYPE_INT16>(PassRefPtr<Int16Array> source);
-template PassRefPtr<CData> CContext::mapData<Uint16Array, TYPE_UINT16>(PassRefPtr<Uint16Array> source);
-template PassRefPtr<CData> CContext::mapData<Int32Array, TYPE_INT32>(PassRefPtr<Int32Array> source);
-template PassRefPtr<CData> CContext::mapData<Uint32Array, TYPE_UINT32>(PassRefPtr<Uint32Array> source);
-template PassRefPtr<CData> CContext::mapData<Float32Array, TYPE_FLOAT32>(PassRefPtr<Float32Array> source);
-template PassRefPtr<CData> CContext::mapData<Float64Array, TYPE_FLOAT64>(PassRefPtr<Float64Array> source);
-template PassRefPtr<CData> CContext::mapData<Uint8ClampedArray, TYPE_UINT8_CLAMPED>(PassRefPtr<Uint8ClampedArray> source);
+template PassRefPtr<CData> CContext::mapData<Int8Array, ArrayBufferView::TypeInt8>(PassRefPtr<Int8Array> source);
+template PassRefPtr<CData> CContext::mapData<Uint8Array, ArrayBufferView::TypeUint8>(PassRefPtr<Uint8Array> source);
+template PassRefPtr<CData> CContext::mapData<Int16Array, ArrayBufferView::TypeInt16>(PassRefPtr<Int16Array> source);
+template PassRefPtr<CData> CContext::mapData<Uint16Array, ArrayBufferView::TypeUint16>(PassRefPtr<Uint16Array> source);
+template PassRefPtr<CData> CContext::mapData<Int32Array, ArrayBufferView::TypeInt32>(PassRefPtr<Int32Array> source);
+template PassRefPtr<CData> CContext::mapData<Uint32Array, ArrayBufferView::TypeUint32>(PassRefPtr<Uint32Array> source);
+template PassRefPtr<CData> CContext::mapData<Float32Array, ArrayBufferView::TypeFloat32>(PassRefPtr<Float32Array> source);
+template PassRefPtr<CData> CContext::mapData<Float64Array, ArrayBufferView::TypeFloat64>(PassRefPtr<Float64Array> source);
+template PassRefPtr<CData> CContext::mapData<Uint8ClampedArray, ArrayBufferView::TypeUint8Clamped>(PassRefPtr<Uint8ClampedArray> source);
 
 template<class ArrayClass> PassRefPtr<CData> CContext::cloneData(ArrayClass* source)
 {
@@ -381,7 +381,7 @@ template PassRefPtr<CData> CContext::cloneData<Float32Array>(Float32Array* sourc
 template PassRefPtr<CData> CContext::cloneData<Float64Array>(Float64Array* source);
 template PassRefPtr<CData> CContext::cloneData<Uint8ClampedArray>(Uint8ClampedArray* source);
 
-template<class ArrayClass, class ElementType, unsigned type> PassRefPtr<CData> CContext::allocateData(ArrayClass* templ, unsigned length)
+template<class ArrayClass, class ElementType, ArrayBufferView::ViewType type> PassRefPtr<CData> CContext::allocateData(ArrayClass* templ, unsigned length)
 {
     cl_int err_code;
     unsigned result;
@@ -438,15 +438,15 @@ template<class ArrayClass, class ElementType, unsigned type> PassRefPtr<CData> C
     return data.release();
 }
 
-template PassRefPtr<CData> CContext::allocateData<Int8Array, char, TYPE_INT8>(Int8Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Uint8Array, unsigned char, TYPE_UINT8>(Uint8Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Int16Array, short, TYPE_INT16>(Int16Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Uint16Array, unsigned short, TYPE_UINT16>(Uint16Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Int32Array, int, TYPE_INT32>(Int32Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Uint32Array, unsigned, TYPE_UINT32>(Uint32Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Float32Array, float, TYPE_FLOAT32>(Float32Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Float64Array, double, TYPE_FLOAT64>(Float64Array* templ, unsigned length);
-template PassRefPtr<CData> CContext::allocateData<Uint8ClampedArray, unsigned char, TYPE_UINT8_CLAMPED>(Uint8ClampedArray* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Int8Array, char, ArrayBufferView::TypeInt8>(Int8Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Uint8Array, unsigned char, ArrayBufferView::TypeUint8>(Uint8Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Int16Array, short, ArrayBufferView::TypeInt16>(Int16Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Uint16Array, unsigned short, ArrayBufferView::TypeUint16>(Uint16Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Int32Array, int, ArrayBufferView::TypeInt32>(Int32Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Uint32Array, unsigned, ArrayBufferView::TypeUint32>(Uint32Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Float32Array, float, ArrayBufferView::TypeFloat32>(Float32Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Float64Array, double, ArrayBufferView::TypeFloat64>(Float64Array* templ, unsigned length);
+template PassRefPtr<CData> CContext::allocateData<Uint8ClampedArray, unsigned char, ArrayBufferView::TypeUint8Clamped>(Uint8ClampedArray* templ, unsigned length);
 
 PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 {
@@ -472,7 +472,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
     DEBUG_LOG_STATUS("allocateData2", "length " << length << " bytePerElements " << bytePerElements);
 
     switch (cData->getType()) {
-    case TYPE_INT8:
+    case ArrayBufferView::TypeInt8:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Int8Array> jsArray;
@@ -507,7 +507,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_UINT8:
+    case ArrayBufferView::TypeUint8:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint8Array> jsArray;
@@ -542,7 +542,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_INT16:
+    case ArrayBufferView::TypeInt16:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Int16Array> jsArray;
@@ -577,7 +577,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_UINT16:
+    case ArrayBufferView::TypeUint16:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint16Array> jsArray;
@@ -612,7 +612,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_INT32:
+    case ArrayBufferView::TypeInt32:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Int32Array> jsArray;
@@ -647,7 +647,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_UINT32:
+    case ArrayBufferView::TypeUint32:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint32Array> jsArray;
@@ -682,7 +682,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_FLOAT32:
+    case ArrayBufferView::TypeFloat32:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Float32Array> jsArray;
@@ -717,7 +717,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_FLOAT64:
+    case ArrayBufferView::TypeFloat64:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Float64Array> jsArray;
@@ -752,7 +752,7 @@ PassRefPtr<CData> CContext::allocateData2(CData* templ, unsigned length)
 
         break;
         }
-    case TYPE_UINT8_CLAMPED:
+    case ArrayBufferView::TypeUint8Clamped:
         {
 #ifdef PREALLOCATE_IN_JS_HEAP
         RefPtr<Uint8ClampedArray> jsArray;

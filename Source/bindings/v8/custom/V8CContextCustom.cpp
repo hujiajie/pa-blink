@@ -69,7 +69,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, source, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Int8Array> int8Array = source;
-        RefPtr<CData> cData = imp->mapData<Int8Array, TYPE_INT8>(int8Array);
+        RefPtr<CData> cData = imp->mapData<Int8Array, ArrayBufferView::TypeInt8>(int8Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -77,7 +77,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Uint8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint8Array*, source, V8Uint8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Uint8Array> uint8Array = source;
-        RefPtr<CData> cData = imp->mapData<Uint8Array, TYPE_UINT8>(uint8Array);
+        RefPtr<CData> cData = imp->mapData<Uint8Array, ArrayBufferView::TypeUint8>(uint8Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -85,7 +85,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Int16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int16Array*, source, V8Int16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int16Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Int16Array> int16Array = source;
-        RefPtr<CData> cData = imp->mapData<Int16Array, TYPE_INT16>(int16Array);
+        RefPtr<CData> cData = imp->mapData<Int16Array, ArrayBufferView::TypeInt16>(int16Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -93,7 +93,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Uint16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint16Array*, source, V8Uint16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint16Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Uint16Array> uint16Array = source;
-        RefPtr<CData> cData = imp->mapData<Uint16Array, TYPE_UINT16>(uint16Array);
+        RefPtr<CData> cData = imp->mapData<Uint16Array, ArrayBufferView::TypeUint16>(uint16Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -101,7 +101,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Int32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int32Array*, source, V8Int32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Int32Array> int32Array = source;
-        RefPtr<CData> cData = imp->mapData<Int32Array, TYPE_INT32>(int32Array);
+        RefPtr<CData> cData = imp->mapData<Int32Array, ArrayBufferView::TypeInt32>(int32Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -109,7 +109,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Uint32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint32Array*, source, V8Uint32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Uint32Array> uint32Array = source;
-        RefPtr<CData> cData = imp->mapData<Uint32Array, TYPE_UINT32>(uint32Array);
+        RefPtr<CData> cData = imp->mapData<Uint32Array, ArrayBufferView::TypeUint32>(uint32Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -117,7 +117,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Float32Array*, source, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Float32Array> float32Array = source;
-        RefPtr<CData> cData = imp->mapData<Float32Array, TYPE_FLOAT32>(float32Array);
+        RefPtr<CData> cData = imp->mapData<Float32Array, ArrayBufferView::TypeFloat32>(float32Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -125,7 +125,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Float64Array*, source, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Float64Array> float64Array = source;
-        RefPtr<CData> cData = imp->mapData<Float64Array, TYPE_FLOAT64>(float64Array);
+        RefPtr<CData> cData = imp->mapData<Float64Array, ArrayBufferView::TypeFloat64>(float64Array);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -133,7 +133,7 @@ v8::Handle<v8::Value> V8CContext::mapDataMethodCustom(const v8::Arguments& args)
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint8ClampedArray*, source, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         RefPtr<Uint8ClampedArray> uint8ClampedArray = source;
-        RefPtr<CData> cData = imp->mapData<Uint8ClampedArray, TYPE_UINT8_CLAMPED>(uint8ClampedArray);
+        RefPtr<CData> cData = imp->mapData<Uint8ClampedArray, ArrayBufferView::TypeUint8Clamped>(uint8ClampedArray);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -220,7 +220,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int8Array*, templ, V8Int8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Int8Array, char, TYPE_INT8>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Int8Array, char, ArrayBufferView::TypeInt8>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -228,7 +228,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Uint8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint8Array*, templ, V8Uint8Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Uint8Array, unsigned char, TYPE_UINT8>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Uint8Array, unsigned char, ArrayBufferView::TypeUint8>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -236,7 +236,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Int16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int16Array*, templ, V8Int16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int16Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Int16Array, short, TYPE_INT16>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Int16Array, short, ArrayBufferView::TypeInt16>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -244,7 +244,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Uint16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint16Array*, templ, V8Uint16Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint16Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Uint16Array, unsigned short, TYPE_UINT16>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Uint16Array, unsigned short, ArrayBufferView::TypeUint16>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -252,7 +252,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Int32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Int32Array*, templ, V8Int32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Int32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Int32Array, int, TYPE_INT32>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Int32Array, int, ArrayBufferView::TypeInt32>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -260,7 +260,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Uint32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint32Array*, templ, V8Uint32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Uint32Array, unsigned, TYPE_UINT32>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Uint32Array, unsigned, ArrayBufferView::TypeUint32>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -268,7 +268,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Float32Array*, templ, V8Float32Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Float32Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Float32Array, float, TYPE_FLOAT32>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Float32Array, float, ArrayBufferView::TypeFloat32>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -276,7 +276,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Float64Array*, templ, V8Float64Array::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Float64Array::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Float64Array, double, TYPE_FLOAT64>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Float64Array, double, ArrayBufferView::TypeFloat64>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());
@@ -284,7 +284,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH(Uint8ClampedArray*, templ, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);
         V8TRYCATCH(unsigned, length, toUInt32(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined)));
-        RefPtr<CData> cData = imp->allocateData<Uint8ClampedArray, unsigned char, TYPE_UINT8_CLAMPED>(templ, length);
+        RefPtr<CData> cData = imp->allocateData<Uint8ClampedArray, unsigned char, ArrayBufferView::TypeUint8Clamped>(templ, length);
         if (!cData)
             return throwError(v8GeneralError, "Cannot create new CData object.", args.GetIsolate());
         return toV8(cData.get(), v8::Handle<v8::Object>(), args.GetIsolate());

@@ -5,6 +5,7 @@
 #include "OCLdebug.h"
 #include "OCLUtil.h"
 #include "opencl_compat.h"
+#include <wtf/ArrayBufferView.h>
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
@@ -32,7 +33,7 @@ public:
     static void CL_CALLBACK collectTimings(cl_event event, cl_int status, void* data);
 #endif // CLPROFILE
     template<class ArrayClass> static unsigned char* getPointerFromTA(ArrayClass* ta);
-    template<class ArrayClass, class ElementType> unsigned createAlignedTA(unsigned type, size_t length, RefPtr<ArrayClass>& retval);
+    template<class ArrayClass, class ElementType> unsigned createAlignedTA(ArrayBufferView::ViewType type, size_t length, RefPtr<ArrayClass>& retval);
 #ifdef WINDOWS_ROUNDTRIP
     static void recordBeginOfRoundTrip(CContext* parent);
     static void recordEndOfRoundTrip(CContext* parent);
@@ -45,9 +46,9 @@ public:
 
     PassRefPtr<CKernel> compileKernel(const String& source, const String& kernelName, const String& options);
     String buildLog();
-    template<class ArrayClass, unsigned type> PassRefPtr<CData> mapData(PassRefPtr<ArrayClass> source);
+    template<class ArrayClass, ArrayBufferView::ViewType type> PassRefPtr<CData> mapData(PassRefPtr<ArrayClass> source);
     template<class ArrayClass> PassRefPtr<CData> cloneData(ArrayClass* source);
-    template<class ArrayClass, class ElementType, unsigned type> PassRefPtr<CData> allocateData(ArrayClass* templ, unsigned length);
+    template<class ArrayClass, class ElementType, ArrayBufferView::ViewType type> PassRefPtr<CData> allocateData(ArrayClass* templ, unsigned length);
     PassRefPtr<CData> allocateData2(CData* templ, unsigned length);
     template<class ArrayClass> bool canBeMapped(ArrayClass* source);
     unsigned long long lastExecutionTime();

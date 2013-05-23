@@ -3,7 +3,7 @@
 
 #include "core/rivertrail/CContext.h"
 #include "core/rivertrail/CData.h"
-#include "core/rivertrail/OCLdebug.h" // FIXME: It may be better to remove TYPE_FLOAT64 from this file
+#include "core/rivertrail/OCLdebug.h"
 #include "bindings/v8/V8Binding.h"
 #include "bindings/v8/V8DOMWrapper.h"
 #include "V8CContext.h"
@@ -46,7 +46,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
 {
     CData* imp = V8CData::toNative(args.Holder());
     switch (imp->getType()) {
-    case TYPE_INT8:
+    case ArrayBufferView::TypeInt8:
 		{
         Int8Array* theArray = imp->getValue<Int8Array>();
         if (!theArray)
@@ -54,7 +54,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
-    case TYPE_UINT8:
+    case ArrayBufferView::TypeUint8:
 		{
         Uint8Array* theArray = imp->getValue<Uint8Array>();
         if (!theArray)
@@ -62,7 +62,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
-    case TYPE_INT16:
+    case ArrayBufferView::TypeInt16:
 		{
         Int16Array* theArray = imp->getValue<Int16Array>();
         if (!theArray)
@@ -70,7 +70,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
-    case TYPE_UINT16:
+    case ArrayBufferView::TypeUint16:
 		{
         Uint16Array* theArray = imp->getValue<Uint16Array>();
         if (!theArray)
@@ -78,7 +78,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
-    case TYPE_INT32:
+    case ArrayBufferView::TypeInt32:
 		{
         Int32Array* theArray = imp->getValue<Int32Array>();
         if (!theArray)
@@ -86,7 +86,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
-    case TYPE_UINT32:
+    case ArrayBufferView::TypeUint32:
 		{
         Uint32Array* theArray = imp->getValue<Uint32Array>();
         if (!theArray)
@@ -94,7 +94,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
 		}
-    case TYPE_FLOAT32:
+    case ArrayBufferView::TypeFloat32:
         {
         Float32Array* theArray = imp->getValue<Float32Array>();
         if (!theArray)
@@ -102,7 +102,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
         }
-    case TYPE_FLOAT64:
+    case ArrayBufferView::TypeFloat64:
         {
         Float64Array* theArray = imp->getValue<Float64Array>();
         if (!theArray)
@@ -110,7 +110,7 @@ v8::Handle<v8::Value> V8CData::getValueMethodCustom(const v8::Arguments& args)
         return toV8(theArray, v8::Handle<v8::Object>(), args.GetIsolate());
         break;
         }
-    case TYPE_UINT8_CLAMPED:
+    case ArrayBufferView::TypeUint8Clamped:
         {
         Uint8ClampedArray* theArray = imp->getValue<Uint8ClampedArray>();
         if (!theArray)

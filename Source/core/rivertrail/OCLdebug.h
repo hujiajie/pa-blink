@@ -32,15 +32,6 @@
 #define RT_ERROR_NOT_AVAILABLE 0x80040111
 #define RT_ERROR_OUT_OF_MEMORY 0x8007000e
 
-#define TYPE_INT8 0
-#define TYPE_UINT8 1
-#define TYPE_INT16 2
-#define TYPE_UINT16 3
-#define TYPE_INT32 4
-#define TYPE_UINT32 5
-#define TYPE_FLOAT32 6
-#define TYPE_FLOAT64 7
-#define TYPE_UINT8_CLAMPED 8
 /*
 #ifndef DEBUG_OFF
 

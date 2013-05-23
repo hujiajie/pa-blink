@@ -26,9 +26,9 @@ public:
     static PassRefPtr<CData> create(CContext* aParent) { return adoptRef(new CData(aParent)); }
     ~CData();
 
-    template<class ArrayClass> unsigned initCData(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<ArrayClass> anArray);
+    template<class ArrayClass> unsigned initCData(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<ArrayClass> anArray);
     cl_mem getContainedBuffer();
-    unsigned getType();
+    ArrayBufferView::ViewType getType();
     unsigned getSize();
     unsigned getLength();
     template<class ArrayClass> ArrayClass* getValue();
@@ -39,7 +39,7 @@ private:
     CContext* m_parent;
     cl_command_queue m_queue;
     cl_mem m_memObj;
-    unsigned m_type;
+    ArrayBufferView::ViewType m_type;
     unsigned m_length;
     unsigned m_size;
     RefPtr<Int8Array> m_theInt8Array;

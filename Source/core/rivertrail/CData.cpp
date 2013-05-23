@@ -71,7 +71,7 @@ cl_int CData::enqueueReadBuffer(size_t size, void* ptr)
 #endif // INCREMENTAL_MEM_RELEASE
 }
 
-template<> unsigned CData::initCData<Int8Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Int8Array> anArray)
+template<> unsigned CData::initCData<Int8Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Int8Array> anArray)
 {
     cl_int err_code;
 
@@ -100,7 +100,7 @@ template<> unsigned CData::initCData<Int8Array>(cl_command_queue aQueue, cl_mem 
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Uint8Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8Array> anArray)
+template<> unsigned CData::initCData<Uint8Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8Array> anArray)
 {
     cl_int err_code;
 
@@ -129,7 +129,7 @@ template<> unsigned CData::initCData<Uint8Array>(cl_command_queue aQueue, cl_mem
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Int16Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Int16Array> anArray)
+template<> unsigned CData::initCData<Int16Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Int16Array> anArray)
 {
     cl_int err_code;
 
@@ -158,7 +158,7 @@ template<> unsigned CData::initCData<Int16Array>(cl_command_queue aQueue, cl_mem
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Uint16Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint16Array> anArray)
+template<> unsigned CData::initCData<Uint16Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint16Array> anArray)
 {
     cl_int err_code;
 
@@ -187,7 +187,7 @@ template<> unsigned CData::initCData<Uint16Array>(cl_command_queue aQueue, cl_me
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Int32Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Int32Array> anArray)
+template<> unsigned CData::initCData<Int32Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Int32Array> anArray)
 {
     cl_int err_code;
 
@@ -216,7 +216,7 @@ template<> unsigned CData::initCData<Int32Array>(cl_command_queue aQueue, cl_mem
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Uint32Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint32Array> anArray)
+template<> unsigned CData::initCData<Uint32Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint32Array> anArray)
 {
     cl_int err_code;
 
@@ -245,7 +245,7 @@ template<> unsigned CData::initCData<Uint32Array>(cl_command_queue aQueue, cl_me
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Float32Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float32Array> anArray)
+template<> unsigned CData::initCData<Float32Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Float32Array> anArray)
 {
     cl_int err_code;
 
@@ -274,7 +274,7 @@ template<> unsigned CData::initCData<Float32Array>(cl_command_queue aQueue, cl_m
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Float64Array>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Float64Array> anArray)
+template<> unsigned CData::initCData<Float64Array>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Float64Array> anArray)
 {
     cl_int err_code;
 
@@ -303,7 +303,7 @@ template<> unsigned CData::initCData<Float64Array>(cl_command_queue aQueue, cl_m
     return RT_OK;
 }
 
-template<> unsigned CData::initCData<Uint8ClampedArray>(cl_command_queue aQueue, cl_mem aMemObj, unsigned aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray)
+template<> unsigned CData::initCData<Uint8ClampedArray>(cl_command_queue aQueue, cl_mem aMemObj, ArrayBufferView::ViewType aType, unsigned aLength, unsigned aSize, PassRefPtr<Uint8ClampedArray> anArray)
 {
     cl_int err_code;
 
@@ -820,7 +820,7 @@ template<> void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest)
         return;
 
     switch (getType()) {
-    case TYPE_FLOAT32:
+    case ArrayBufferView::TypeFloat32:
         {
         Float32Array* src = getValue<Float32Array>();
         if (!src)
@@ -837,7 +837,7 @@ template<> void CData::writeTo<Uint8ClampedArray>(Uint8ClampedArray* dest)
 
         break;
         }
-    case TYPE_FLOAT64:
+    case ArrayBufferView::TypeFloat64:
         {
         Float64Array* src = getValue<Float64Array>();
         if (!src)
@@ -870,7 +870,7 @@ unsigned CData::getSize()
     return m_size;
 }
 
-unsigned CData::getType()
+ArrayBufferView::ViewType CData::getType()
 {
     return m_type;
 }
