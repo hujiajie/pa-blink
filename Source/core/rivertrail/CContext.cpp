@@ -271,15 +271,15 @@ template<class ArrayClass> inline unsigned char* CContext::getPointerFromTA(Arra
     return (unsigned char*)ta->data();
 }
 
-template inline unsigned char* CContext::getPointerFromTA<Int8Array>(Int8Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Uint8Array>(Uint8Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Int16Array>(Int16Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Uint16Array>(Uint16Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Int32Array>(Int32Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Uint32Array>(Uint32Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Float32Array>(Float32Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Float64Array>(Float64Array* ta);
-template inline unsigned char* CContext::getPointerFromTA<Uint8ClampedArray>(Uint8ClampedArray* ta);
+template unsigned char* CContext::getPointerFromTA<Int8Array>(Int8Array* ta);
+template unsigned char* CContext::getPointerFromTA<Uint8Array>(Uint8Array* ta);
+template unsigned char* CContext::getPointerFromTA<Int16Array>(Int16Array* ta);
+template unsigned char* CContext::getPointerFromTA<Uint16Array>(Uint16Array* ta);
+template unsigned char* CContext::getPointerFromTA<Int32Array>(Int32Array* ta);
+template unsigned char* CContext::getPointerFromTA<Uint32Array>(Uint32Array* ta);
+template unsigned char* CContext::getPointerFromTA<Float32Array>(Float32Array* ta);
+template unsigned char* CContext::getPointerFromTA<Float64Array>(Float64Array* ta);
+template unsigned char* CContext::getPointerFromTA<Uint8ClampedArray>(Uint8ClampedArray* ta);
 
 template<class ArrayClass, class ElementType> unsigned CContext::createAlignedTA(ArrayBufferView::ViewType type, size_t length, RefPtr<ArrayClass>& res)
 {

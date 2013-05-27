@@ -28,6 +28,8 @@
 #ifndef OCLconfig_h
 #define OCLconfig_h
 
+#include "config.h"
+
 #define INTERFACE_VERSION           2   /* running version number of the interface */
 #define NUMBER_OF_ARTIFICIAL_ARGS   1   /* number of internal kernel arguments used by runtime */
 
@@ -46,6 +48,10 @@
 #define DPO_PREFERENCE_BRANCH "extensions.dpointerface."    /* preference branch to use */
 #define DPO_DEFAULT_PLATFORM_PREFNAME "defaultPlatform"     /* preference name for default platform */
 
+#if defined(WTF_OS_WINDOWS)
 #define RivertrailExport   __declspec( dllexport )
+#else
+#define RivertrailExport   
+#endif
 
 #endif /* OCLconfig_h */

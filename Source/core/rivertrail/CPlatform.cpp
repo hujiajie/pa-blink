@@ -36,6 +36,11 @@ CPlatform::CPlatform()
 {
     DEBUG_LOG_CREATE("CPlatform", this);  
     opencl_util = new OCLUtil();
+#if defined(WTF_OS_ANDROID)
+    // Because android use uid for sandbox, which is different with windows.
+    // So no need to initialize the utility function before sandbox. 
+    opencl_util->Init();
+#endif
 }
 
 CPlatform::~CPlatform()

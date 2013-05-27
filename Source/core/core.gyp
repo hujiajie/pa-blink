@@ -347,6 +347,13 @@
 	    },
 	  },
         }],
+        ['OS=="android"', {
+          'link_settings': {
+            'libraries': [
+              '-lOpenCL',
+            ]
+          },
+        }],
         ['OS in ("linux", "android") and "WTF_USE_WEBAUDIO_IPP=1" in feature_defines', {
           'cflags': [
             '<!@(pkg-config --cflags-only-I ipp)',
@@ -1018,6 +1025,13 @@
 	    },
 	  },
 	}],
+        ['OS=="android"', {
+          'link_settings': {
+            'libraries': [
+              '-lOpenCL',
+            ]
+          },
+        }],
         # Shard this taret into parts to work around linker limitations.
         # on link time code generation builds.
         ['OS=="win" and buildtype=="Official"', {
