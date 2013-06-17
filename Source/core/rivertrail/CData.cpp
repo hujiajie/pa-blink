@@ -68,6 +68,7 @@ inline int CData::checkFree()
         // Make sure we have not lost our parent due to CC.
         return m_parent->checkFree();
     }
+    return 0;
 }
 
 inline void CData::deferFree(cl_mem obj)
