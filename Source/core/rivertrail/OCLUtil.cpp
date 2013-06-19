@@ -35,7 +35,7 @@ namespace WebCore {
     if (!(f)) {                                                 \
         FreeLibrary(openclModule);                              \
         openclModule = 0;                                       \
-        DEBUG_LOG_ERROR("Init", "Get OpenCL function failed."); \
+        DEBUG_LOG_STATUS("Init", "Get OpenCL function failed."); \
         return;                                                 \
     }
 
@@ -70,7 +70,7 @@ void OCLUtil::Init() {
   // Load OpenCL library
   openclModule = LoadLibrary(TEXT("OpenCL.dll"));
   if (!openclModule) {
-      DEBUG_LOG_ERROR("Init", "Load OpenCL.dll failed.");
+      DEBUG_LOG_STATUS("Init", "Load OpenCL.dll failed.");
       return;
   }
 
@@ -83,13 +83,13 @@ void OCLUtil::Init() {
   // Platform
   error = clGetPlatformIDs( 0, 0, &nplatforms);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform number error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
       return;
   }
   cl_platform_id* m_platforms = new cl_platform_id[nplatforms];
   error = clGetPlatformIDs(nplatforms, m_platforms, &numberOfPlatforms);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform id error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
       delete [] m_platforms;
       return;
   }
@@ -99,7 +99,7 @@ void OCLUtil::Init() {
   for (cl_uint i = 0; i < numberOfPlatforms; i++) {
       error = clGetPlatformInfo(m_platforms[i], CL_PLATFORM_NAME, maxNameLength * sizeof(char), name, 0);
       if (error != CL_SUCCESS) {
-          DEBUG_LOG_ERROR("Init", "Get platform name error: " << error);
+          DEBUG_LOG_ERROR("Init", error);
       } else {
           if (!strcmp(name, "Intel(R) OpenCL") || !strcmp(name, "AMD Accelerated Parallel Processing")) {
               platform_ = m_platforms[i];
@@ -109,7 +109,7 @@ void OCLUtil::Init() {
   }
   delete [] m_platforms;
   if (!platform_) {
-      DEBUG_LOG_ERROR("Init", "Find Intel or AMD platform failed.");
+      DEBUG_LOG_STATUS("Init", "Find Intel or AMD platform failed.");
       return;
   }
 
@@ -117,7 +117,7 @@ void OCLUtil::Init() {
   char* temp;
   error = getPlatformPropertyHelper(CL_PLATFORM_VERSION, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform version error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
   } else {
       version_ =  std::string(temp);
       delete [] temp;
@@ -125,7 +125,7 @@ void OCLUtil::Init() {
   // Name
   error = getPlatformPropertyHelper(CL_PLATFORM_NAME, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform name error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
   } else {
       name_ = std::string(temp);
       delete [] temp;
@@ -133,7 +133,7 @@ void OCLUtil::Init() {
   // Vendor
   error = getPlatformPropertyHelper(CL_PLATFORM_VENDOR, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform vendor error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
   } else {
       vendor_ = std::string(temp);
       delete [] temp;
@@ -141,7 +141,7 @@ void OCLUtil::Init() {
   // Profile
   error = getPlatformPropertyHelper(CL_PLATFORM_PROFILE, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform profile error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
   } else {
       profile_ = std::string(temp);
       delete [] temp;
@@ -149,7 +149,7 @@ void OCLUtil::Init() {
   // Platform Extensions
   error = getPlatformPropertyHelper(CL_PLATFORM_EXTENSIONS, temp);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get platform extension error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
   } else {
       platformExtensions_ = std::string(temp);
       delete [] temp;
@@ -159,7 +159,7 @@ void OCLUtil::Init() {
   cl_uint number;
   error = clGetDeviceIDs(platform_, CL_DEVICE_TYPE_ALL, 0, 0, &number);
   if (error != CL_SUCCESS) {
-     DEBUG_LOG_ERROR("Init", "Get device number error: " << error);
+     DEBUG_LOG_ERROR("Init", error);
   } else {
      numberOfDevices_ = number;
   }
@@ -168,7 +168,7 @@ void OCLUtil::Init() {
   cl_context_properties context_properties[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platform_, 0};
   context_ = clCreateContextFromType(context_properties, CL_DEVICE_TYPE_CPU, &reportCLError, this, &error);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Create context error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
       return;
   }
   createContextSuccess = true;
@@ -177,7 +177,7 @@ void OCLUtil::Init() {
   size_t cb;
   error = clGetContextInfo(context_, CL_CONTEXT_DEVICES, 0, 0, &cb);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get context device number error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
       return;
   }
   cl_device_id* devices = (cl_device_id*)malloc(sizeof(cl_device_id) * cb);
@@ -187,7 +187,7 @@ void OCLUtil::Init() {
   }
   error = clGetContextInfo(context_, CL_CONTEXT_DEVICES, cb, devices, 0);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get context device info error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
       free(devices);
       return;
   }
@@ -203,7 +203,7 @@ void OCLUtil::Init() {
       0,
       &error);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Create command queue error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
       free(devices);
       return;
   }
@@ -226,7 +226,7 @@ void OCLUtil::Init() {
   // Device Extensions
   error = clGetCommandQueueInfo(queue_, CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, 0);
   if (error != CL_SUCCESS) {
-      DEBUG_LOG_ERROR("Init", "Get command queue device error: " << error);
+      DEBUG_LOG_ERROR("Init", error);
   } else {
       error = clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, 0, &length);
       if (error == CL_SUCCESS) {
@@ -235,7 +235,7 @@ void OCLUtil::Init() {
           deviceExtensions_ = std::string(temp);
           delete [] temp;
       } else {
-          DEBUG_LOG_ERROR("Init", "Get device extension error: " << error);
+          DEBUG_LOG_ERROR("Init", error);
       }
   }
   temp = 0;
@@ -251,7 +251,7 @@ void OCLUtil::Finalize() {
     if (createCommandQueueSuccess) {
         error = clReleaseCommandQueue(queue_);
         if (error != CL_SUCCESS) {
-            DEBUG_LOG_ERROR("Finalize", "Release command queue error: " << error);
+            DEBUG_LOG_ERROR("Finalize", error);
         } else {
             createCommandQueueSuccess = false;
         }
@@ -259,7 +259,7 @@ void OCLUtil::Finalize() {
     if (createContextSuccess) {
         error = clReleaseContext(context_);
         if (error != CL_SUCCESS) {
-            DEBUG_LOG_ERROR("Finalize", "Release context error: " << error);
+            DEBUG_LOG_ERROR("Finalize", error);
         } else {
             createContextSuccess = false;
         }
