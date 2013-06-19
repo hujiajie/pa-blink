@@ -76,7 +76,7 @@ v8::Handle<v8::Value> V8CContext::constructorCustom(const v8::Arguments& args)
 
 v8::Handle<v8::Value> V8CContext::compileKernelMethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() != 2)
+    if (args.Length() < 2 || args.Length() > 3)
         return throwError(v8SyntaxError, "Cannot compile the kernel because of invalid number of arguments.", args.GetIsolate());
     if (!openclFlag)
         return throwError(v8SyntaxError, "Cannot call compileKernel when OpenCL is not loaded.", args.GetIsolate());
@@ -247,7 +247,7 @@ v8::Handle<v8::Value> V8CContext::cloneDataMethodCustom(const v8::Arguments& arg
 
 v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() != 2)
+    if (args.Length() < 1 || args.Length() > 2)
         return throwError(v8SyntaxError, "Cannot allocate data because of invalid number of arguments.", args.GetIsolate());
     if (!openclFlag)
         return throwError(v8SyntaxError, "Cannot call allocateData when OpenCL is not loaded.", args.GetIsolate());
@@ -329,7 +329,7 @@ v8::Handle<v8::Value> V8CContext::allocateDataMethodCustom(const v8::Arguments& 
 
 v8::Handle<v8::Value> V8CContext::allocateData2MethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() != 2)
+    if (args.Length() < 1 || args.Length() > 2)
         return throwError(v8SyntaxError, "Cannot allocate data because of invalid number of arguments.", args.GetIsolate());
     if (!openclFlag)
         return throwError(v8SyntaxError, "Cannot call allocateData2 when OpenCL is not loaded.", args.GetIsolate());

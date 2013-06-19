@@ -97,7 +97,7 @@ v8::Handle<v8::Value> V8CKernel::setScalarArgumentMethodCustom(const v8::Argumen
 
 v8::Handle<v8::Value> V8CKernel::runMethodCustom(const v8::Arguments& args)
 {
-    if (args.Length() != 3)
+    if (args.Length() < 2 || args.Length() > 3)
         return throwError(v8SyntaxError, "Cannot run because of invalid number of arguments.", args.GetIsolate());
     if (!openclFlag)
         return throwError(v8SyntaxError, "Cannot call run when OpenCL is not loaded.", args.GetIsolate());
