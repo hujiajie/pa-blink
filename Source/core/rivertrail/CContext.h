@@ -29,7 +29,6 @@
 #define CContext_h
 
 #include "core/rivertrail/OCLconfig.h"
-#include "core/rivertrail/OCLdebug.h"
 #include "core/rivertrail/OCLUtil.h"
 #include "core/rivertrail/opencl_compat.h"
 #include <wtf/ArrayBufferView.h>

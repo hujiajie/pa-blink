@@ -30,6 +30,7 @@
 #include "core/rivertrail/CData.h"
 
 #include "core/rivertrail/CContext.h"
+#include "core/rivertrail/OCLdebug.h"
 
 namespace WebCore {
 

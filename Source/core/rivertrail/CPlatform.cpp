@@ -30,6 +30,8 @@
 
 #include "core/rivertrail/CPlatform.h"
 
+#include "core/rivertrail/OCLdebug.h"
+
 namespace WebCore {
 
 CPlatform::CPlatform()

@@ -35,6 +35,7 @@
 #include "core/rivertrail/CData.h"
 #include "core/rivertrail/CKernel.h"
 #include "core/rivertrail/CPlatform.h"
+#include "core/rivertrail/OCLdebug.h"
 #include <stdlib.h>
 #include <wtf/ArrayBuffer.h>
 #include <wtf/Float32Array.h>

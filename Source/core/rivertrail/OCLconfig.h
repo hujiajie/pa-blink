@@ -39,7 +39,6 @@
 #undef USE_LOCAL_WORKSIZE       /* whether the tile argument is passed down to opencl */
 #define BUILDLOG_MAX 1024   /* size of buildlog buffer */
 //#define DEBUG_OFF             /* disable debugging code */
-#define DEBUG_WEBKIT        /* debug using webkit log */
 #undef WINDOWS_ROUNDTRIP        /* enable code to measure rounttrip time of kernel run using windows API */
 #undef PREALLOCATE_IN_JS_HEAP  /* allocate buffers in the JS heap and use CL_MEM_USE_HOST_POINTER */
 #undef SUPPORT_MAPPING_ARRAYS  /* allow dense arrays to be mapped to JavaScript */

@@ -29,7 +29,6 @@
 #define OCLUtil_h
 
 #include "OCLconfig.h"
-#include "OCLdebug.h"
 #include "opencl_compat.h"
 #include <string>
 #include <windows.h>

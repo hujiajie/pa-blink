@@ -33,35 +33,52 @@
 #define RT_ERROR_NOT_AVAILABLE 0x80000002
 #define RT_ERROR_OUT_OF_MEMORY 0x80000003
 
-/*
 #ifndef DEBUG_OFF
+#include "core/platform/Logging.h"
+#include <sstream>
 
-#ifdef DEBUG_WEBKIT
-#include "Logging.h"
-#define DEBUG_LOG_ERROR( src, code) LOG(RiverTrail, "DEBUG @ %s:%d in %s ERROR CODE: %d\n", __FILE__,__LINE__,src, code)
-#define DEBUG_LOG_STATUS( src, status) LOG(RiverTrail, "DEBUG @ %s:%d in %s LOG_STATUS: sorry to ignore status output here\n", __FILE__,__LINE__,src)
-#define DEBUG_LOG_CLERROR( text) LOG(RiverTrail, "DEBUG @ [OPENCLRUNTIME] STATUS: %s\n", text)
-#define DEBUG_LOG_CREATE( src, ptr) LOG(RiverTrail, "DEBUG @ %s:%d CREATION %s at %p\n", __FILE__,__LINE__,src, ptr)
-#define DEBUG_LOG_DESTROY( src, ptr) LOG(RiverTrail, "DEBUG @ %s:%d DESTRUCTION %s at %p\n", __FILE__,__LINE__,src, ptr)
+#define DEBUG_LOG_ERROR( src, code)                                                              \
+{                                                                                                \
+    std::stringstream debug;                                                                     \
+    debug << "DEBUG @ " << __FILE__ << ":" << __LINE__ << " in " src << " ERROR CODE: " << code; \
+    LOG(RiverTrail, debug.str().c_str());                                                        \
+}
 
-#else /* DEBUG_WEBKIT */
+#define DEBUG_LOG_STATUS( src, status)                                                         \
+{                                                                                              \
+    std::stringstream debug;                                                                   \
+    debug << "DEBUG @ " << __FILE__ << ":" << __LINE__ << " in " src << " STATUS: " << status; \
+    LOG(RiverTrail, debug.str().c_str());                                                      \
+}
 
-#include <iostream>
-#define DEBUG_LOG_ERROR( src, code) std::cout << "DEBUG @ " << __FILE__ << ":" << __LINE__ << " in " src << " ERROR CODE: " << code << "\n"
-#define DEBUG_LOG_STATUS( src, status) std::cout << "DEBUG @ " << __FILE__ << ":" << __LINE__ << " in " src << " STATUS: " << status << "\n"
-#define DEBUG_LOG_CLERROR( text) std::cout << "DEBUG @ [OPENCLRUNTIME] STATUS: " << text << "\n"
-#define DEBUG_LOG_CREATE( src, ptr) std::cout << "DEBUG @ " __FILE__ << ":" << __LINE__ << " CREATION " << src << " at " << ptr << "\n"
-#define DEBUG_LOG_DESTROY( src, ptr) std::cout << "DEBUG @ " __FILE__ << ":" << __LINE__ << " DESTRUCTION " << src << " at " << ptr << "\n"
-/*
-#endif /* DEBUG_WEBKIT */
-/*
-#else /* DEBUG_OFF */
-/*
+#define DEBUG_LOG_CLERROR( text)                         \
+{                                                        \
+    std::stringstream debug;                             \
+    debug << "DEBUG @ [OPENCLRUNTIME] STATUS: " << text; \
+    LOG(RiverTrail, debug.str().c_str());                \
+}
+
+#define DEBUG_LOG_CREATE( src, ptr)                                                          \
+{                                                                                            \
+    std::stringstream debug;                                                                 \
+    debug << "DEBUG @ " __FILE__ << ":" << __LINE__ << " CREATION " << src << " at " << ptr; \
+    LOG(RiverTrail, debug.str().c_str());                                                    \
+}
+
+#define DEBUG_LOG_DESTROY( src, ptr)                                                            \
+{                                                                                               \
+    std::stringstream debug;                                                                    \
+    debug << "DEBUG @ " __FILE__ << ":" << __LINE__ << " DESTRUCTION " << src << " at " << ptr; \
+    LOG(RiverTrail, debug.str().c_str());                                                       \
+}
+
+#else // DEBUG_OFF
+
 #define DEBUG_LOG_ERROR( src, code) 
 #define DEBUG_LOG_STATUS( src, status) 
 #define DEBUG_LOG_CLERROR( text) 
 #define DEBUG_LOG_CREATE( src, ptr) 
 #define DEBUG_LOG_DESTROY( src, ptr) 
 
-#endif /* DEBUG_OFF */
-#endif /* OCLdebug_h */
+#endif // DEBUG_OFF
+#endif // OCLdebug_h
