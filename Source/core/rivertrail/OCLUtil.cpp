@@ -33,12 +33,12 @@
 
 namespace WebCore {
 
-#define checkFunction(f)                                        \
-    if (!(f)) {                                                 \
-        FreeLibrary(openclModule);                              \
-        openclModule = 0;                                       \
+#define checkFunction(f)                                         \
+    if (!(f)) {                                                  \
+        FreeLibrary(openclModule);                               \
+        openclModule = 0;                                        \
         DEBUG_LOG_STATUS("Init", "Get OpenCL function failed."); \
-        return;                                                 \
+        return;                                                  \
     }
 
 // Define OpenCL function entries
