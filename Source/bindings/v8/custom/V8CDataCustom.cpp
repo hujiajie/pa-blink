@@ -28,10 +28,6 @@
 #include "config.h"
 #include "V8CData.h"
 
-#include "core/rivertrail/CContext.h"
-#include "core/rivertrail/CData.h"
-#include "bindings/v8/V8Binding.h"
-#include "bindings/v8/V8DOMWrapper.h"
 #include "V8CContext.h"
 #include "V8Float32Array.h"
 #include "V8Float64Array.h"
@@ -42,6 +38,10 @@
 #include "V8Uint32Array.h"
 #include "V8Uint8Array.h"
 #include "V8Uint8ClampedArray.h"
+#include "bindings/v8/V8Binding.h"
+#include "bindings/v8/V8DOMWrapper.h"
+#include "core/rivertrail/CContext.h"
+#include "core/rivertrail/CData.h"
 #include <wtf/Float32Array.h>
 #include <wtf/Float64Array.h>
 #include <wtf/Int16Array.h>

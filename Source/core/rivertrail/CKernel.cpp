@@ -30,7 +30,6 @@
 #include "core/rivertrail/CKernel.h"
 
 #include "core/rivertrail/CContext.h"
-#include "core/rivertrail/OCLdebug.h"
 #include <limits>
 
 #ifdef WINDOWS_ROUNDTRIP

@@ -28,12 +28,12 @@
 #include "config.h"
 #include "V8CKernel.h"
 
+#include "V8CContext.h"
+#include "V8CData.h"
+#include "bindings/v8/V8Binding.h"
 #include "core/rivertrail/CContext.h"
 #include "core/rivertrail/CData.h"
 #include "core/rivertrail/CKernel.h"
-#include "bindings/v8/V8Binding.h"
-#include "V8CContext.h"
-#include "V8CData.h"
 #include <limits>
 
 namespace WebCore {

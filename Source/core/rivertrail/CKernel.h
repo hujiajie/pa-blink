@@ -28,9 +28,11 @@
 #ifndef CKernel_h
 #define CKernel_h
 
-#include "CData.h"
-#include "OCLconfig.h"
-#include "opencl_compat.h"
+#include "core/rivertrail/CData.h"
+#include "core/rivertrail/OCLUtil.h"
+#include "core/rivertrail/OCLconfig.h"
+#include "core/rivertrail/OCLdebug.h"
+#include "core/rivertrail/opencl_compat.h"
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>

@@ -28,8 +28,10 @@
 #ifndef CData_h
 #define CData_h
 
-#include "OCLconfig.h"
-#include "opencl_compat.h"
+#include "core/rivertrail/OCLUtil.h"
+#include "core/rivertrail/OCLconfig.h"
+#include "core/rivertrail/OCLdebug.h"
+#include "core/rivertrail/opencl_compat.h"
 #include <wtf/Float32Array.h>
 #include <wtf/Float64Array.h>
 #include <wtf/Int16Array.h>

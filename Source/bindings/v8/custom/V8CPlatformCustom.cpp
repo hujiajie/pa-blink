@@ -28,9 +28,9 @@
 #include "config.h"
 #include "V8CPlatform.h"
 
-#include "core/rivertrail/CPlatform.h"
-#include "bindings/v8/V8Binding.h"
 #include "V8CContext.h"
+#include "bindings/v8/V8Binding.h"
+#include "core/rivertrail/CPlatform.h"
 
 namespace WebCore {
 

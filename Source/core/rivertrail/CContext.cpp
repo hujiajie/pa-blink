@@ -29,13 +29,12 @@
 
 #include "core/rivertrail/CContext.h"
 
-#include "core/html/canvas/CanvasRenderingContext2D.h"
 #include "core/html/ImageData.h"
+#include "core/html/canvas/CanvasRenderingContext2D.h"
 #include "core/platform/graphics/IntSize.h"
 #include "core/rivertrail/CData.h"
 #include "core/rivertrail/CKernel.h"
 #include "core/rivertrail/CPlatform.h"
-#include "core/rivertrail/OCLdebug.h"
 #include <stdlib.h>
 #include <wtf/ArrayBuffer.h>
 #include <wtf/Float32Array.h>

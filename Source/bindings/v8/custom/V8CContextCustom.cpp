@@ -28,13 +28,6 @@
 #include "config.h"
 #include "V8CContext.h"
 
-#include "core/html/canvas/CanvasRenderingContext2D.h"
-#include "core/rivertrail/CContext.h"
-#include "core/rivertrail/CData.h"
-#include "core/rivertrail/CKernel.h"
-#include "core/rivertrail/CPlatform.h"
-#include "bindings/v8/V8Binding.h"
-#include "bindings/v8/V8DOMWrapper.h"
 #include "V8CanvasRenderingContext2D.h"
 #include "V8CData.h"
 #include "V8CKernel.h"
@@ -48,6 +41,13 @@
 #include "V8Uint32Array.h"
 #include "V8Uint8Array.h"
 #include "V8Uint8ClampedArray.h"
+#include "bindings/v8/V8Binding.h"
+#include "bindings/v8/V8DOMWrapper.h"
+#include "core/html/canvas/CanvasRenderingContext2D.h"
+#include "core/rivertrail/CContext.h"
+#include "core/rivertrail/CData.h"
+#include "core/rivertrail/CKernel.h"
+#include "core/rivertrail/CPlatform.h"
 #include <wtf/Float32Array.h>
 #include <wtf/Float64Array.h>
 #include <wtf/Int16Array.h>
