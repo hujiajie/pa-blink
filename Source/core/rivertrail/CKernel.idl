@@ -27,7 +27,6 @@
 
 [
     CustomConstructor,
-    ImplementationLacksVTable
 ] interface CKernel {
     [Custom] boolean setArgument(unsigned long number, CData argument);
     [Custom] boolean setScalarArgument(unsigned long number, any argument, boolean isInteger, boolean highPrecision);

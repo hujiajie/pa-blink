@@ -27,7 +27,6 @@
 
 [
     CustomConstructor,
-    ImplementationLacksVTable
 ] interface CData {
     [Custom] ArrayBufferView getValue();
     [Custom] void writeTo(ArrayBufferView dest);

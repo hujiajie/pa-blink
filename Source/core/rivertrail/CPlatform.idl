@@ -26,7 +26,6 @@
  */
 [
     NoInterfaceObject,
-    SkipVTableValidation
 ] interface CPlatform {
     [Custom] CContext createContext();
 

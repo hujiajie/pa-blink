@@ -34,22 +34,26 @@
 
 namespace WebCore {
 
-v8::Handle<v8::Value> V8CInterface::constructorCustom(const v8::Arguments& args)
+void V8CInterface::constructorCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     RefPtr<CInterface> cInterface = CInterface::create();
     V8DOMWrapper::associateObjectWithWrapper(cInterface.release(), &info, args.Holder(), args.GetIsolate(), WrapperConfiguration::Dependent);
-    return args.Holder();;
+    v8SetReturnValue(args, args.Holder());
 }
 
-v8::Handle<v8::Value> V8CInterface::getPlatformMethodCustom(const v8::Arguments& args)
+void V8CInterface::getPlatformMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     CInterface* imp = V8CInterface::toNative(args.Holder());
     RefPtr<CPlatform> cPlatform = imp->getPlatform();
-    if (!cPlatform)
-        return throwError(v8SyntaxError, "Cannot create new CPlatform object.", args.GetIsolate());
-    if (!openclFlag)
-        return throwError(v8SyntaxError, "Cannot call getPlatform when OpenCL is not loaded.", args.GetIsolate());
-    return toV8(cPlatform.get(), v8::Handle<v8::Object>(), args.GetIsolate());
+    if (!cPlatform) {
+        throwError(v8SyntaxError, "Cannot create new CPlatform object.", args.GetIsolate());
+        return;
+    }
+    if (!openclFlag) {
+        throwError(v8SyntaxError, "Cannot call getPlatform when OpenCL is not loaded.", args.GetIsolate());
+        return;
+    }
+    v8SetReturnValue(args, toV8(cPlatform.get(), v8::Handle<v8::Object>(), args.GetIsolate()));
 }
 
 } // namespace WebCore

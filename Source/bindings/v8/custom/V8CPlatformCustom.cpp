@@ -34,24 +34,30 @@
 
 namespace WebCore {
 
-v8::Handle<v8::Value> V8CPlatform::createContextMethodCustom(const v8::Arguments& args)
+void V8CPlatform::createContextMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
-    if (!openclFlag)
-        return throwError(v8SyntaxError, "Cannot call createContext when OpenCL is not loaded.", args.GetIsolate());
+    if (!openclFlag) {
+        throwError(v8SyntaxError, "Cannot call createContext when OpenCL is not loaded.", args.GetIsolate());
+        return;
+    }
     CPlatform* imp = V8CPlatform::toNative(args.Holder());
     RefPtr<CContext> cContext = imp->createContext();
-    if (!cContext)
-        return throwError(v8SyntaxError, "Cannot create new CContext object.", args.GetIsolate());
-    return toV8(cContext.get(), v8::Handle<v8::Object>(), args.GetIsolate());
+    if (!cContext) {
+        throwError(v8SyntaxError, "Cannot create new CContext object.", args.GetIsolate());
+        return;
+    }
+    v8SetReturnValue(args, toV8(cContext.get(), v8::Handle<v8::Object>(), args.GetIsolate()));
 }
 
-v8::Handle<v8::Value> V8CPlatform::numberOfDevicesAttrGetterCustom(v8::Local<v8::String> name, const v8::AccessorInfo& info)
+void V8CPlatform::numberOfDevicesAttrGetterCustom(v8::Local<v8::String> name, const v8::PropertyCallbackInfo<v8::Value>& info)
 {
     CPlatform* imp = V8CPlatform::toNative(info.Holder());
     int number = imp->openclUtil()->numberOfDevices();
-    if (number == -1)
-        return throwError(v8SyntaxError, "Cannot get numberOfDevices.", info.GetIsolate());
-    return v8UnsignedInteger(number, info.GetIsolate());
+    if (number == -1) {
+        throwError(v8SyntaxError, "Cannot get numberOfDevices.", info.GetIsolate());
+        return;
+    }
+    v8SetReturnValue(info, v8UnsignedInteger(number, info.GetIsolate()));
 }
 
 } // namespace WebCore

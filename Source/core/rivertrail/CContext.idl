@@ -27,7 +27,6 @@
 
 [
     CustomConstructor,
-    ImplementationLacksVTable
 ] interface CContext {
     // Functions for generating kernels.
     [Custom] CKernel compileKernel(DOMString source, DOMString kernelName, [Default=NullString] optional DOMString options);
