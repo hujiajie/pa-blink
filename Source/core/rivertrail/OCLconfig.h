@@ -44,6 +44,9 @@
 #undef SUPPORT_MAPPING_ARRAYS  /* allow dense arrays to be mapped to JavaScript */
 #define DIRECT_WRITE        /* support helper function for fast write to canvas */
 
+#define INITIAL_BUILDLOG_SIZE   256                          /* initial size for buildlog */
+#define MAX_BUILDLOG_SIZE       (INITIAL_BUILDLOG_SIZE << 8) /* maxium size of buildlog in bytes */
+
 #define DPO_PREFERENCE_BRANCH "extensions.dpointerface."    /* preference branch to use */
 #define DPO_DEFAULT_PLATFORM_PREFNAME "defaultPlatform"     /* preference name for default platform */
 

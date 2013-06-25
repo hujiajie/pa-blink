@@ -151,7 +151,6 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
     cl_int err_code, err_code2;
     cl_uint numDevices;
     cl_device_id* devices = 0;
-    size_t actual;
     const char* sourceStr,* optionsStr,* kernelNameStr;
     RefPtr<CKernel> ret;
     unsigned result;
@@ -183,19 +182,30 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
         DEBUG_LOG_ERROR("compileKernel", err_code);
         goto FAIL;
     }
-    err_code2 = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, m_buildLogSize, m_buildLog, &actual);
-    if (actual > m_buildLogSize) {
+
+    if (m_buildLogSize == 0) {
         if (m_buildLog)
             free(m_buildLog);
-        m_buildLog = (char*)malloc(actual * sizeof(char));
-        if (!m_buildLog) {
-            DEBUG_LOG_STATUS("compileKernel", "Cannot allocate buildLog");
-            m_buildLogSize = 0;
-            goto DONE;
-        }
-        m_buildLogSize = actual;
-        err_code2 = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, m_buildLogSize, m_buildLog, &actual);
+        m_buildLogSize = INITIAL_BUILDLOG_SIZE;
+        m_buildLog = (char*)malloc(m_buildLogSize * sizeof(char));
     }
+
+    err_code2 = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, m_buildLogSize, 0, 0);
+    while ((err_code2 == CL_INVALID_VALUE) && (m_buildLogSize < MAX_BUILDLOG_SIZE)) {
+        if (m_buildLog) {
+            free(m_buildLog);
+            m_buildLogSize *= 2;
+        }
+        m_buildLog = (char*)malloc(m_buildLogSize * sizeof(char));
+        err_code2 = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, m_buildLogSize, 0, 0);
+    }
+
+    if (!m_buildLog) {
+        DEBUG_LOG_STATUS("compileKernel", "Cannot allocate buildLog");
+        m_buildLogSize = 0;
+        goto DONE;
+    }
+    err_code2 = clGetProgramBuildInfo(program, devices[0], CL_PROGRAM_BUILD_LOG, m_buildLogSize, m_buildLog, 0);
 
     if (err_code2 != CL_SUCCESS) {
         DEBUG_LOG_ERROR("compileKernel", err_code);
