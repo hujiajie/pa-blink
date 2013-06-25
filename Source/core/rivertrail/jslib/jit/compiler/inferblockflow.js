@@ -107,7 +107,7 @@ RiverTrail.InferBlockFlow = function () {
     };
 
     function infer(ast, ins, outs, locals) {
-        // "use strict";
+        "use strict";
 
         if ((ins === undefined)) {
             (ast.type === FUNCTION) || reportBug("you probably wanted to start inference with a function!");

@@ -35,8 +35,30 @@ RiverTrail.Typeinference = function () {
     var stackTrace = [];
 
     var definitions = Narcissus.definitions;
-    eval(definitions.consts);
-    eval(RiverTrail.definitions.consts);
+
+    try {
+        (function hostSupportEvalConstInStrictMode () {
+            eval("const FOOBAR = 0;");
+            function inner() {
+                "use strict";
+                return FOOBAR;
+            }
+            return inner;
+        }())();
+        eval(definitions.consts);
+        eval(RiverTrail.definitions.consts);
+    } catch (e) {
+        if (definitions.consts.indexOf("const ") === 0) {
+            eval(definitions.consts.substring(6));
+        } else {
+            eval(definitions.consts);
+        }
+        if (RiverTrail.definitions.consts.indexOf("const ") === 0) {
+            eval(RiverTrail.definitions.consts.substring(6));
+        } else {
+            eval(RiverTrail.definitions.consts);
+        }
+    }
 
     var inferPAType = RiverTrail.Helper.inferPAType;
     var nameGen = RiverTrail.Helper.nameGen;
@@ -828,7 +850,7 @@ RiverTrail.Typeinference = function () {
 
     TOp.registry[TObject.PARALLELARRAY] = {
         methodCall : function(thisType, name, tEnv, fEnv, ast) {
-            // "use strict";
+            "use strict";
             var type;
             ast.children[1] = drive(ast.children[1], tEnv, fEnv);
             var argTypes = tEnv.accu;
@@ -986,7 +1008,7 @@ RiverTrail.Typeinference = function () {
     // main analysis driver
     //
     function drive(ast, tEnv, fEnv) {
-        // "use strict";
+        "use strict";
 
         var left, right;
 
@@ -1646,7 +1668,7 @@ RiverTrail.Typeinference = function () {
     }
 
     function typeOracle(val) {
-            // "use strict";
+            "use strict";
         var type;
 
         switch (typeof(val)) {

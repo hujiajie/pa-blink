@@ -239,7 +239,7 @@ RiverTrail.InferMem = function () {
     }
 
     function infer(ast, memVars, ins, outs) {
-        // "use strict";
+        "use strict";
 
         switch (ast.type) {
             case SCRIPT:
@@ -318,7 +318,7 @@ RiverTrail.InferMem = function () {
                 var aVar = ast.children[0];
                 var rhs = ast.children[1];
                 var allocationHelper = function (name) {
-                    // "use strict";
+                    "use strict";
                     if(!ast.typeInfo.isScalarType()) {
                         var shape = rhs.typeInfo.getOpenCLShape();
                         var shape_len = shape.length;
