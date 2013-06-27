@@ -28,13 +28,13 @@
 var WINW                = 800;          // drawing canvas width
 var WINH                = 480;          // drawing canvas height
 
-var	NUM_VERTEX_COMPONENTS = 3;			// xyz, xyz, ...
+var NUM_VERTEX_COMPONENTS = 3;          // xyz, xyz, ...
 
 var SAMPLEPERIOD        = 10;           // calculate fps and sim/draw times over this many frames
 var DISPLAYPERIOD       = 400;          // msecs between display updates of fps and sim/draw times
 
-var GLCL_SHARE_MODE     = true;         // shareMode is boolean
-var PHASE_DELTA			= 0.01;			// per cycle change to phase
+var GLCL_SHARE_MODE     = false;        // shareMode is boolean
+var PHASE_DELTA		= 0.01;         // per cycle change to phase
 
 var NO_SIM              = 0;
 var JS_SIM              = 1;
@@ -43,22 +43,22 @@ var RT_SIM              = 3;
 var MAX_SIM             = RT_SIM;
 
 function UserData() {
-	this.nVertices		= null;			// number of vertices
-	this.nFlops			= 0;			// flop estimate per sim cycle
+    this.nVertices	= null;		// number of vertices
+    this.nFlops		= 0;            // flop estimate per sim cycle
 
-	this.initPos		= null;			// initial vertex positions
+    this.initPos	= null;         // initial vertex positions
     this.initNor        = null;         // initial vertex normals (just needed for resetting)
     this.curPos         = null;         // current vertex positions
-    this.curNor			= null;			// current vertex normals
+    this.curNor		= null;         // current vertex normals
 
-   	this.curPosVBO      = null;         // shared buffer between GL and CL
+    this.curPosVBO      = null;         // shared buffer between GL and CL
     this.curNorVBO      = null;         // shared buffer between GL and CL
 
     this.gl             = null;         // handle for GL context
     this.cl             = null;         // handle for CL context
-    this.glLoaded		= false;		// indicates completion of geometry initialization
-    this.clLoaded		= false;		// indicates completion of buffer initialization
-    this.simMode      = NO_SIM;         // toggles between simulation modes
+    this.glLoaded	= false;        // indicates completion of geometry initialization
+    this.clLoaded	= false;        // indicates completion of buffer initialization
+    this.simMode        = NO_SIM;       // toggles between simulation modes
     this.fpsSampler     = null;         // FPS sampler
     this.simSampler     = null;         // Sim time sampler
     this.drawSampler    = null;         // Draw time sampler
