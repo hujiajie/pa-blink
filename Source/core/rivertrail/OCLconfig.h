@@ -37,12 +37,12 @@
 #undef CLPROFILE_ASYNC          /* use event callbacks for profiling */
 #undef OUTOFORDERQUEUE          /* enable out of order execution. Needs to be off on certain platforms. */
 #undef USE_LOCAL_WORKSIZE       /* whether the tile argument is passed down to opencl */
-#define BUILDLOG_MAX 1024   /* size of buildlog buffer */
+#define BUILDLOG_MAX 1024       /* size of buildlog buffer */
 //#define DEBUG_OFF             /* disable debugging code */
 #undef WINDOWS_ROUNDTRIP        /* enable code to measure rounttrip time of kernel run using windows API */
-#undef PREALLOCATE_IN_JS_HEAP  /* allocate buffers in the JS heap and use CL_MEM_USE_HOST_POINTER */
-#undef SUPPORT_MAPPING_ARRAYS  /* allow dense arrays to be mapped to JavaScript */
-#define DIRECT_WRITE        /* support helper function for fast write to canvas */
+#undef PREALLOCATE_IN_JS_HEAP   /* allocate buffers in the JS heap and use CL_MEM_USE_HOST_POINTER */
+#undef SUPPORT_MAPPING_ARRAYS   /* allow dense arrays to be mapped to JavaScript */
+#define DIRECT_WRITE            /* support helper function for fast write to canvas */
 
 #define INITIAL_BUILDLOG_SIZE   256                          /* initial size for buildlog */
 #define MAX_BUILDLOG_SIZE       (INITIAL_BUILDLOG_SIZE << 8) /* maxium size of buildlog in bytes */
