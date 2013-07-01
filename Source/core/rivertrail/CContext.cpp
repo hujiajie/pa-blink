@@ -167,8 +167,9 @@ PassRefPtr<CKernel> CContext::compileKernel(const String& source, const String& 
     CString optionsCString = options.utf8();
     optionsStr = optionsCString.data();
     err_code = clBuildProgram(program, 0, 0, optionsStr, 0, 0);
-    if (err_code != CL_SUCCESS)
+    if (err_code != CL_SUCCESS) {
         DEBUG_LOG_ERROR("compileKernel", err_code);
+    }
 
     err_code2 = clGetProgramInfo(program, CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint), &numDevices, 0);
     if (err_code2 != CL_SUCCESS) {
