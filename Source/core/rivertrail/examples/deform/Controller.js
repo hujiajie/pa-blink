@@ -130,8 +130,11 @@ function ShowFLOPS() {
     if(userData.simSampler.ms > 0)
     	flops = (userData.nFlops * 1000) / (userData.simSampler.ms);
 
-    if(userData.simMode === NO_SIM || userData.simMode === RT_SIM)
-        flops = 0;
+    if(userData.simMode === NO_SIM || userData.simMode === CL_SIM || userData.simMode === RT_SIM) {
+        document.getElementById("f1").firstChild.nodeValue = "TEXT:";
+        document.getElementById("f2").firstChild.nodeValue = "XX";
+        return;
+    }
 
     if(flops > 1000 * 1000 * 1000) {
         flops = Math.round(flops / (1000 * 1000 * 1000));
