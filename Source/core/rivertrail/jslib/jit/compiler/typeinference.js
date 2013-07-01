@@ -36,18 +36,23 @@ RiverTrail.Typeinference = function () {
 
     var definitions = Narcissus.definitions;
 
-    try {
-        (function hostSupportEvalConstInStrictMode () {
-            eval("const FOOBAR = 0;");
-            function inner() {
-                "use strict";
-                return FOOBAR;
-            }
-            return inner;
-        }())();
+    function allowEvaluatedConstInStrictMode () {
+        eval("const FOOBAR = 0;");
+        var f = function () {
+            "use strict";
+            return FOOBAR;
+        };
+        try {
+            f();
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    if (allowEvaluatedConstInStrictMode()) {
         eval(definitions.consts);
         eval(RiverTrail.definitions.consts);
-    } catch (e) {
+    } else {
         if (definitions.consts.indexOf("const ") === 0) {
             eval(definitions.consts.substring(6));
         } else {
