@@ -42,6 +42,11 @@ var CL_SIM              = 2;
 var RT_SIM              = 3;
 var MAX_SIM             = RT_SIM;
 
+var intervalId1 = null;
+var intervalId2 = null;
+var intervalId3 = null;
+var intervalId4 = null;
+
 function UserData() {
     this.nVertices	= null;		// number of vertices
     this.nFlops		= 0;            // flop estimate per sim cycle
@@ -78,11 +83,27 @@ var userData = null;
 function RANDM1TO1() { return Math.random() * 2 - 1; }
 function RAND0TO1() { return Math.random(); }
 
-function onLoad() {
-    userData = new UserData();
+function ResetSamplers(userData) {
+    if(intervalId1) clearInterval(intervalId1);
+    if(intervalId2) clearInterval(intervalId2);
+    if(intervalId3) clearInterval(intervalId3);
+    if(intervalId4) clearInterval(intervalId4);
+    document.getElementById("fps").firstChild.nodeValue = "XX";
+    document.getElementById("f1").firstChild.nodeValue = "TEXT:";
+    document.getElementById("f2").firstChild.nodeValue = "XX";
+    document.getElementById("sms").firstChild.nodeValue = "XX";
+    document.getElementById("dms").firstChild.nodeValue = "XX";
     userData.fpsSampler = new FpsSampler(SAMPLEPERIOD, "fps");
     userData.simSampler = new MSecSampler(SAMPLEPERIOD, "sms");
     userData.drawSampler = new MSecSampler(SAMPLEPERIOD, "dms");
+    intervalId1 = setInterval( function() { userData.fpsSampler.display(); }, DISPLAYPERIOD);
+    intervalId2 = setInterval( function() { userData.simSampler.display(); }, DISPLAYPERIOD);
+    intervalId3 = setInterval( function() { userData.drawSampler.display(); }, DISPLAYPERIOD);
+    intervalId4 = setInterval( ShowFLOPS, 2*DISPLAYPERIOD);
+}
+
+function onLoad() {
+    userData = new UserData();
 
     userData.gl  = InitGL();
     userData.cl  = InitCL();
@@ -100,10 +121,7 @@ function onLoad() {
     SetSimButton();
 
     setInterval( MainLoop, 0 );
-    setInterval( function() { userData.fpsSampler.display(); }, DISPLAYPERIOD);
-    setInterval( function() { userData.simSampler.display(); }, DISPLAYPERIOD);
-    setInterval( function() { userData.drawSampler.display(); }, DISPLAYPERIOD);
-    setInterval( ShowFLOPS, 2*DISPLAYPERIOD);
+    ResetSamplers(userData);
 }
 
 function ShowFLOPS() {
@@ -171,6 +189,7 @@ function ToggleSim() {
     if(userData.simMode > MAX_SIM)
         userData.simMode = NO_SIM;
 	SetSimButton();
+    ResetSamplers(userData);
 }
 
 function SetSimButton() {
