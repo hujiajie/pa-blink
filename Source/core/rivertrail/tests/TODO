@@ -1,0 +1,4 @@
+* Merge the tests from Firefox Nightly
+* Merge the tests from rtctest
+* Test the APIs defined in the IDL files
+* Merge the tests from test_for_rivertrail.html

@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RiverTrail API Tests</title>
+
+    <script type="application/javascript" src="../jslib/ParallelArray.js"></script>
+    <script type="application/javascript" src="../jslib/jit/narcissus/jsdefs.js"></script>
+    <script type="application/javascript" src="../jslib/jit/narcissus/jslex.js"></script>
+    <script type="application/javascript" src="../jslib/jit/narcissus/jsparse.js"></script>
+    <script type="application/javascript" src="../jslib/jit/narcissus/jsdecomp.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/definitions.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/helper.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/driver.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/dotviz.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/typeinference.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/rangeanalysis.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/inferblockflow.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/infermem.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/genOCL.js"></script>
+    <script type="application/javascript" src="../jslib/jit/compiler/runOCL.js"></script>
+
+    <script type="application/javascript" src="RTTest.js"></script>
+  </head>
+  <body style="min-width:80em">
+    <h1 style="text-align:center">RiverTrail API Tests</h1>
+    <hr>
+    <table>
+      <tr style="font-size:40px">
+        <td><div style="width:5em;background-color:#00a000;border:solid 5px #008000;text-align:center;color:#ffffff;font-weight:bold;cursor:pointer" onmouseover="this.style.backgroundColor='#00e000';" onmouseout="this.style.backgroundColor='#00a000';" onclick="runAll();">Run All</div></td>
+        <td style="width:1em"></td>
+        <td style="color:#00c000">Passed :</td>
+        <td style="width:0.5em"></td>
+        <td id="summary1" style="color:#00c000">--</td>
+        <td style="width:1em"></td>
+        <td style="color:#c00000">Failed :</td>
+        <td style="width:0.5em"></td>
+        <td id="summary2" style="color:#c00000">--</td>
+        <td style="width:1em"></td>
+        <td style="color:#c0c000">Unsupported :</td>
+        <td style="width:0.5em"></td>
+        <td id="summary3" style="color:#c0c000">--</td>
+      </tr>
+    </table>
+    <script>
+      function toggleVerbose(id)
+      {
+        var maxHeight = 200;
+        var step = 10;
+        var speed = 20;
+
+        var i = parseInt(id.replace(/group_/g, '').replace(/_item_[0-9]*_toggleVerbose/g, ''));
+        var j = parseInt(id.replace(/group_[0-9]*_item_/g, '').replace(/_toggleVerbose/g, '')) + 1;
+        var color = (j % 2 == 1) ? '#c0c0c0' : '#f0f0f0';
+        var btn = document.getElementById(id);
+        var div = document.getElementById('group_' + i + '_item_' + (j - 1) + '_verbose');
+
+        if (btn.busy == true) {
+          return;
+        }
+        btn.busy = true;
+
+        if (btn.innerHTML == 'Expand') {
+          var animate = function () {
+            var h = parseInt(div.style.height);
+            h += step;
+            div.style.height = h + 'px';
+            if (h == step) {
+              div.style.borderBottom = 'solid 5px ' + color;
+            }
+            if (h < maxHeight) {
+              setTimeout(animate, speed);
+            } else {
+              btn.innerHTML = 'Collapse';
+              btn.busy = false;
+            }
+          };
+          animate();
+        } else {
+          var animate = function () {
+            var h = parseInt(div.style.height);
+            h -= step;
+            if (h == 0) {
+              div.style.borderBottom = 'solid 0px ' + color;
+            }
+            div.style.height = h + 'px';
+            if (h > 0) {
+              setTimeout(animate, speed);
+            } else {
+              btn.innerHTML = 'Expand';
+              btn.busy = false;
+            }
+          };
+          animate();
+        }
+      }
+
+      function run(id)
+      {
+        var i = parseInt(id.replace(/group_/g, '').replace(/_item_[0-9]*_run/g, ''));
+        var j = parseInt(id.replace(/group_[0-9]*_item_/g, '').replace(/_run/g, '')) + 1;
+
+        var group = tests[i];
+        var item = group[j];
+
+        var verbose = '<b>Code :</b>';
+        verbose += '<pre>' + item[1] + '</pre>';
+        try {
+          var result = item[1].apply();
+          verbose += '<b>Result :</b>';
+          verbose += '<pre>' + result + '</pre>';
+          if (result == item[2]) {
+            document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#00c000;font-weight:bold">Passed</div>';
+          } else if (item[3] !== undefined && result == item[3]) {
+            document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#c0c000;font-weight:bold">Unsupported</div>';
+          } else {
+            document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#c00000;font-weight:bold">Failed</div>';
+          }
+        } catch (e) {
+          verbose += '<b>Error :</b>';
+          verbose += '<pre>' + e + '</pre>';
+          document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#c00000;font-weight:bold">Failed</div>';
+        }
+        document.getElementById('group_' + i + '_item_' + (j - 1) + '_verbose').innerHTML = verbose;
+      }
+
+      function runAll()
+      {
+        var passed = 0;
+        var failed = 0;
+        var unsupported = 0;
+
+        for (var i = 0; i < tests.length; i++) {
+          var group = tests[i];
+          for (var j = 1; j < group.length; j++) {
+            run('group_' + i + '_item_' + (j - 1) + '_run');
+            var status = document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML;
+            if (status.indexOf('Passed') >= 0) {
+              passed++;
+            } else if (status.indexOf('Failed') >= 0) {
+              failed++;
+            } else if (status.indexOf('Unsupported') >= 0) {
+              unsupported++;
+            }
+          }
+        }
+
+        document.getElementById('summary1').innerHTML = passed;
+        document.getElementById('summary2').innerHTML = failed;
+        document.getElementById('summary3').innerHTML = unsupported;
+      }
+
+      for (var i = 0; i < tests.length; i++) {
+        if (i > 0) {
+          document.body.innerHTML += '<div style="height:10px"/>';
+        }
+
+        var group = tests[i];
+
+        var header = '<div style="background-color:#7f7fff;padding:5px;text-align:center;color:#ffffff;font-weight:bold">' + group[0] + '</div>';
+        document.body.innerHTML += header;
+
+        for (var j = 1; j < group.length; j++) {
+          var item = group[j];
+
+          var color = (j % 2 == 1) ? '#c0c0c0' : '#f0f0f0';
+
+          var test = '<table style="width:100%" cellspacing="0px" cellpadding="5px">';
+          test += '<tr style="background-color:' + color + '">';
+          test += '<td style="width:5em"><div id="group_' + i + '_item_' + (j - 1) + '_toggleVerbose" style="background-color:#00a000;border:solid 3px #008000;text-align:center;color:#ffffff;font-weight:bold;cursor:pointer" onmouseover="this.style.backgroundColor=\'#00e000\';" onmouseout="this.style.backgroundColor=\'#00a000\';" onclick="toggleVerbose(this.id);">Expand</div></td>';
+          test += '<td style="width:5em"><div id="group_' + i + '_item_' + (j - 1) + '_run" style="background-color:#00a000;border:solid 3px #008000;text-align:center;color:#ffffff;font-weight:bold;cursor:pointer" onmouseover="this.style.backgroundColor=\'#00e000\';" onmouseout="this.style.backgroundColor=\'#00a000\';" onclick="run(this.id);">Run</div></td>';
+          test += '<td>' + item[0] + '</td>';
+          test += '<td id="group_' + i + '_item_' + (j - 1) + '_status" style="width:5em"></td>';
+          test += '</tr>';
+          test += '</table>';
+          document.body.innerHTML += test;
+
+          var verbose = '<div id="group_' + i + '_item_' + (j - 1) + '_verbose" style="height:0px;border-left:solid 5px ' + color + ';border-right:solid 5px ' + color + ';border-bottom:solid 0px ' + color + ';overflow:auto">';
+          verbose += '<b>Code :</b>';
+          verbose += '<pre>' + item[1] + '</pre>';
+          verbose += '</div>';
+          document.body.innerHTML += verbose;
+
+          document.getElementById('group_' + i + '_item_' + (j - 1) + '_toggleVerbose').busy = false;
+        }
+      }
+    </script>
+  </body>
+</html>
