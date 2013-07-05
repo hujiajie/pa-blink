@@ -27,7 +27,7 @@
     <hr>
     <table>
       <tr style="font-size:40px">
-        <td><div style="width:5em;background-color:#00a000;border:solid 5px #008000;text-align:center;color:#ffffff;font-weight:bold;cursor:pointer" onmouseover="this.style.backgroundColor='#00e000';" onmouseout="this.style.backgroundColor='#00a000';" onclick="runAll();">Run All</div></td>
+        <td><div id="runAll" style="width:5em;background-color:#00a000;border:solid 5px #008000;text-align:center;color:#ffffff;font-weight:bold;cursor:pointer" onmouseover="this.style.backgroundColor='#00e000';" onmouseout="this.style.backgroundColor='#00a000';" onclick="runAll();">Run All</div></td>
         <td style="width:1em"></td>
         <td style="color:#00c000">Passed :</td>
         <td style="width:0.5em"></td>
@@ -126,28 +126,62 @@
 
       function runAll()
       {
+        var btn = document.getElementById('runAll');
+
+        if (btn.busy == true) {
+          return;
+        }
+        btn.busy = true;
+
+        document.getElementById('summary1').innerHTML = '--';
+        document.getElementById('summary2').innerHTML = '--';
+        document.getElementById('summary3').innerHTML = '--';
+        for (var i = 0; i < tests.length; i++) {
+          var group = tests[i];
+          for (var j = 1; j < group.length; j++) {
+            document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '';
+          }
+        }
+
         var passed = 0;
         var failed = 0;
         var unsupported = 0;
 
-        for (var i = 0; i < tests.length; i++) {
-          var group = tests[i];
-          for (var j = 1; j < group.length; j++) {
-            run('group_' + i + '_item_' + (j - 1) + '_run');
-            var status = document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML;
-            if (status.indexOf('Passed') >= 0) {
-              passed++;
-            } else if (status.indexOf('Failed') >= 0) {
-              failed++;
-            } else if (status.indexOf('Unsupported') >= 0) {
-              unsupported++;
+        function runOne(i, j)
+        {
+          run('group_' + i + '_item_' + (j - 1) + '_run');
+
+          var status = document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML;
+          if (status.indexOf('Passed') >= 0) {
+            passed++;
+            document.getElementById('summary1').innerHTML = passed;
+          } else if (status.indexOf('Failed') >= 0) {
+            failed++;
+            document.getElementById('summary2').innerHTML = failed;
+          } else if (status.indexOf('Unsupported') >= 0) {
+            unsupported++;
+            document.getElementById('summary3').innerHTML = unsupported;
+          }
+
+          if (j < tests[i].length - 1) {
+            j++;
+            setTimeout(function () { runOne(i, j); }, 10);
+            return;
+          } else {
+            while (i < tests.length - 1) {
+              i++;
+              if (tests[i].length > 1) {
+                j = 1;
+                setTimeout(function () { runOne(i, j); }, 10);
+                return;
+              }
             }
+            btn.busy = false;
+            return;
           }
         }
 
-        document.getElementById('summary1').innerHTML = passed;
-        document.getElementById('summary2').innerHTML = failed;
-        document.getElementById('summary3').innerHTML = unsupported;
+        setTimeout(function () { runOne(0, 1); }, 10);
       }
 
       for (var i = 0; i < tests.length; i++) {
@@ -180,8 +214,6 @@
           verbose += '<pre>' + item[1] + '</pre>';
           verbose += '</div>';
           document.body.innerHTML += verbose;
-
-          document.getElementById('group_' + i + '_item_' + (j - 1) + '_toggleVerbose').busy = false;
         }
       }
     </script>
