@@ -79,9 +79,7 @@ function RT_dot4(a, b)
 function RT_vload4(index, ar, NUM_VERTEX_COMPONENTS)
 {
 	var i = index * NUM_VERTEX_COMPONENTS;
-	// FIXME: '+ 0' ensures the elements of the result array have the same precision.
-	// It's a workaround due to a bug in jslib.
-	return [ ar[i] + 0, ar[i+1] + 0, ar[i+2] + 0, 1.0 ];
+	return [ ar[i], ar[i+1], ar[i+2], 1.0 ];
 }
 
 function RT_clamp(x, minval, maxval)
