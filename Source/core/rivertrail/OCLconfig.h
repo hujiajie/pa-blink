@@ -28,8 +28,6 @@
 #ifndef OCLconfig_h
 #define OCLconfig_h
 
-#include "config.h"
-
 #define INTERFACE_VERSION           2   /* running version number of the interface */
 #define NUMBER_OF_ARTIFICIAL_ARGS   1   /* number of internal kernel arguments used by runtime */
 
