@@ -49,10 +49,12 @@ void V8CInterface::getPlatformMethodCustom(const v8::FunctionCallbackInfo<v8::Va
         throwError(v8SyntaxError, "Cannot create new CPlatform object.", args.GetIsolate());
         return;
     }
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call getPlatform when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     v8SetReturnValue(args, toV8(cPlatform.get(), v8::Handle<v8::Object>(), args.GetIsolate()));
 }
 

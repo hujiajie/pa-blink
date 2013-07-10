@@ -36,10 +36,12 @@ namespace WebCore {
 
 void V8CPlatform::createContextMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call createContext when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CPlatform* imp = V8CPlatform::toNative(args.Holder());
     RefPtr<CContext> cContext = imp->createContext();
     if (!cContext) {

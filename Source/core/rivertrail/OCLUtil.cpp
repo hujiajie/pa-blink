@@ -33,6 +33,7 @@
 
 namespace WebCore {
 
+#if defined(WTF_OS_WINDOWS)
 #define checkFunction(f)                                         \
     if (!(f)) {                                                  \
         FreeLibrary(openclModule);                               \
@@ -46,6 +47,7 @@ bool openclFlag = false;
 #define DEFINE_FUNCTION_ENTRY(name) name##Function __##name = 0;
 OPENCL_FUNCTION_LIST(DEFINE_FUNCTION_ENTRY)
 #undef DEFINE_FUNCTION_ENTRY
+#endif // WTF_OS_WINDOWS
 
 void CL_CALLBACK reportCLError(const char* err_info, const void* private_info, size_t cb, void* user_data)
 {
@@ -67,21 +69,22 @@ void OCLUtil::Init() {
 
   createContextSuccess = false;
   createCommandQueueSuccess = false;
-  openclModule = 0;
 
+#if defined(WTF_OS_WINDOWS)
+  openclModule = 0;
   // Load OpenCL library
   openclModule = LoadLibrary(TEXT("OpenCL.dll"));
   if (!openclModule) {
       DEBUG_LOG_STATUS("Init", "Load OpenCL.dll failed.");
       return;
   }
-
   // Initialize function entries
 #define INITIALIZE_FUNCTION_ENTRY(name) checkFunction(__##name = (name##Function) GetProcAddress(openclModule, #name));
   OPENCL_FUNCTION_LIST(INITIALIZE_FUNCTION_ENTRY)
 #undef INITIALIZE_FUNCTION_ENTRY
-
   openclFlag = true;
+#endif // WTF_OS_WINDOWS
+
   // Platform
   error = clGetPlatformIDs( 0, 0, &nplatforms);
   if (error != CL_SUCCESS) {
@@ -247,9 +250,10 @@ void OCLUtil::Init() {
 
 void OCLUtil::Finalize() {
     cl_int error;
-
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag)
         return;
+#endif // WTF_OS_WINDOWS
     if (createCommandQueueSuccess) {
         error = clReleaseCommandQueue(queue_);
         if (error != CL_SUCCESS) {
@@ -266,9 +270,11 @@ void OCLUtil::Finalize() {
             createContextSuccess = false;
         }
     }
+#if defined(WTF_OS_WINDOWS)
     FreeLibrary(openclModule);
     openclModule = 0;
     openclFlag = false;
+#endif // WTF_OS_WINDOWS
 }
 
 int OCLUtil::getPlatformPropertyHelper(cl_platform_info param, char*& out) {

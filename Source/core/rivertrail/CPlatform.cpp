@@ -25,7 +25,6 @@
  *
  */
 
-#pragma once
 #include "config.h"
 
 #include "core/rivertrail/CPlatform.h"

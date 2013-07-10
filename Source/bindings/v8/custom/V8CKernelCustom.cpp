@@ -61,10 +61,12 @@ void V8CKernel::setArgumentMethodCustom(const v8::FunctionCallbackInfo<v8::Value
         throwError(v8SyntaxError, "Cannot set argument because of invalid number of arguments.", args.GetIsolate());
         return;
     }
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call setArgument when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH_VOID(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     V8TRYCATCH_VOID(CData*, argument, V8CData::HasInstance(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8CData::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 1, DefaultIsUndefined))) : 0);
@@ -77,10 +79,12 @@ void V8CKernel::setScalarArgumentMethodCustom(const v8::FunctionCallbackInfo<v8:
         throwError(v8SyntaxError, "Cannot set scalar because of invalid number of arguments", args.GetIsolate());
         return;
     }
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call setScalarArgument when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH_VOID(unsigned, number, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
@@ -120,10 +124,12 @@ void V8CKernel::runMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
         throwError(v8SyntaxError, "Cannot run because of invalid number of arguments.", args.GetIsolate());
         return;
     }
-	if (!openclFlag) {
+#if defined(WTF_OS_WINDOWS)
+    if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call run when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CKernel* imp = V8CKernel::toNative(args.Holder());
     V8TRYCATCH_VOID(unsigned, rank, toUInt32(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined)));
     
@@ -153,10 +159,12 @@ void V8CKernel::runMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 
 void V8CKernel::numberOfArgsAttrGetterCustom(v8::Local<v8::String> name, const v8::PropertyCallbackInfo<v8::Value>& info)
 {
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot get numberOfArgs when OpenCL is not loaded.", info.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CKernel* imp = V8CKernel::toNative(info.Holder());
     unsigned long number = imp->numberOfArgs();
     if (number == std::numeric_limits<unsigned long>::max()) {

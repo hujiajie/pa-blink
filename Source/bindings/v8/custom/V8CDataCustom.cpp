@@ -74,10 +74,12 @@ void V8CData::constructorCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 
 void V8CData::getValueMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call getValue when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CData* imp = V8CData::toNative(args.Holder());
     switch (imp->getType()) {
     case ArrayBufferView::TypeInt8: {
@@ -174,10 +176,12 @@ void V8CData::writeToMethodCustom(const v8::FunctionCallbackInfo<v8::Value>& arg
         throwError(v8SyntaxError, "Cannot write because of invalid number of arguments.", args.GetIsolate());
         return;
     }
+#if defined(WTF_OS_WINDOWS)
     if (!openclFlag) {
         throwError(v8SyntaxError, "Cannot call writeTo when OpenCL is not loaded.", args.GetIsolate());
         return;
     }
+#endif // WTF_OS_WINDOWS
     CData* imp = V8CData::toNative(args.Holder());
     if (V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate()))) {
         V8TRYCATCH_VOID(Uint8ClampedArray*, dest, V8Uint8ClampedArray::HasInstance(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined), args.GetIsolate(), worldType(args.GetIsolate())) ? V8Uint8ClampedArray::toNative(v8::Handle<v8::Object>::Cast(MAYBE_MISSING_PARAMETER(args, 0, DefaultIsUndefined))) : 0);

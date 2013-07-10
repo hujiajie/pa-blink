@@ -32,6 +32,7 @@
 #define CL_CALLBACK
 #endif
 
+#if defined(WTF_OS_WINDOWS)
 /* Wrap OpenCL functions */
 /* Platform API */
 typedef CL_API_ENTRY cl_int (CL_API_CALL* 
@@ -298,3 +299,4 @@ clEnqueueNDRangeKernelFunction)(cl_command_queue /* command_queue */,
 #define clEnqueueWriteBuffer __clEnqueueWriteBuffer
 #define clEnqueueMapBuffer __clEnqueueMapBuffer
 #define clEnqueueNDRangeKernel __clEnqueueNDRangeKernel
+#endif // WTF_OS_WINDOWS
