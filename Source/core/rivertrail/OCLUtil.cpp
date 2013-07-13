@@ -29,7 +29,7 @@
 
 #include "core/rivertrail/OCLUtil.h"
 
-#include "core/rivertrail/OCLdebug.h"
+#include "core/rivertrail/OCLDebug.h"
 
 namespace WebCore {
 

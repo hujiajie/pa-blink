@@ -28,7 +28,7 @@
 #ifndef OCLUtil_h
 #define OCLUtil_h
 
-#include "OCLconfig.h"
+#include "OCLConfig.h"
 #include "opencl_compat.h"
 #include <string>
 

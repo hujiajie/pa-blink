@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef OCLconfig_h
-#define OCLconfig_h
+#ifndef OCLConfig_h
+#define OCLConfig_h
 
 #define INTERFACE_VERSION           2   /* running version number of the interface */
 #define NUMBER_OF_ARTIFICIAL_ARGS   1   /* number of internal kernel arguments used by runtime */
@@ -58,4 +58,4 @@
 #define RivertrailExport   
 #endif
 
-#endif /* OCLconfig_h */
+#endif /* OCLConfig_h */
