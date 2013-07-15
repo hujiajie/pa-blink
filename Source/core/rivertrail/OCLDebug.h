@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef OCLdebug_h
-#define OCLdebug_h
+#ifndef OCLDebug_h
+#define OCLDebug_h
 
 #define RT_OK 0
 #define RT_ERROR_NOT_IMPLEMENTED 0x80000001
@@ -81,4 +81,4 @@
 #define DEBUG_LOG_DESTROY( src, ptr) 
 
 #endif // DEBUG_OFF
-#endif // OCLdebug_h
+#endif // OCLDebug_h
