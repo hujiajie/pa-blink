@@ -25,8 +25,8 @@
 * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-var WINW                = 800;          // drawing canvas width
-var WINH                = 480;          // drawing canvas height
+var WINW                = window.innerWidth;          // drawing canvas width
+var WINH                = window.innerHeight;          // drawing canvas height
 
 var NUM_VERTEX_COMPONENTS = 3;          // xyz, xyz, ...
 

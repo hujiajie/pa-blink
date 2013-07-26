@@ -155,7 +155,8 @@ function InitGL() {
 	
 	//webgl.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-	
+        document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+        document.getElementById('btn').addEventListener( 'touchstart', onDocumentTouchStart, false );	
 	return webgl.context;
 }
 
@@ -163,6 +164,22 @@ function onDocumentMouseMove(event) {
 
 	mouseX = ( event.clientX - (WINW / 2) ) * 15;
 	mouseY = ( event.clientY - (WINH / 2) ) * 15;
+}
+
+function onDocumentTouchMove(event) {
+    
+    if (event.touches.length == 1) {
+        event.preventDefault();
+        mouseX = ( event.touches[0].clientX - (WINW / 2) ) * 15;
+        mouseY = ( event.touches[0].clientX - (WINH / 2) ) * 15;
+    }
+}
+
+function onDocumentTouchStart(event) {
+    if (event.touches.length == 1) {
+        event.preventDefault();
+        ToggleSim();
+    }
 }
 
 function ResetGeometry(gl) {
