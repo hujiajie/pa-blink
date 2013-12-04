@@ -65,12 +65,9 @@ RiverTrail.Typeinference = function () {
         }
     }
 
-    var inferPAType = RiverTrail.Helper.inferPAType;
     var nameGen = RiverTrail.Helper.nameGen;
     
     const debug = false;
-    //const allowGlobalFuns = false; // Set to true so kernel functions can call global functions.
-    const allowGlobalFuns = true; // Set to true so kernel functions can call global functions.
     const lazyJSArrayCheck = true; // check for homogeneity of JS Arrays at runtime
 
     var openCLUseLowPrecision = false;
@@ -113,7 +110,6 @@ RiverTrail.Typeinference = function () {
     Type.OBJECT = "OBJECT";
     Type.LITERAL = "LITERAL";
     Type.FUNCTION = "FUNCTION";
-    Type.BOTTOM = "BOTTOM";
 
     var Tp = Type.prototype;
     Tp.toString = function () { return "<general type>"; };
@@ -148,10 +144,7 @@ RiverTrail.Typeinference = function () {
                  (this.name === name)));
     };
     Tp.isArrayishType = function () { // checks whether the type is an array like type
-        return this.isObjectType(TObject.ARRAY) || this.isObjectType(TObject.JSARRAY) || this.isObjectType(TObject.PARALLELARRAY);
-    };
-    Tp.isBottomType = function () {
-        return (this.kind === Type.BOTTOM);
+        return this.isObjectType(TObject.ARRAY) || this.isObjectType(TObject.JSARRAY);
     };
     Tp.registerFlow = function (from) {
         (from.flowTo || (from.flowTo = [])).push(this);
@@ -286,7 +279,7 @@ RiverTrail.Typeinference = function () {
 
     //
     // Object type. The name is the globally unique name of the object,
-    // usually the name of the constructor (e.g. Array, ParallelArray).
+    // usually the name of the constructor (e.g. Array).
     //
     var TObject = function (name) {
         this.name = name;
@@ -296,7 +289,6 @@ RiverTrail.Typeinference = function () {
     };
     TObject.ARRAY = "Array";
     TObject.JSARRAY = "JSArray";
-    TObject.PARALLELARRAY = "ParallelArray";
     TObject.INLINEOBJECT = "InlineObject";
     TObject.makeType = function (name, val) {
         return this.prototype.registry[name].makeType(val);
@@ -388,15 +380,6 @@ RiverTrail.Typeinference = function () {
             this.properties.adressSpace = val;
         }
     }
-
-    //
-    // Bottom type for error states
-    //
-    var TBottom = function () { 
-        this.label = labelGen();
-    };
-    var TBp = TBottom.prototype = new Type(Type.BOTTOM);
-    TBp.equals = function (other, considerStorageFormat) { return false; };
 
     // 
     // type environment AKA symbol table
@@ -782,10 +765,10 @@ RiverTrail.Typeinference = function () {
             var elemType = this.properties.elements;
             if (elemType instanceof TLiteral) {
                 this.OpenCLType = this.properties.elements.OpenCLType + "*";
-            } else if( (elemType.properties.addressSpace === "__private") && (elemType.isObjectType(TObject.ARRAY) || elemType.isObjectType(TObject.PARALLELARRAY))) {
-                // JS : Generate right type for nested local arrays (JS Arrays and ParallelArrays)
+            } else if( (elemType.properties.addressSpace === "__private") && elemType.isObjectType(TObject.ARRAY)) {
+                // JS : Generate right type for nested local arrays (JS Arrays)
                 this.OpenCLType = elemType.OpenCLType + "*";
-            } else if (elemType.isObjectType(TObject.ARRAY) || elemType.isObjectType(TObject.PARALLELARRAY)) {
+            } else if (elemType.isObjectType(TObject.ARRAY)) {
                 // TODO: Global arrays of element type T should have type T* here
                 //
                 this.OpenCLType = elemType.OpenCLType;
@@ -851,128 +834,6 @@ RiverTrail.Typeinference = function () {
         getOpenCLSize : TOp.registry[TObject.ARRAY].getOpenCLSize,
         equals : TOp.registry[TObject.ARRAY].equals,
         setAddressSpace : TOp.registry[TObject.ARRAY].setAddressSpace
-    };
-
-    TOp.registry[TObject.PARALLELARRAY] = {
-        methodCall : function(thisType, name, tEnv, fEnv, ast) {
-            "use strict";
-            var type;
-            ast.children[1] = drive(ast.children[1], tEnv, fEnv);
-            var argTypes = tEnv.accu;
-            tEnv.resetAccu();
-
-            switch (name) {
-                case "get":
-                    var idxLen;
-                    if ((argTypes.length == 1) &&
-                        ((argTypes[0].isObjectType(TObject.ARRAY)) ||
-                         (argTypes[0].isObjectType(TObject.PARALLELARRAY)))) {
-                        // ensure valid index
-                        argTypes[0].isObjectType(TObject.ARRAY) || reportError("invalid index in get call", ast);
-                        argTypes[0].properties.shape.length === 1 || reportError("only vectors and scalars are allowed as indices in get", ast);
-                        argTypes[0].properties.shape[0] <= thisType.properties.shape.length || reportError("index vector too long", ast);
-                        idxLen = argTypes[0].properties.shape[0];
-                    } else {
-                        // index scalars
-                        // a) ensure all are numbers
-                        argTypes.every( function (t) { return t.isArithType(); }) || reportError("indices in call to get " +
-                                "on parallel array are not numbers", ast);
-                        // b) ensure index is not too long
-                        argTypes.length <= thisType.properties.shape.length || reportError("too many indices in get call", ast);
-                        // get idx length
-                        idxLen = argTypes.length;
-                    }
-                    if (idxLen === thisType.properties.shape.length) {
-                        type = thisType.properties.elements.clone();
-                        if (type.isNumberType()) {
-                            // regardless of the type representation inside of the array, on read we
-                            // always convert to the default number type
-                            type._castRequired = new TLiteral(TLiteral.NUMBER);
-                        }
-                    } else {
-                        type = new TObject(TObject.PARALLELARRAY);
-                        type.properties.shape = thisType.properties.shape.slice(idxLen);
-                        type.properties.addressSpace = thisType.properties.addressSpace;
-                        type.properties.elements = thisType.properties.elements.clone();
-                        type.updateOpenCLType();
-                    }
-                    // add flow information for dataflow graph
-                    type.registerFlow(thisType);
-                    // tell the allocator that this result will share the memory of the source
-                    if (!type.isScalarType()) {
-                        type.properties.isShared = true;
-                    }
-                    break;
-
-                case "getShape":
-                    argTypes.length === 0 || reportError("too many argument to getShape");
-                    type = new TObject(TObject.ARRAY);
-                    type.properties.shape = [thisType.properties.shape.length];
-                    type.properties.elements = new TLiteral(TLiteral.NUMBER);
-                    type.properties.addressSpace = "__private"
-                    type.updateOpenCLType();
-                    tEnv.addRoot(type);
-                    break;
-
-                case "concat":
-                case "join":
-                case "slice":
-                case "combine":
-                case "map":
-                case "reduce":
-                case "filer":
-                case "scatter":
-                    reportError("method `" + name + "` not yet implemented for parallel array objects", ast);
-
-                default:
-                    reportError("method `" + name + "` not supported for parallel array objects", ast);
-            }
-
-            return type;
-        },
-        propertySelection : function (name, tEnv, fEnv, ast) {
-            var type;
-
-            switch (name) {
-                case "length":
-                    type = new TLiteral(TLiteral.NUMBER);
-                    break;
-
-                default:
-                    reportError("unknown parallel array property `" + name + "`", ast);
-            }
-
-            return type;
-        },
-        constructor : ParallelArray,
-        makeType : function (val) {
-            var type = new TObject(TObject.PARALLELARRAY);
-            // TODO: reflect shape information etc
-            type.properties.shape = val.getShape();
-            type.properties.elements = new TLiteral(TLiteral.NUMBER); // ParallelArrays always contain numbers
-            type.properties.elements.OpenCLType = inferPAType(val).inferredType; // but they may use a different representation
-            type.updateOpenCLType();
-            return type;
-        },
-        updateOpenCLType : function () {
-            debug && ((this.properties.elements instanceof TLiteral) || reportBug("ParallelArray with non literal elements!"));
-            this.OpenCLType = this.properties.elements.OpenCLType + "*";
-        },
-        getOpenCLShape : function () {
-            return this.properties.shape.concat(this.properties.elements.getOpenCLShape());
-        },
-        getOpenCLSize : function () {
-            return this.properties.shape.reduce(function (prev, curr) { return prev*curr; }, 1) * this.properties.elements.getOpenCLSize();
-        },
-        equals : function (other, considerStorageFormat) {
-            return (this.properties.shape.length === other.properties.shape.length) &&
-                   this.properties.shape.every( function (val, idx) { return val === other.properties.shape[idx]; }) &&
-                   (this.properties.elements.equals(other.properties.elements, considerStorageFormat));
-        },
-        setAddressSpace : function (val) {
-            this.properties.addressSpace = val;
-            this.properties.elements.setAddressSpace(val);
-        }
     };
 
     //
@@ -1286,21 +1147,6 @@ RiverTrail.Typeinference = function () {
                     left = tEnv.accu.properties.elements.clone();
                     left.registerFlow(tEnv.accu);
                     tEnv.accu = left;
-                } else if (tEnv.accu.isObjectType(TObject.PARALLELARRAY)) {
-                    if (tEnv.accu.properties.shape.length === 1) {
-                        // result is a scalar
-                        left = tEnv.accu.properties.elements.clone();
-                        left.registerFlow(tEnv.accu);
-                    } else {
-                        // result is a ParallelArray again
-                        left = new TObject(TObject.PARALLELARRAY);
-                        left.properties.shape = tEnv.accu.properties.shape.slice(1);
-                        left.properties.addressSpace = tEnv.accu.properties.addressSpace;
-                        left.properties.elements = tEnv.accu.properties.elements.clone();
-                        left.updateOpenCLType();
-                        left.registerFlow(tEnv.accu);
-                    }
-                    tEnv.accu = left;
                 } else {
                     reportError("Index operator applied to non array value. Type found: " + tEnv.accu.toString(), ast);
                 }
@@ -1332,10 +1178,6 @@ RiverTrail.Typeinference = function () {
             case CALL:
                 switch (ast.children[0].type) {
                     case DOT: // method invocation
-                        if(ast.children[0].children[0].value === "RiverTrailUtils") {
-                            RiverTrailUtils_Trap(ast, tEnv, fEnv);
-                            break;
-                        }
                         var dot = ast.children[0];
                         // figure out what type this object is
                         dot.children[0] = drive(dot.children[0], tEnv, fEnv);
@@ -1353,20 +1195,16 @@ RiverTrail.Typeinference = function () {
                         var fname = ast.children[0].value;
                         var fun = fEnv.lookup(fname);
                         if (!fun) {
-                           if (allowGlobalFuns) {
-                               // so this is not a local function. first make sure it is not a local variable
-                               !tEnv.lookup(fname) || reportError("not a function `" + fname + "`", ast);
-                               // CHEAT: we would have to inspect the current functions closure here but we cannot. So we just
-                               //        take whatever the name is bound to in the current scope. 
-                               //        This should at least be the global scope, really...
-                               var obj = eval(fname) || reportError("unknown function `" + fname + "`", ast);
-                               (typeof(obj) === 'function') || reportError("not a function `" + fname + "`", ast);
-                               fun = RiverTrail.Helper.parseFunction(obj.toString());
-                               // if we get here, we can just add the function to the function environment for future use
-                               fEnv.add(fun, ast.children[0].value, true);
-                           } else {
-                               reportError("unknown function `" + fname + "`", ast);
-                           }
+                            // so this is not a local function. first make sure it is not a local variable
+                            !tEnv.lookup(fname) || reportError("not a function `" + fname + "`", ast);
+                            // CHEAT: we would have to inspect the current functions closure here but we cannot. So we just
+                            //        take whatever the name is bound to in the current scope. 
+                            //        This should at least be the global scope, really...
+                            var obj = eval(fname) || reportError("unknown function `" + fname + "`", ast);
+                            (typeof(obj) === 'function') || reportError("not a function `" + fname + "`", ast);
+                            fun = RiverTrail.Helper.parseFunction(obj.toString());
+                            // if we get here, we can just add the function to the function environment for future use
+                            fEnv.add(fun, ast.children[0].value, true);
                         }
                         var resType = undefined;
                         var rootFun = fun;
@@ -1480,37 +1318,7 @@ RiverTrail.Typeinference = function () {
                 break;
             case NEW:
             case NEW_WITH_ARGS:
-                if ((ast.children[0].type === IDENTIFIER) &&
-                    (ast.children[0].value === "ParallelArray") &&
-                    (ast.children[1].type === LIST) &&
-                    (ast.children[1].children.length === 1)) { 
-                    // special case of new ParallelArray(<expr>)
-                    //
-                    // this turns into the identity modulo type
-                    ast.children[1].children[0] = drive(ast.children[1].children[0], tEnv, fEnv);
-                    right = tEnv.accu.clone();
-                    if (right.isObjectType(TObject.ARRAY)) {
-                        // Change the type. We have to construct the resulting type
-                        // by hand here, as usually parallel arrays objects do not
-                        // fall from the sky but are passed in or derived from
-                        // selections. As this is potentially a nested array,
-                        // we have to flatten the type here.
-                        right.name = TObject.PARALLELARRAY;
-                        right.properties.shape = right.getOpenCLShape();
-                        right.properties.elements = function getLast(type) { return type.isScalarType() ? type : getLast(type.properties.elements);}(right);
-                        ast.type = FLATTEN;
-                        ast.children[0] = ast.children[1].children[0];
-                        delete ast.children[1];
-                    } else if (right.isObjectType(TObject.PARALLELARRAY)) {
-                        // simply get rid of the new
-                        ast = ast.children[1].children[0];
-                    } else {
-                        reportError("Only the simple form of ParallelArray's constructor is implemented", ast);
-                    }
-                    tEnv.accu = right;
-                    break;
-                }
-                reportError("general object construction not yet implemented", ast);
+                reportError("object construction not yet implemented", ast);
             case OBJECT_INIT:
                 var property_names = [];
                 var property_typeInfo = [];
@@ -1595,81 +1403,8 @@ RiverTrail.Typeinference = function () {
         }
         ast.typeInfo = tEnv.accu;
         debug && ast.typeInfo && console.log(Narcissus.decompiler.pp(ast) + " has type " + ast.typeInfo.toString());
-        if (ast.typeInfo && ast.typeInfo._castRequired) {
-            var newAst = new Narcissus.parser.Node(ast.tokenizer);
-            newAst.children.push(ast);
-            newAst.type = CAST;
-            newAst.typeInfo = ast.typeInfo._castRequired;
-            delete ast.typeInfo._castRequired;
-            ast = newAst;
-            tEnv.accu = ast.typeInfo;
-        }
 
         return ast;
-    }
-
-    // Handle RiverTrailUtils...() calls
-    function RiverTrailUtils_Trap(ast, tEnv, fEnv) {
-        if(! (ast.children[1].type === LIST) ||
-                !(ast.children[1].children.length === 2) ) {
-            reportError("Invalid method signature on RiverTrailUtils", ast);
-        }
-        switch(ast.children[0].children[1].value) {
-            case "createArray":
-                var elementTypeInfo = drive(ast.children[1].children[1], tEnv, fEnv);
-                if(elementTypeInfo.typeInfo.kind === "LITERAL" &&
-                        elementTypeInfo.typeInfo.type === "NUMBER") {
-                    ast.initializer = ast.children[1].children[1].value;
-                }
-                else {
-                    reportError("Invalid value initializer", ast);
-                }
-                var objshape = [];
-                // Infer shape description
-                ast.children[1].children[0] = drive(ast.children[1].children[0], tEnv, fEnv);
-                var shapes = ast.children[1].children[0].children;
-                var shapes_length = shapes.length;
-                for(var idx = 0; idx < shapes_length; idx++) {
-                    if(shapes[idx].typeInfo.kind !== "LITERAL" ||
-                            shapes[idx].typeInfo.type !== "NUMBER" ||
-                            shapes[idx].type !== 61) {
-                        reportError("Shape description must consist of literals only, e.g: [3, 4, 2]", ast);
-                    }
-                    objshape.push(shapes[idx].value);
-                }
-                tEnv.accu = new TObject(TObject.ARRAY);
-                var elements = [];
-                var d;
-                var top_level_type = "";
-                for(d = 0; d < objshape.length; d++) {
-                    top_level_type += "*";
-                }
-                for(d = 0; d < objshape.length; d++) {
-                    if(d === objshape.length-1) {
-                        elements[d] = elementTypeInfo.typeInfo;
-                        elements[d].properties = {};
-                    }
-                    else {
-                        elements[d] = new TObject(TObject.ARRAY);
-                        elements[d].OpenCLType = elementTypeInfo.typeInfo.OpenCLType +
-                            top_level_type.slice(0, top_level_type.length - d - 1);
-                        elements[d].properties = {};
-                        elements[d].properties.shape = [objshape[d+1]];
-                        elements[d].properties.addressSpace = "__private";
-                    }
-                    if(d > 0) elements[d-1].properties.elements = elements[d];
-                }
-                tEnv.accu.properties.elements = elements[0];
-                // Given an n x m x p array, the shape in 'typeInfo' for this ast node
-                // is 'n'.
-                tEnv.accu.properties.shape = [objshape[0]];
-                tEnv.accu.updateOpenCLType();
-                tEnv.addRoot(tEnv.accu);
-                tEnv.accu.setAddressSpace("__private");
-                break;
-            default:
-                reportError("Invalid method called on RiverTrailUtils", ast);
-        }
     }
 
     function typeOracle(val) {
@@ -1912,7 +1647,7 @@ RiverTrail.Typeinference = function () {
         ast.body.funDecls.forEach(function (v) {insertSpecialisations(v, ast.body.funDecls);});
     }
 
-    function analyze(ast, pa, construct, rank, extraArgs, lowPrecision) {
+    function analyze(ast, array, construct, lowPrecision) {
         var tEnv = new TEnv(rootEnvironment, true); // create a new top-level function frame
         var params = ast.params;
         var argT = [];
@@ -1924,9 +1659,8 @@ RiverTrail.Typeinference = function () {
         openCLUseLowPrecision = (lowPrecision === true);
         tEnv.openCLFloatType = (openCLUseLowPrecision ? "float" : "double");
         // create type info for this
-        if ((construct === "combine") || (construct === "map")) {
-            var thisT = TObject.makeType(TObject.PARALLELARRAY, pa);
-            thisT.properties.addressSpace = "__global";
+        if (construct === "map") {
+            var thisT = typeOracle(array);
             tEnv.bind("this");
             tEnv.update("this", thisT);
             tEnv.addRoot(thisT);
@@ -1934,49 +1668,40 @@ RiverTrail.Typeinference = function () {
         }
 
         // create type information for generated arguments
-        if ((construct === "combine") || (construct === "comprehension")) {
-            // create type info for vector index argument
-            var ivType = new TObject(TObject.ARRAY);
-            ivType.properties.shape = [rank];
-            ivType.properties.elements = new TLiteral(TLiteral.NUMBER);
-            ivType.updateOpenCLType();
-            ivType.properties.addressSpace = "__private";
-            tEnv.bind(params[0]);
-            tEnv.update(params[0], ivType);
-            tEnv.addRoot(ivType);
-            params = params.slice(1);
-            argT.push(ivType);
-        } else if (construct === "comprehensionScalar") {
+        if (construct === "buildPar") {
+            // ensure we have enough arguments
+            params.length === 1 || reportError("number of arguments does not match number of parameters");
             // create type info for scalar index argument
             var ivType = new TLiteral(TLiteral.NUMBER);
             tEnv.bind(params[0]);
             tEnv.update(params[0], ivType);
-            params = params.slice(1);
             argT.push(ivType);
         } else if (construct === "map") {
+            // ensure we have enough arguments
+            (params.length >= 1 && params.length <= 3) || reportError("number of arguments does not match number of parameters");
             // create type info for current element argument
             var elemT = tEnv.getType("this").clone();
-            if (pa.getShape().length > rank) {
-                elemT.properties.shape = elemT.properties.shape.slice(rank);
-            } else {
-                elemT = elemT.properties.elements;
-            }
+            elemT = elemT.properties.elements;
             tEnv.bind(params[0]);
             tEnv.update(params[0], elemT);
             (!elemT.isObjectType()) || tEnv.addRoot(elemT);
-            params = params.slice(1);
             argT.push(elemT);
+            if (params.length === 2 || params.length === 3) {
+                // create type info for scalar index argument
+                var ivType = new TLiteral(TLiteral.NUMBER);
+                tEnv.bind(params[1]);
+                tEnv.update(params[1], ivType);
+                argT.push(ivType);
+            }
+            if (params.length === 3) {
+                // create type info for the source holding the elements
+                var sourceT = tEnv.getType("this").clone();
+                tEnv.bind(params[2]);
+                tEnv.update(params[2], sourceT);
+                tEnv.addRoot(sourceT);
+                argT.push(sourceT);
+            }
         }
-
-        // ensure we have enough arguments
-        params.length === extraArgs.length || reportError("number of arguments does not match number of parameters: " + extraArgs.length + " vs. " + params.length);
-
-        // create type info for all arguments
-        params.forEach(function (name) { tEnv.bind(name); });
-        params.forEach(function (name, idx) { var type = typeOracle(extraArgs[idx]); 
-                                              tEnv.update(name, type); 
-                                              type.isObjectType() && tEnv.addRoot(type);
-                                              argT.push(type);});
 
         ast.body = drive(ast.body, tEnv, undefined);
 
