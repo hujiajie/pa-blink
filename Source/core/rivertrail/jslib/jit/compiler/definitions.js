@@ -30,7 +30,7 @@ if (RiverTrail === undefined) {
 }
 
 RiverTrail.definitions = function () {
-    var tokens= [ "CAST", "TOINT32", "FLATTEN" ];
+    var tokens= [ "CAST", "TOINT32" ];
     const offset = Narcissus.definitions.tokens.length;
 
     var consts = "const ";
