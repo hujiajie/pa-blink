@@ -1658,35 +1658,28 @@ RiverTrail.Typeinference = function () {
         // set default precision for numbers
         openCLUseLowPrecision = (lowPrecision === true);
         tEnv.openCLFloatType = (openCLUseLowPrecision ? "float" : "double");
-        // create type info for this
-        if (construct === "map") {
+        // create type info for the source holding the elements
+        // the type info will not be bound to any identifier in the type
+        // environment, but we will use this to initialise the type of other
+        // arguments.
+        if (construct === "mapPar") {
             var thisT = typeOracle(array);
-            tEnv.bind("this");
-            tEnv.update("this", thisT);
-            tEnv.addRoot(thisT);
-            argT.push(thisT);
+        } else {
+            reportBug(construct + " is not yet implemented.");
         }
 
         // create type information for generated arguments
-        if (construct === "buildPar") {
-            // ensure we have enough arguments
-            params.length === 1 || reportError("number of arguments does not match number of parameters");
-            // create type info for scalar index argument
-            var ivType = new TLiteral(TLiteral.NUMBER);
-            tEnv.bind(params[0]);
-            tEnv.update(params[0], ivType);
-            argT.push(ivType);
-        } else if (construct === "map") {
+        if (construct === "mapPar") {
             // ensure we have enough arguments
             (params.length >= 1 && params.length <= 3) || reportError("number of arguments does not match number of parameters");
             // create type info for current element argument
-            var elemT = tEnv.getType("this").clone();
+            var elemT = thisT.clone();
             elemT = elemT.properties.elements;
             tEnv.bind(params[0]);
             tEnv.update(params[0], elemT);
             (!elemT.isObjectType()) || tEnv.addRoot(elemT);
             argT.push(elemT);
-            if (params.length === 2 || params.length === 3) {
+            if (params.length >= 2) {
                 // create type info for scalar index argument
                 var ivType = new TLiteral(TLiteral.NUMBER);
                 tEnv.bind(params[1]);
@@ -1695,12 +1688,14 @@ RiverTrail.Typeinference = function () {
             }
             if (params.length === 3) {
                 // create type info for the source holding the elements
-                var sourceT = tEnv.getType("this").clone();
+                var sourceT = thisT.clone();
                 tEnv.bind(params[2]);
                 tEnv.update(params[2], sourceT);
                 tEnv.addRoot(sourceT);
                 argT.push(sourceT);
             }
+        } else {
+            reportBug(construct + " is not yet implemented.");
         }
 
         ast.body = drive(ast.body, tEnv, undefined);
