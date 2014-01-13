@@ -326,18 +326,11 @@ RiverTrail.InferBlockFlow = function () {
                 ast.children.forEach(function (val) { infer(val, ins, outs, locals); });
                 break;
             case CALL:
-                if(ast.children[0].type === DOT &&
-                        (ast.children[0].children[0].value === "RiverTrailUtils" ||
-                        ast.children[0].children[1].value === "createArray")) {
-                    infer(ast.children[1].children[1], ins, outs, locals);
-                    break;
-                }
                 ast.children.forEach(function (val) { infer(val, ins, outs, locals); });
                 break;
             case LIST:      
             case CAST:
             case TOINT32:
-            case FLATTEN:
             case ARRAY_INIT:
             case INDEX:
                 ast.children.forEach(function (val) { infer(val, ins, outs, locals); });
