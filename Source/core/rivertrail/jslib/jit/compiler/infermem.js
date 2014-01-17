@@ -453,7 +453,6 @@ RiverTrail.InferMem = function () {
             case INDEX:
             case LIST:      
             case CAST:
-            case FLATTEN:
             case TOINT32:
                 if (ast.children) {
                     ast.children.forEach( function (child) { infer(child, memVars, ins, outs); });
@@ -461,28 +460,15 @@ RiverTrail.InferMem = function () {
                 break;
             case CALL: 
                 if (ast.children) {
-                    if(ast.children[0].type === DOT && ast.children[0].children[0].value === "RiverTrailUtils") {
-                        switch (ast.children[0].children[1].value) {
-                            case "createArray":
-                                allocateArrayMem(ast, memVars);
-                                break;
-                            default:
-                                reportError("Invalid method " + ast.children[0].children[1].value + " on RiverTrailUtils", ast);
-                        }
-                    }
-                    else {
-                        ast.children.forEach( function (child) { infer(child, memVars, ins, outs); });
-                    }
+                    ast.children.forEach( function (child) { infer(child, memVars, ins, outs); });
                 }
                 if(ast.typeInfo.name === "InlineObject") {
                     allocateObjMem(ast, memVars);
                 }
                 // If I am returning an Array space needs to be allocated for it in the caller and 
                 // the name of the space should be left in the CALL nodes allocatedMem field so that when
-                // I generate the call it is available. However, if this method does return a pointer
-                // to some existing data, like |get| on ParallelArray, the type inference will have
-                // left an isShared annotation and no memory needs to be allocated.
-                else if (!ast.typeInfo.isScalarType() && !ast.typeInfo.properties.isShared) { 
+                // I generate the call it is available.
+                else if (!ast.typeInfo.isScalarType()) { 
                     // This call returns a nested array. The caller needs to allocate enough
                     // memory for this array and initialize the pointers in
                     // the allocated buffer to create a structure that the
@@ -520,11 +506,9 @@ RiverTrail.InferMem = function () {
                 reportError("array comprehensions not yet implemented", ast);
                 break;
             case NEW:
-                for(var idx = 0; idx < ast.children.length; idx++) {
-                    infer(ast.children[idx].children[1], memVars, ins, outs);
-                }
-                break;
             case NEW_WITH_ARGS:
+                reportError("object construction not yet implemented", ast);
+                break;
             case OBJECT_INIT:
                 for(var idx = 0; idx < ast.children.length; idx++) {
                     infer(ast.children[idx].children[1], memVars, ins, outs);
