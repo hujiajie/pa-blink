@@ -1117,7 +1117,6 @@ RiverTrail.Typeinference = function () {
 
             // literals
             case IDENTIFIER:
-            case THIS:
                 var idType = tEnv.lookup(ast.value) || reportError("unbound variable: " + ast.value, ast);
                 idType.initialized || reportError("variable " + ast.value + " might be uninitialized", ast);
                 tEnv.accu = idType.type.clone();
@@ -1387,6 +1386,9 @@ RiverTrail.Typeinference = function () {
                 break;
 
             // unsupported literals
+            case THIS:
+                reportError("this not yet implemented", ast);
+                break;
             case NULL:
                 reportError("null not yet implemented", ast);
                 break;
