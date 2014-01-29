@@ -891,7 +891,6 @@ RiverTrail.RangeAnalysis = function () {
 
             // literals
             case IDENTIFIER:
-            case THIS:
                 if (constraintAccu && constraints) { // we have a new constraint here, so add it to constraints
                     constraints.addAccu(ast.value, constraintAccu);
                 }
@@ -1077,6 +1076,9 @@ RiverTrail.RangeAnalysis = function () {
                 break;
 
             // unsupported literals
+            case THIS:
+                reportError("this not yet implemented", ast);
+                break;
             case NULL:
                 reportError("null not yet implemented", ast);
                 break;
@@ -1385,7 +1387,6 @@ RiverTrail.RangeAnalysis = function () {
 
                 // literals
                 case IDENTIFIER:
-                case THIS:
                     ast.typeInfo = tEnv.lookup(ast.value).type.clone();
                     // if the variable is a float but this expression is known to be 
                     // an int, we have to put a cast here
@@ -1511,6 +1512,9 @@ RiverTrail.RangeAnalysis = function () {
                     break;
 
                 // unsupported literals
+                case THIS:
+                    reportError("this not yet implemented", ast);
+                    break;
                 case NULL:
                     reportError("null not yet implemented", ast);
                     break;
