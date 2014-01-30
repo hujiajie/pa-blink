@@ -343,7 +343,6 @@ RiverTrail.InferBlockFlow = function () {
 
             // literals
             case IDENTIFIER:
-            case THIS:
                 if (!locals.contains(ast.value)) {
                     ins.union(ast.value);
                 }
@@ -415,6 +414,9 @@ RiverTrail.InferBlockFlow = function () {
                 break;
 
             // unsupported literals
+            case THIS:
+                reportError("this not yet implemented", ast);
+                break;
             case NULL:
                 reportError("null not yet implemented", ast);
                 break;
