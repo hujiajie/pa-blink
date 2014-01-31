@@ -401,7 +401,6 @@ RiverTrail.InferMem = function () {
                 
             // literals
             case IDENTIFIER:
-            case THIS:
             case NUMBER:
             case TRUE:
             case FALSE:
@@ -538,6 +537,9 @@ RiverTrail.InferMem = function () {
                 break;
 
             // unsupported literals
+            case THIS:
+                reportError("this not yet implemented", ast);
+                break;
             case NULL:
                 reportError("null not yet implemented", ast);
                 break;
