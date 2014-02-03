@@ -159,40 +159,6 @@ RiverTrail.compiler.codeGen = (function() {
         return s;
     };
 
-    var adjustFormalsWithOffsets = function (formalsAst, construct) {
-        "use strict";
-        var i;
-        var s = "";
-        var start = 0;
-        var formalsNames = formalsAst.params;
-        var formalsTypes = formalsAst.typeInfo.parameters;
-        if ((construct === "map") || (construct === "combine") || (construct === "comprehension") || (construct === "comprehensionScalar")) {
-            // Skip the first argument since it is the index for combine and comprehension and value for map.
-            start = 2; // the extras do not include |this| and the first formal since that is the index generated in the body.
-        }
-        if (construct === "combine") { 
-            formalsNames = formalsNames.slice(1); // This skips the index argument
-            formalsTypes = formalsTypes.slice(2); // This skips this and the index argument
-        } else if ((construct === "comprehension") || (construct === "comprehensionScalar")) {
-            formalsTypes = formalsTypes.slice(1);
-            formalsNames = formalsNames.slice(1);
-        } else if (construct === "map") {
-            formalsTypes = formalsTypes.slice(2); // Skip this and the val argument.
-            formalsNames = formalsNames.slice(1); // Skip the val argument
-        }
-        for (i = 0; i < formalsTypes.length; i++) {
-            // array arguments have an extra offset qualifier
-            if (formalsTypes[i].isObjectType("ParallelArray")) {
-                //s = s + formalsNames[i-1] + " = &"+formalsNames[i-1]+"["+formalsNames[i-1]+"__offset];"; //offset
-                s = s + RENAME(formalsNames[i]) + " = &"+RENAME(formalsNames[i])+"["+RENAME(formalsNames[i])+"__offset];"; //offset
-            } else if (formalsTypes[i].isObjectType("JSArray")) {
-                // these are passed with one level of indirection, so we need to unwrap them here
-                s = s + RENAME(formalsNames[i]) + " = *((" + RENAME(formalsTypes[i]).getOpenCLAddressSpace() + " double **)" + RENAME(formalsNames[i]) + ");";
-            }
-        }
-
-        return s;
-    };
     // formalsTypeProperty holds "__"+addresSpace+OpenCLType+formalsName+shape
     // Some kernel function formals are calculated in the body, for example index argument to combine and the value
     // argument to map.
@@ -427,14 +393,14 @@ RiverTrail.compiler.codeGen = (function() {
             "map": {
                 "hasThis": true,
                 "localThisName": " tempThis",
-                "localThisDefinition": " opThisVect[opThisVect__offset]",
+                "localThisDefinition": " opThisVect",
                 "localResultName": " tempResult",
             },
             "combine": {
                 "hasThis": true,
                 // the type of this goes here.
                 "localThisName": " tempThis",
-                "localThisDefinition": " opThisVect[opThisVect__offset]",
+                "localThisDefinition": " opThisVect",
                 // the type of the result of the elemental function goes here
                 "localResultName": " tempResult",
             },
@@ -442,7 +408,7 @@ RiverTrail.compiler.codeGen = (function() {
                 "hasThis": false,
                 // the type of this goes here.
                 "localThisName": undefined,
-                "localThisDefinition": " opThisVect[opThisVect__offset]",
+                "localThisDefinition": " opThisVect",
                 // the type of the result of the elemental function goes here
                 "localResultName": " tempResult",
             },
@@ -450,7 +416,7 @@ RiverTrail.compiler.codeGen = (function() {
                 "hasThis": false,
                 // the type of this goes here.
                 "localThisName": undefined,
-                "localThisDefinition": " opThisVect[opThisVect__offset]",
+                "localThisDefinition": " opThisVect",
                 // the type of the result of the elemental function goes here
                 "localResultName": " tempResult",
             }
@@ -571,11 +537,10 @@ RiverTrail.compiler.codeGen = (function() {
                 if (thisIsScalar && (construct === "map")) {
                     // for map, the this argument has a different type than the this inside the kernel
                     // so we have to lift it to a pointer if it isn't one yet.
-                    s = s + " __global " + thisSymbolType.OpenCLType + "* opThisVect ";
+                    s = s + " __global " + thisSymbolType.OpenCLType + "* opThisVect, ";
                 } else {
-                    s = s + " __global " + thisSymbolType.OpenCLType + " opThisVect ";
+                    s = s + " __global " + thisSymbolType.OpenCLType + " opThisVect, ";
                 }
-                s = s + ", int opThisVect__offset, ";
             } else {
                 // special case where we do not have this to derive iteration space. Here, rankOrShape
                 // will be the shape of the iteration space, so use rankOrShape as iteration space and 
@@ -588,14 +553,12 @@ RiverTrail.compiler.codeGen = (function() {
             // Note that result.openCLType is the type of the result of a single iteration!
             if ((construct === "combine") || (construct === "map") || (construct === "comprehension") || (construct === "comprehensionScalar")) {      
                 if(funDecl.typeInfo.result.isScalarType() || funDecl.typeInfo.result.isArrayishType()) {
-                    s = s + "__global " + getReturnFormalType(funDecl.typeInfo.result) + " retVal, ";
-                    //s = s + "__global " + funDecl.typeInfo.result.OpenCLType + (funDecl.typeInfo.result.isScalarType() ? "*" : "") + " retVal"; 
-                    s = s + "int retVal__offset";
+                    s = s + "__global " + getReturnFormalType(funDecl.typeInfo.result) + " retVal";
                 }
                 else if(funDecl.typeInfo.result.isObjectType("InlineObject")) {
                     var fields = funDecl.typeInfo.result.properties.fields;
                     for(var idx in fields) {
-                        s = s + " __global " + getReturnFormalType(fields[idx]) + " retVal_" + idx + ", int retVal_" + idx + "_offset,";
+                        s = s + " __global " + getReturnFormalType(fields[idx]) + " retVal_" + idx + ",";
                     }
                     s = s.slice(0, -1);
                 }
@@ -649,7 +612,7 @@ RiverTrail.compiler.codeGen = (function() {
                     reportError("Not supported");
                 }
                 else {
-                    s = s + "int _readoffset = " + pa.offset;
+                    s = s + "int _readoffset = 0";
                     var resShape = ast.typeInfo.result.getOpenCLShape();
                     if ((paShape.length === rank + resShape.length) &&
                         (resShape.every(function(e,idx) { return (e === paShape[idx+rank]);}))) {
@@ -664,10 +627,6 @@ RiverTrail.compiler.codeGen = (function() {
                 }
                 s = s + ";";
             }
-            // add retval offset to writeoffset
-            if (ast.typeInfo.result.isArrayishType() || ast.typeInfo.result.isScalarType()) {
-                s = s + "_writeoffset += retVal__offset;";
-            }
 
             // Add code to declare tempThis
             if (boilerplate.hasThis) {
@@ -675,7 +634,7 @@ RiverTrail.compiler.codeGen = (function() {
                 s = s + (thisIsScalar ? " " : " __global ") + thisSymbolType.OpenCLType + " "+ boilerplate.localThisName + ";";
 
                 // initialise tempThis
-                s = s + boilerplate.localThisName + " = " + (thisIsScalar ? "(" : "&(") + boilerplate.localThisDefinition + ");"; 
+                s = s + boilerplate.localThisName + " = " + (thisIsScalar ? "(*" : "(") + boilerplate.localThisDefinition + ");"; 
             }
 
             // declare tempResult
@@ -683,8 +642,6 @@ RiverTrail.compiler.codeGen = (function() {
             // define index
             s = s + genFormalRelativeArg(funDecl, construct); // The first param's name.
 
-            // Adjust the ParallelArray formals that come with offsets to formal = &formal[formalName_offset]
-            s = s + adjustFormalsWithOffsets(funDecl, construct);
             // Generate the statements;
             var body = oclStatements(funDecl.body);
             s = s + tempVars.declare() + body;
