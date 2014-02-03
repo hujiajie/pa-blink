@@ -129,31 +129,21 @@ RiverTrail.compiler.codeGen = (function() {
             return res;
     };
 
-    //
-    // The Ast is set up so that formalsAst.params holds the names of the params specified in the signature
-    // of the function.
-    // formals.typeInfo.parameters includes the implicit "this" parameter. 
-    // This means that the name of information for this is at typeInfo.paramaters[0] and information
-    // for the type information for the explicit formals starts at typeInfo.paramaters[1] while
-    // the names start at params[0]
-    //
-
-    var genFormalParams = function (formalsAst, construct) {
-        "use strict";
-        if (calledScope.inCalledScope()) {
-            return genNonKernelFormalParams(formalsAst);
-        } else {
-            return genKernelFormalParams(formalsAst, construct);
-        }
-    };
-    // This is for called functions, not the top level kernel function.
-    var genNonKernelFormalParams = function (formalsAst) {
+    // For called functions, we emit the declaration of formals according to
+    // formalsAst.params and formalsAst.typeInfo.parameters.
+    // For the top level kernel function, parameters like the current element
+    // and the index are declared and calculated during runtime based on the
+    // global id, so these formals won't appear in the function header.
+    // Therefore, genFormalParams should only be called when we are in a called
+    // scope.
+    var genFormalParams = function (formalsAst) {
         "use strict";
         var i;
         var s = "";
         var formalsNames = formalsAst.params;
         var formalsTypes = formalsAst.typeInfo.parameters;
 
+        calledScope.inCalledScope() || reportBug("unexpected declaration of formal parameters");
         for (i = 0; i < formalsTypes.length; i++) {
             if (s !== "" ) { 
                 s = s + ", "; // leave out the , before the first parameter
@@ -165,50 +155,6 @@ RiverTrail.compiler.codeGen = (function() {
             }
 
             s = s + formalsTypes[i].OpenCLType + " " + RENAME(formalsNames[i]);
-        }
-        return s;
-    };
-
-    var genKernelFormalParams = function (formalsAst, construct) {
-        "use strict";
-        var i;
-        var s = "";
-        var formalsNames = formalsAst.params;
-        var formalsTypes = formalsAst.typeInfo.parameters;
-        if (construct === "combine") { 
-            // Skip the extra type for this and ignore the first argument.
-            // the extras do not include |this| and the first formal since that is the index generated in the body.
-
-            formalsNames = formalsNames.slice(1); // This skips the index argument
-            formalsTypes = formalsTypes.slice(2); // This skips this and the index argument
-        } else if ((construct === "comprehension") || (construct === "comprehensionScalar")) {
-            // ignore the first argument, the index
-            formalsTypes = formalsTypes.slice(1);
-            formalsNames = formalsNames.slice(1);
-        } else if (construct === "map") {
-            // Skip the extra type for this
-            // Skip the extra type for this and ignore the first argument, which is the value and is set
-            // explicitly based on this and the id.
-            // the extras do not include |this| and the first formal since that is the value generated in the body.
-            formalsTypes = formalsTypes.slice(2); // Skip this and the val argument.
-            formalsNames = formalsNames.slice(1); // Skip the val argument
-        }
-
-        for (i = 0; i < formalsTypes.length; i++) {
-            if (s !== "" ) { 
-                s = s + ", "; // leave out the , before the first parameter
-            }
-
-            if (formalsTypes[i].isArrayishType()) {
-                // array argument, so needs address space qualifier
-                s = s + formalsTypes[i].getOpenCLAddressSpace() + " ";
-            }
-
-            s = s + formalsTypes[i].OpenCLType + " " + RENAME(formalsNames[i]);
-            // array arguments have an extra offset qualifier
-            if (formalsTypes[i].isObjectType("ParallelArray")) {
-                s = s + ", int " + RENAME(formalsNames[i]) + "__offset"; //offset
-            }
         }
         return s;
     };
@@ -324,7 +270,7 @@ RiverTrail.compiler.codeGen = (function() {
             s = s + "("; // start param list.
             // add extra parameter for failure propagation
             s = s + "int * _FAILRET";
-            formals = genFormalParams(ast, "ignore");
+            formals = genFormalParams(ast);
             if (formals !== "") {
                 s = s + ", " + formals;
             } // else there are no formals to output.
@@ -638,11 +584,6 @@ RiverTrail.compiler.codeGen = (function() {
                 rank = rankOrShape.length;
             }
 
-            // Dump any additional parameters
-            formals = genFormalParams(funDecl, construct);
-            if (formals !== "") {
-                s = s + formals + ",";
-            }
             // Dump the standard output parameters.
             // Note that result.openCLType is the type of the result of a single iteration!
             if ((construct === "combine") || (construct === "map") || (construct === "comprehension") || (construct === "comprehensionScalar")) {      
