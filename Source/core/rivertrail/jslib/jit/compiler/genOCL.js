@@ -159,61 +159,37 @@ RiverTrail.compiler.codeGen = (function() {
         return s;
     };
 
-    // formalsTypeProperty holds "__"+addresSpace+OpenCLType+formalsName+shape
-    // Some kernel function formals are calculated in the body, for example index argument to combine and the value
-    // argument to map.
-    var genFormalRelativeArg = function (funDecl, construct) { //formalsName, formalsType, formalsTypeProperties, construct) {
+    // Some kernel function formals are calculated in the body, for example index argument and the value argument.
+    var genFormalRelativeArg = function (funDecl, construct) {
         "use strict";
-        var i;
-        var dimSizes;
         var s = " ";
-        var indexName, indexType;
-        if ((construct === "combine") || (construct === "comprehension") || (construct === "comprehensionScalar")) {
-            // The relative argumment is an index.
-            if (construct === "combine") {
-                indexType = funDecl.typeInfo.parameters[1];
+        var argName, argType;
+        if (construct === "mapPar") {
+            // The first relative argument is a value found in the Array.
+            argName = RENAME(funDecl.params[0]);
+            argType = funDecl.typeInfo.parameters[0];
+            if (argType.isScalarType()) {
+                s = s + " " + argType.OpenCLType+" "+ argName+" = _source[_readoffset];"
             } else {
-                // comprehensions have no this!
-                indexType = funDecl.typeInfo.parameters[0];
+                s = s + argType.getOpenCLAddressSpace() + " " + argType.OpenCLType+" "+ argName+" = &(_source[_readoffset]);"
             }
-            indexName = RENAME(funDecl.params[0]);
-
-            // the first argument is id that this call is responsible for.
-            if (indexType.isObjectType("Array")) { //(formalsType === "int*") {
-                dimSizes = indexType.getOpenCLShape();
-                var idxTypeStr = RiverTrail.Helper.stripToBaseType(indexType.OpenCLType);
-                s = s + indexType.getOpenCLAddressSpace() +" "+ idxTypeStr + " " +
-                    indexName+"["+ dimSizes.toString() +"] = "; 
-                // Deal with array indices.
-                // SAH: id may _NEVER_ be changed in this process as it is required to assign the result!
-                //   CR -- RLH I think we are OK w.r.t the alert following but need to build regression.
-                //   alert("make sure this deals with combine to different levels.");
-                s = s + " { ";
-                for (i = 0; i < dimSizes[0]; i++) { // Ususally only 2 or 3 dimensions so ignore complexity
-                    //s = s + indexName + "[" + i + "] = _id_" + i + ";";
-                    if (i > 0) {
-                        s = s + ", ";
-                    }
-                    s = s + "(" + idxTypeStr + ") _id_" + i;
-                }
-                s = s + "};";
-            } else {            
-                // this path is taken by scalar comprehensions
-                s = s + " "+indexType.OpenCLType+" "+ indexName+" = _id_0;"; 
+            if (funDecl.params.length >= 2) {
+                // The second relative argument is an index.
+                argName = RENAME(funDecl.params[1]);
+                argType = funDecl.typeInfo.parameters[1];
+                s = s + " "+argType.OpenCLType+" "+ argName+" = _id_0;";
             }
-            } else if (construct === "map") {
-                // 
-                // The relative argumment is a value found in the ParallelArray.
-                indexName = funDecl.params[0];
-                indexType = funDecl.typeInfo.parameters[1];
-                if (indexType.isScalarType()) {
-                    s = s + " " + indexType.OpenCLType+" "+ RENAME(indexName)+" = tempThis[_readoffset];"
-                } else {
-                    s = s + indexType.getOpenCLAddressSpace() + " " + indexType.OpenCLType+" "+ RENAME(indexName)+" = &(tempThis[_readoffset]);"
-                }
+            if (funDecl.params.length === 3) {
+                // The third relative argument is the source holding the elements.
+                argName = RENAME(funDecl.params[2]);
+                argType = funDecl.typeInfo.parameters[2];
+                s = s + " " + argType.getOpenCLAddressSpace() + " " + argType.OpenCLType + " " + argName + " = _source;";
             }
-            return s;
-        };
+        } else {
+            reportBug(construct + " is not yet implemented.");
+        }
+        return s;
+    };
 
         //
         // This generates code for a function that is presmable called from the kernel function.
