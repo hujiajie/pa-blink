@@ -362,11 +362,11 @@ RiverTrail.compiler.codeGen = (function() {
         // For now, I disable it by default.
         var prelude = "";
 
-        function genKernel (ast, pa, rank, construct) {
+        function genKernel (ast, construct) {
             "use strict";
             var kernelCode;
             try {        
-                kernelCode = prelude + genKernelHelper(ast, pa, rank, construct);
+                kernelCode = prelude + genKernelHelper(ast, construct);
                 if (verboseDebug) {
                     console.log(kernelCode);
                 }
