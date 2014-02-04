@@ -253,7 +253,6 @@ RiverTrail.compiler.codeGen = (function() {
             }
             s = s + genCalledFunctionHeader(ast);
             s = s + " { ";// function body
-            s = s + " const int _writeoffset = 0; "; // add a write offset to fool the rest of code generation
             s = s + " int _FAIL = 0;"; // declare local _FAIL variable for selection failures
             s = s + " int _sel_idx_tmp;"; // tmp var required for selections
             s = s + returnType + " " + boilerplate.localResultName + ";"; // tmp var for parking result
@@ -751,7 +750,7 @@ RiverTrail.compiler.codeGen = (function() {
                 // direct write but only for flat arrays i.e.,
                 // rhs.typeInfo.properties.shape.length===1
                 if (isArrayLiteral(rhs)) {
-                    s = s + "{" + buildWrite("(retVal + _writeoffset)", "", rhs) + "}";
+                    s = s + "{" + buildWrite("retVal", "", rhs) + "}";
                 }
                 else if(rhs.typeInfo.isObjectType("InlineObject")) {
                     var numProps = 0;
