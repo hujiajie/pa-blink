@@ -255,7 +255,7 @@ RiverTrail.compiler.codeGen = (function() {
             s = s + " { ";// function body
             s = s + " int _FAIL = 0;"; // declare local _FAIL variable for selection failures
             s = s + " int _sel_idx_tmp;"; // tmp var required for selections
-            s = s + returnType + " " + boilerplate.localResultName + ";"; // tmp var for parking result
+            s = s + returnType + " tempResult;"; // tmp var for parking result
             var body = oclStatements(ast.body); // Generate the statements;
             s += tempVars.declare() + body;
             s = s + " } ";
@@ -362,43 +362,6 @@ RiverTrail.compiler.codeGen = (function() {
         // For now, I disable it by default.
         var prelude = "";
 
-        // boilerplate holds the various strings used for the signature of opneCL kernel function,
-        // the declaration of some locals and the postfix (used by return). 
-        var boilerplateTemplates = {
-            "map": {
-                "hasThis": true,
-                "localThisName": " tempThis",
-                "localThisDefinition": " opThisVect",
-                "localResultName": " tempResult",
-            },
-            "combine": {
-                "hasThis": true,
-                // the type of this goes here.
-                "localThisName": " tempThis",
-                "localThisDefinition": " opThisVect",
-                // the type of the result of the elemental function goes here
-                "localResultName": " tempResult",
-            },
-            "comprehension": {
-                "hasThis": false,
-                // the type of this goes here.
-                "localThisName": undefined,
-                "localThisDefinition": " opThisVect",
-                // the type of the result of the elemental function goes here
-                "localResultName": " tempResult",
-            },
-            "comprehensionScalar": {
-                "hasThis": false,
-                // the type of this goes here.
-                "localThisName": undefined,
-                "localThisDefinition": " opThisVect",
-                // the type of the result of the elemental function goes here
-                "localResultName": " tempResult",
-            }
-        };
-
-        var boilerplate = null; // Set to the template based on the construct being compiled. 
-
         function genKernel (ast, pa, rank, construct) {
             "use strict";
             var kernelCode;
@@ -474,8 +437,6 @@ RiverTrail.compiler.codeGen = (function() {
             if (funDecl.value != "function") {
                 throw new Error("function expected"); // we can't deal with this so execute it sequentially
             }
-
-            boilerplate = boilerplateTemplates[construct];
 
             // Emit definitions of InlineObject types
             //var globalInlineObjectTypes = RiverTrail.TypeInference.globalInlineObjectTypes;
@@ -606,14 +567,14 @@ RiverTrail.compiler.codeGen = (function() {
             // Add code to declare tempThis
             if (boilerplate.hasThis) {
                 var thisShape = thisSymbolType.getOpenCLShape();
-                s = s + (thisIsScalar ? " " : " __global ") + thisSymbolType.OpenCLType + " "+ boilerplate.localThisName + ";";
+                s = s + (thisIsScalar ? " " : " __global ") + thisSymbolType.OpenCLType + " tempThis;";
 
                 // initialise tempThis
-                s = s + boilerplate.localThisName + " = " + (thisIsScalar ? "(*" : "(") + boilerplate.localThisDefinition + ");"; 
+                s = s + " tempThis = " + (thisIsScalar ? "(*" : "(") + "opThisVect);"; 
             }
 
             // declare tempResult
-            s = s + funDecl.typeInfo.result.OpenCLType + " " + boilerplate.localResultName + ";";
+            s = s + funDecl.typeInfo.result.OpenCLType + " tempResult;";
             // define index
             s = s + genFormalRelativeArg(funDecl, construct); // The first param's name.
 
@@ -651,9 +612,9 @@ RiverTrail.compiler.codeGen = (function() {
             if (rhs.typeInfo.isScalarType()) {
                 // scalar result
                 // propagate failure code
-                s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
+                s = "tempResult = " + oclExpression(rhs) + ";";
                 s = s + "if (_FAIL) {*_FAILRET = _FAIL;}";
-                s = s + " return " + boilerplate.localResultName + ";";
+                s = s + " return tempResult;";
             } else {            
                 // vector result. We have two cases: either it is an identifier, then we do an elementwise assign.
                 // or it is an array expression, in which case we generate code for each element and then assign that.
@@ -676,7 +637,7 @@ RiverTrail.compiler.codeGen = (function() {
                     s = s + "}";
                 } else {
                     // arbitrary expression
-                    s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
+                    s = "tempResult = " + oclExpression(rhs) + ";";
                     s = s + "{ int _writeback_idx = 0; for (;_writeback_idx < " + elements + "; _writeback_idx++) { ";
                     s = s + " retVal[_writeoffset + _writeback_idx] = " + convPre + "tempResult[_writeback_idx]" + convPost + ";",
                       s = s + "}";
@@ -743,9 +704,9 @@ RiverTrail.compiler.codeGen = (function() {
             rhs = ast.value;
             if (rhs.typeInfo.isScalarType()) {
                 // scalar result
-                s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
+                s = "tempResult = " + oclExpression(rhs) + ";";
                 s = s + "if (_FAIL) {*_FAILRET = _FAIL;}";
-                s = s + " return " + boilerplate.localResultName + ";";
+                s = s + " return tempResult;";
             } else {
                 // direct write but only for flat arrays i.e.,
                 // rhs.typeInfo.properties.shape.length===1
@@ -811,17 +772,17 @@ RiverTrail.compiler.codeGen = (function() {
                     //
                     var elements = rhs.typeInfo.getOpenCLShape().reduce(function (a,b) { return a*b;});
                     if(rhs.typeInfo.properties.addressSpace === "__global") {
-                        s = "__global " + rhs.typeInfo.OpenCLType + " " + boilerplate.localResultName + "_g" + " = " +  oclExpression(rhs) + ";";
+                        s = "__global " + rhs.typeInfo.OpenCLType + " tempResult_g = " +  oclExpression(rhs) + ";";
                         s += " int _idx1; ";
                         s += "for ( _idx1 = 0; _idx1 < " + elements + "; _idx1++) {"; 
-                        s += " retVal[_idx1] = " + boilerplate.localResultName + "_g" + "[_idx1]; }";
+                        s += " retVal[_idx1] = tempResult_g[_idx1]; }";
                     }
                     else {
                         // arbitrary expression, possibly a nested array identifier
                         var source = rhs;
                         var sourceType = source.typeInfo;
                         var sourceShape = sourceType.getOpenCLShape();
-                        s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
+                        s = "tempResult = " + oclExpression(rhs) + ";";
                         var maxDepth = sourceShape.length;
                         var i; var idx; var indexString = ""; var post_parens = "";
                         s += "{ int _writeback_idx = 0 ;";
@@ -832,7 +793,7 @@ RiverTrail.compiler.codeGen = (function() {
                             indexString += "[" + idx + "]";
                             post_parens += "}}";
                         }
-                        s += " retVal" + indexString + " = " + "((" + sourceType.OpenCLType + ")" +  boilerplate.localResultName + ")" + indexString + ";" + post_parens + "}";
+                        s += " retVal" + indexString + " = " + "((" + sourceType.OpenCLType + ")tempResult)" + indexString + ";" + post_parens + "}";
                     }
                 }
                 s = s + "if (_FAIL) {*_FAILRET = _FAIL;}";
@@ -893,19 +854,19 @@ RiverTrail.compiler.codeGen = (function() {
             };
             if (rhs.typeInfo.isScalarType()) {
                 // scalar result
-                s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
-                s = s + "retVal[_writeoffset] = " + boilerplate.localResultName + ";"; 
+                s = "tempResult = " + oclExpression(rhs) + ";";
+                s = s + "retVal[_writeoffset] = tempResult;"; 
             } else {
                 // direct write but only for flat arrays i.e.,
                 // rhs.typeInfo.properties.shape.length===1
                 if (isArrayLiteral(rhs)) {
                     s = s + "{ int writeidx = 0; " + buildWrite("(retVal + _writeoffset)", "writeidx", rhs) + "}";
                 } else if(rhs.typeInfo.properties.addressSpace === "__global") {
-                    s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
+                    s = "tempResult = " + oclExpression(rhs) + ";";
                     var elements = rhs.typeInfo.getOpenCLShape().reduce(function (a,b) { return a*b;});
                     s += "{ int _writeback_idx = 0 ;";
                     s += "for (_writeback_idx = 0; _writeback_idx < " + elements + "; " + "_writeback_idx++) {"; 
-                    s += " retVal[_writeoffset + _writeback_idx]  = " + boilerplate.localResultName + "[_writeback_idx] ; } }";
+                    s += " retVal[_writeoffset + _writeback_idx]  = tempResult[_writeback_idx] ; } }";
                 }
                 else if(rhs.typeInfo.isObjectType("InlineObject")) {
                     var fields = rhs.typeInfo.properties.fields;
@@ -942,7 +903,7 @@ RiverTrail.compiler.codeGen = (function() {
                     var source = rhs;
                     var sourceType = source.typeInfo;
                     var sourceShape = sourceType.getOpenCLShape();
-                    s = boilerplate.localResultName + " = " + oclExpression(rhs) + ";";
+                    s = "tempResult = " + oclExpression(rhs) + ";";
                     var maxDepth = sourceShape.length;
                     var i; var idx; var indexString = ""; var post_parens = "";
                     s += "{ int _writeback_idx = 0 ;";
@@ -954,8 +915,7 @@ RiverTrail.compiler.codeGen = (function() {
                         post_parens += "}}";
                     }
                     s += " retVal[_writeoffset + _writeback_idx++]  = " + "((" +
-                    sourceType.OpenCLType + ")" + boilerplate.localResultName +
-                    ")" + indexString + ";" + post_parens + "}";
+                    sourceType.OpenCLType + ")tempResult)" + indexString + ";" + post_parens + "}";
                 }
             }
             s = s + "if (_FAIL) {*_FAILRET = _FAIL;}";
@@ -1266,7 +1226,7 @@ RiverTrail.compiler.codeGen = (function() {
         } else if (ast.type === NUMBER) {
             s = s + toCNumber(ast.value, ast.typeInfo);
         } else if (ast.type === THIS) {
-            s = s + " tempThis "; // SAH: this should come from the boilerplate but that cannot be passed around easily
+            s = s + " tempThis ";
 
         } else if (ast.type === CALL) {
             // Deal with some intrinsics if found, otherwise just make the call.
@@ -1756,7 +1716,7 @@ RiverTrail.compiler.codeGen = (function() {
                 s = s + RENAME(ast.value);
                 break;
             case THIS:
-                s = s + " tempThis "; // This should come from the boilerplate but that cannot be passed around easily
+                s = s + " tempThis ";
                 break;
             case DOT:
                 if (ast.children[0].typeInfo.isObjectType("InlineObject")) {
