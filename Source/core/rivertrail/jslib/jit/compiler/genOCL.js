@@ -177,7 +177,7 @@ RiverTrail.compiler.codeGen = (function() {
                 // The second relative argument is an index.
                 argName = RENAME(funDecl.params[1]);
                 argType = funDecl.typeInfo.parameters[1];
-                s = s + " "+argType.OpenCLType+" "+ argName+" = _id_0;";
+                s = s + " "+argType.OpenCLType+" "+ argName+" = _id;";
             }
             if (funDecl.params.length === 3) {
                 // The third relative argument is the source holding the elements.
@@ -410,28 +410,13 @@ RiverTrail.compiler.codeGen = (function() {
             return s;
         }
 
-        // It is used below and in the stmt("return") logic above.
-
-        // Input
-        //    source      - a string representing the elemental function source or the ast from parsing the string.
-        //    pa          - the parallel array being worked on, used to get type from typed array.
-        //    rankOrShape - rank of iteration space, or in the case of comprehensions the shape of the iteration space
-        //    construct   - construct to be compiled
-        function genKernelHelper (ast, pa, rankOrShape, construct) {
+        function genKernelHelper (ast, construct) {
             "use strict";
 
             var s = ""; // The kernel string
-            var name = ast.name;
-            var i = 0;
-            var strides;
-            var thisIsScalar;
-            var iterSpace;
+            var i;
             var stride;
-            var paShape;
-            var formals;
-            var rank;
             var funDecl;
-            var thisSymbolType;
 
             funDecl = ast;
             if (funDecl.value != "function") {
@@ -442,7 +427,7 @@ RiverTrail.compiler.codeGen = (function() {
             //var globalInlineObjectTypes = RiverTrail.TypeInference.globalInlineObjectTypes;
             var numGlobalObjTypes = globalInlineObjectTypes.length;
 
-            for(var i = 0; i < numGlobalObjTypes; i++) {
+            for(i = 0; i < numGlobalObjTypes; i++) {
                 s += "typedef struct struct_" + globalInlineObjectTypes[i].baseType + " { ";
                 var fields = globalInlineObjectTypes[i].properties.fields;
                 for (var idx in fields) {
@@ -462,32 +447,12 @@ RiverTrail.compiler.codeGen = (function() {
             // add the special return parameter used to detect failure
             s = s + "__global int *_FAILRET, ";
 
-            if (boilerplate.hasThis) {
-                // derive iteration space and type information from rankOrShape and this
-                thisSymbolType = funDecl.typeInfo.parameters[0];
-                rank = rankOrShape;
-                thisIsScalar = thisSymbolType.isNumberType();
-                paShape = pa.getShape();
-                iterSpace = paShape.slice(0,rank);
-                // add this formal parameter
-                if (thisIsScalar && (construct === "map")) {
-                    // for map, the this argument has a different type than the this inside the kernel
-                    // so we have to lift it to a pointer if it isn't one yet.
-                    s = s + " __global " + thisSymbolType.OpenCLType + "* opThisVect, ";
-                } else {
-                    s = s + " __global " + thisSymbolType.OpenCLType + " opThisVect, ";
-                }
-            } else {
-                // special case where we do not have this to derive iteration space. Here, rankOrShape
-                // will be the shape of the iteration space, so use rankOrShape as iteration space and 
-                // its length as rank
-                iterSpace = rankOrShape;
-                rank = rankOrShape.length;
-            }
+            if (construct === "mapPar") {
+                // add source formal parameter
+                s = s + " __global " + RiverTrail.Helper.stripToBaseType(funDecl.typeInfo.parameters[0]) + "* _source, ";
 
-            // Dump the standard output parameters.
-            // Note that result.openCLType is the type of the result of a single iteration!
-            if ((construct === "combine") || (construct === "map") || (construct === "comprehension") || (construct === "comprehensionScalar")) {      
+                // Dump the standard output parameters.
+                // Note that result.openCLType is the type of the result of a single iteration!
                 if(funDecl.typeInfo.result.isScalarType() || funDecl.typeInfo.result.isArrayishType()) {
                     s = s + "__global " + getReturnFormalType(funDecl.typeInfo.result) + " retVal";
                 }
@@ -511,72 +476,41 @@ RiverTrail.compiler.codeGen = (function() {
             // add declaration of bounds checks helper variables
             s = s + "int _sel_idx_tmp; int _FAIL = 0;";
 
-            // add code to declare id_x for each iteration dimension
-            for (i = 0; i < rank; i++) {
-                s = s + "int _id_" + i + " = (int)get_global_id(" + i + ");";
-            }
+            // add code to declare id
+            s = s + "int _id = (int)get_global_id(0);";
 
             // add code to compute the offset 'writeoffset' into flat result vector
             if (ast.typeInfo.result.isArrayishType() || ast.typeInfo.result.isScalarType()) {
-                s = s + "int _writeoffset = 0";
                 stride = ast.typeInfo.result.getOpenCLShape().reduce(function(a,b) { return (a*b);}, 1);
-                for (i = rank-1; i>=0; i--) {
-                    s = s + "+" + stride + " * " + "_id_" + i;
-                    stride = stride * iterSpace[i];
-                }
-                s = s + ";";
+                s = s + "int _writeoffset = " + stride + " * _id;";
             }
             else if (ast.typeInfo.result.isObjectType("InlineObject")) {
-                stride = 0;
                 var fields = ast.typeInfo.result.properties.fields;
                 if(!fields)  reportError("Invalid type definition for returned object");
                 for(var idx in fields) {
-                    s = s + "int _writeoffset_" + idx + " = 0";
                     stride = fields[idx].getOpenCLShape().reduce(function(a,b) { return (a*b);}, 1);
-                    //stride += fields[idx].getOpenCLShape().reduce(function(a,b) {return (a*b);}, 1);
-                    for (i = rank-1; i>=0; i--) {
-                        s = s + "+" + stride + " * " + "_id_" + i;
-                        stride = stride * iterSpace[i];
-                    }
-                    s = s + ";";
+                    s = s + "int _writeoffset_" + idx + " = " + stride + " * _id;";
                 }
             }
 
             // add code to compute offset 'readoffset' into flat vector when using map
-            if (construct === "map") {
-                if(ast.typeInfo.result.isObjectType("InlineObject")) {
-                    reportError("Not supported");
+            if (construct === "mapPar") {
+                if (ast.typeInfo.parameters[0].isArrayishType() || ast.typeInfo.parameters[0].isScalarType()) {
+                    stride = ast.typeInfo.parameters[0].getOpenCLShape().reduce(function(a,b) { return (a*b);}, 1);
+                    s = s + "int _readoffset = " + stride + " * _id;";
+                } else {
+                    // This really should not happen. The source array can only
+                    // contain scalar or arrayish elements, otherwise we cannot
+                    // pass the type inference stage.
+                    reportBug("Unknown element type");
                 }
-                else {
-                    s = s + "int _readoffset = 0";
-                    var resShape = ast.typeInfo.result.getOpenCLShape();
-                    if ((paShape.length === rank + resShape.length) &&
-                        (resShape.every(function(e,idx) { return (e === paShape[idx+rank]);}))) {
-                        // result has same shape as input, so the offsets are the same
-                        s = s + " + _writeoffset"
-                    } else {
-                        strides = pa.strides.slice(0,rank);
-                        for (i=0; i<rank; i++) {
-                            s = s + "+ _id_" + i + " * " + strides[i];
-                        }
-                    }
-                }
-                s = s + ";";
-            }
-
-            // Add code to declare tempThis
-            if (boilerplate.hasThis) {
-                var thisShape = thisSymbolType.getOpenCLShape();
-                s = s + (thisIsScalar ? " " : " __global ") + thisSymbolType.OpenCLType + " tempThis;";
-
-                // initialise tempThis
-                s = s + " tempThis = " + (thisIsScalar ? "(*" : "(") + "opThisVect);"; 
             }
 
             // declare tempResult
             s = s + funDecl.typeInfo.result.OpenCLType + " tempResult;";
-            // define index
-            s = s + genFormalRelativeArg(funDecl, construct); // The first param's name.
+            // define names which appear in the formal list of the JS elemental
+            // function but are missing in the signature of the OpenCL kernel
+            s = s + genFormalRelativeArg(funDecl, construct);
 
             // Generate the statements;
             var body = oclStatements(funDecl.body);
