@@ -1028,7 +1028,6 @@ RiverTrail.compiler.codeGen = (function() {
         }
         return "(" + base_type + ")";
     }
-    //This is the next thing to do..... Deal today with return this.get(iv); The return calls oclExpression 
 
     function oclExpression(ast) {
         "use strict";
