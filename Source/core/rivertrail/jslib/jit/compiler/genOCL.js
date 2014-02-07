@@ -930,42 +930,34 @@ RiverTrail.compiler.codeGen = (function() {
     }
 
     //
-    // Given we have a source and an arrayOfIndices. If the result is
-    // a primitive type we return it. If it is an array then we generate a
-    // pointer to the start of that array.
+    // Given we have a source and an index. If the result is a primitive type we
+    // return it. If it is an array then we generate a pointer to the start of
+    // that array.
     //
 
-    var compileSelectionOperation = function (ast, source, arrayOfIndices) {
+    var compileSelectionOperation = function (ast, source, index) {
         "use strict";
 
         var s = "";
-        var i;
-        var elemSize;
         var stride;
-        var indexLen;
-        var dynamicSel;
         var rangeInfo;
-        // If arrayOfIndices has an inferredType of an array (dimSize > 0) then it is get([x, y...]);
-        // If that is the case then elemRank will be the sourceRank - the length of the argument.
         var sourceType = source.typeInfo;
         var sourceShape = sourceType.getOpenCLShape();
-        var sourceRank = sourceShape.length;
         var elemRank = ast.typeInfo.getOpenCLShape().length;
         if (sourceType.isObjectType("JSArray")) {
             // special treatment for JavaScript encoded arrays
-            rangeInfo = arrayOfIndices.rangeInfo;
+            rangeInfo = index.rangeInfo;
             if (elemRank === 0) {
                 // scalar case 
-                s = s + "__JS_array_sel_S(" + oclExpression(source) + ", " + wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(arrayOfIndices), ast) + ")";
+                s = s + "__JS_array_sel_S(" + oclExpression(source) + ", " + wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(index), ast) + ")";
             } else {
-                s = s + "__JS_array_sel_A(" + oclExpression(source) + ", " + wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(arrayOfIndices), ast) + ", " + sourceShape[1] + ", &_FAIL)";
+                s = s + "__JS_array_sel_A(" + oclExpression(source) + ", " + wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(index), ast) + ", " + sourceShape[1] + ", &_FAIL)";
             }
         } else {
             // C style arrays
-            var isParallelArray = sourceType.isObjectType("ParallelArray");
             var isGlobal = (sourceType.getOpenCLAddressSpace() === "__global");
             if (elemRank !== 0) {
-                if(isParallelArray || isGlobal) {
+                if(isGlobal) {
                     // The result is a pointer to a sub dimension.
                     s = s + "( &";
                 }
@@ -973,47 +965,16 @@ RiverTrail.compiler.codeGen = (function() {
                     s = s + "(";
                 }
             }
-            elemSize = ast.typeInfo.getOpenCLShape().reduce( function (p,n) { return p*n;}, 1);
-            if(isParallelArray || isGlobal) {
+            stride = ast.typeInfo.getOpenCLShape().reduce( function (p,n) { return p*n;}, 1);
+            rangeInfo = index.rangeInfo;
+            if(isGlobal) {
                 s = s + " ( " + oclExpression(source) + "[0 ";
+                s = s + " + " + stride + " * ("+wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(index), ast) + ")";
+                s = s + "])";
             }
             else {
                 s = s + oclExpression(source) ;
-            }
-
-            stride = elemSize;
-
-            if (arrayOfIndices.type !== LIST) {
-                // we have a single scalar index from an INDEX op
-                rangeInfo = arrayOfIndices.rangeInfo;
-                if(isParallelArray || isGlobal) {
-                    s = s + " + " + stride + " * ("+wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(arrayOfIndices), ast) + ")";
-                }
-                else {
-                    s = s + "[" + wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(arrayOfIndices), ast) + "]";
-                }
-            } else {
-                // this is a get
-                if (arrayOfIndices.children[0] && (arrayOfIndices.children[0].type === ARRAY_INIT)) { 
-                    // We might have get([0,0]); instead of get(0,0);
-                    arrayOfIndices = arrayOfIndices.children[0];
-                }
-                rangeInfo = arrayOfIndices.rangeInfo;
-                // the first argument could be an index vector, in which case we have to produce dynamic
-                // selection code
-                dynamicSel = arrayOfIndices.children[0].typeInfo.getOpenCLShape().length !== 0;
-                for (i = sourceRank - elemRank - 1; i >= 0; i--) { // Ususally only 2 or 3 dimensions so ignore complexity
-                    s = s + " + " + stride + " * ("
-                        if (dynamicSel) {
-                            s = s + wrapIntoCheck((rangeInfo ? rangeInfo.get(0).get(i) : undefined), sourceShape[i], oclExpression(arrayOfIndices.children[0], ast) + "[" + i + "]") + ")";
-                        } else {
-                            s = s + wrapIntoCheck((rangeInfo ? rangeInfo.get(i) : undefined), sourceShape[i], oclExpression(arrayOfIndices.children[i]), ast) + ")";
-                        }
-                    stride = stride * sourceType.getOpenCLShape()[i];
-                }
-            }
-            if(isParallelArray || isGlobal) {
-                s = s + "])";
+                s = s + "[" + wrapIntoCheck(rangeInfo, sourceShape[0], oclExpression(index), ast) + "]";
             }
 
             if (elemRank !== 0) {
