@@ -850,32 +850,20 @@ RiverTrail.compiler.codeGen = (function() {
     // Given a series of mem buffers representing levels of a nested array,
     // this function initializes the pointers in the upper levels to point
     // to the right mem buffer.
-    // When setInitialValues is 'true', it also sets the initial values at
-    // the leaves of the array
 
-    function initNestedArrayStructure(ast, setInitialValues) {
-        if(setInitialValues === true && ast.initializer === undefined) {
-            reportError("Invalid value initializer while creating array", ast)
-        }
+    function initNestedArrayStructure(ast) {
         var sourceShape = ast.typeInfo.getOpenCLShape();
         var maxDepth = sourceShape.length;
         var s = "";
         var redu = 1; var rhs = ""; var lhs = "";
-        for(var i = 0 ; i < maxDepth; i++) {
-            if((i === maxDepth - 1) && !setInitialValues)
-                break;
+        for(var i = 0 ; i < maxDepth - 1; i++) {
             for(var j = 0; j < sourceShape[i]*redu; j++) {
                 lhs = "(" + getPointerCast(i, maxDepth, ast.typeInfo.OpenCLType) +
                     ast.memBuffers.list[i] + ")"
                     + "[" + j + "]";
-                if(i === maxDepth-1 && setInitialValues) {
-                    rhs = ast.initializer;
-                }
-                else {
-                    rhs = "&((" + getPointerCast(i+1, maxDepth, ast.typeInfo.OpenCLType)
-                    + ast.memBuffers.list[i+1]
-                    + ")" + "[" + j*sourceShape[i+1] + "]" + ")";
-                }
+                rhs = "&((" + getPointerCast(i+1, maxDepth, ast.typeInfo.OpenCLType)
+                + ast.memBuffers.list[i+1]
+                + ")" + "[" + j*sourceShape[i+1] + "]" + ")";
                 s += lhs + " = " + rhs + " ,";
             }
             redu = redu*sourceShape[i];
@@ -1174,7 +1162,7 @@ RiverTrail.compiler.codeGen = (function() {
                 else if(!(ast.typeInfo.isScalarType()) && ast.typeInfo.getOpenCLShape().length > 1) {
                     // Create structure if this call is going to return a nested
                     // array
-                    s += "(" + initNestedArrayStructure(ast, false);
+                    s += "(" + initNestedArrayStructure(ast);
                     post_parens = ")";
                     // NOTE: use renamed dispatch name here!
                     s = s + RENAME(ast.children[0].dispatch) + "( &_FAIL" + (actuals !== "" ? ", " : "") + actuals;
