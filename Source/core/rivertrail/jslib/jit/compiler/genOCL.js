@@ -1010,9 +1010,6 @@ RiverTrail.compiler.codeGen = (function() {
         if (jsMethod === "round") {
             return "floor(.5 + " + oclExpression(ast.children[1]) + ")";
         }
-        if (jsMethod === "atan2") {
-            return "atan2(" + oclExpression(ast.children[1]) + "," + oclExpression(ast.children[1]) + ")";
-        }
         if (jsMethod === "random") { // JS wants something between 0 and 1.
             return "(rand()/(RAND_MAX-1))"; // -1 so that we can never get 1 which JS random nevers returns.
         }
