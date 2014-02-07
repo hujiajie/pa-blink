@@ -816,13 +816,6 @@ RiverTrail.compiler.codeGen = (function() {
         // -------- End of genStatement helper functions. --------------
         //-------------------------------------------------------------------------------------------------
 
-    function genOCL(ast) {
-       "use strict";
-        var s = "";
-        console.log("Call to genOCL line 1456 that probable shouldn't be there");
-        return s;
-    }
-
     function oclStatements(statements) {
         "use strict";
         var i;
