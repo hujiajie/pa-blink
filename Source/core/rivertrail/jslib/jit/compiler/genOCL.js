@@ -219,8 +219,9 @@ RiverTrail.compiler.codeGen = (function() {
 
             var returnType = ast.typeInfo.result.OpenCLType;
 
-            if (!(ast.typeInfo.result.isScalarType())) { // This assumes it is an array.
-                // If the return type of the result is an Array then a pointer to it is passed in.
+            if (!(ast.typeInfo.result.isScalarType())) {
+                // If the return type of the result is an Array or an inline
+                // object then a pointer to it is passed in.
                 s = s + ", " + returnType + " retVal";
             }
             s = s + " ) ";
@@ -601,87 +602,89 @@ RiverTrail.compiler.codeGen = (function() {
                     s = s + "{" + buildWrite("retVal", "", rhs) + "}";
                 }
                 else if(rhs.typeInfo.isObjectType("InlineObject")) {
-                    var numProps = 0;
-                    var nonScalarResultContainer = "tempResult_p";
-                    var scalarResultContainer = "tempResult_s";
-                    var propResultContainer = "";
                     for(var idx in rhs.typeInfo.properties.fields) {
                         var propType = rhs.typeInfo.properties.fields[idx];
                         var is_scalar_property = propType.isScalarType();
-                        propResultContainer = is_scalar_property ? scalarResultContainer : nonScalarResultContainer;
+                        var propResultContainer = is_scalar_property ? "tempResult_s" : "tempResult_p";
                         // Declare result containers in a block scope for each
                         // property in the object
-                        s += is_scalar_property ? ("{ double " + scalarResultContainer + ";") : ("{ void * " + nonScalarResultContainer + ";");
-                        if(!is_scalar_property && propType.properties.addressSpace === "__global") {
-                           s += "{ __global " + propType.OpenCLType + " " + nonScalarResultContainer + "_g";
-                               + "_g" + " = " +  oclExpression(rhs.children[numProps].children[1]) + ";";
-                           s += " int _idx1; ";
-                           s += "for ( _idx1 = 0; _idx1 < " + elements + "; _idx1++) {";
-                           s += " retVal[_idx1] = " + nonScalarResultContainer + "_g" + "[_idx1]; } }";
-                           //TODO: What does numProps do ? Check this
-                           numProps++;
-                        }
-                        else {
-                            // The order of properties in the object type being
-                            // returned may be different than in the actual expression
-                            // being returned. So we should map between these types.
-                            var prop_index = 0;
-                            while(1) {
-                                if(rhs.children[prop_index++].children[0].value === idx) {
-                                    s +=  propResultContainer + " = " + oclExpression(rhs.children[prop_index-1].children[1]) + "; ";
-                                    break;
-                                }
-                                if(prop_index >= rhs.typeInfo.properties.fields.length) {
-                                    reportError("Statement return: Field", idx, "could not be found! ", ast);
-                                }
+                        s += "{ ";
+                        if (is_scalar_property) {
+                            s += "double";
+                        } else {
+                            if (propType.properties.addressSpace === "__global") {
+                                s += "__global " + propType.OpenCLType;
+                            } else {
+                                s += "void *";
                             }
-                            // getOpeCLShape() already returns an empty array for scalars
-                            //var propShape = !(is_scalar_property) ? propType.getOpenCLShape() : [];
-                            var propShape = propType.getOpenCLShape();
-                            var propShapeLength = propShape.length;
-                            var i; var index; var indexString = ""; var post_parens = "";
-                            for( i = 0; i < propShapeLength; i++) {
-                                index = "_idx" + i;
-                                s += " { int " + index + "; ";
-                                s += "for (" + index + "= 0; " + index + " < " + propShape[i] + "; " + index + "++) {";
-                                indexString += "[" + index + "]";
-                                post_parens += "}}";
-                            }
-                            s += " (retVal" + "->" + idx + ")" + indexString + " = " + "((" + propType.OpenCLType + ")" +  propResultContainer + ")" + indexString + ";" + post_parens;
                         }
+                        s += " " + propResultContainer + " = ";
+                        // The order of properties in the object type being
+                        // returned may be different than in the actual expression
+                        // being returned. So we should map between these types.
+                        var prop_index = 0;
+                        while(1) {
+                            if(rhs.children[prop_index++].children[0].value === idx) {
+                                s += oclExpression(rhs.children[prop_index - 1].children[1]) + "; ";
+                                break;
+                            }
+                            if(prop_index >= rhs.typeInfo.properties.fields.length) {
+                                reportError("Statement return: Field", idx, "could not be found! ", ast);
+                            }
+                        }
+                        // getOpeCLShape() returns an empty array for scalars
+                        var propShape = propType.getOpenCLShape();
+                        var propShapeLength = propShape.length;
+                        var i; var index; var indexString = ""; var post_parens = "";
+                        if (!is_scalar_property && propType.properties.addressSpace === "__global") {
+                            s += "int _src_idx = 0; ";
+                        }
+                        for (i = 0; i < propShapeLength; i++) {
+                            index = "_idx" + i;
+                            s += "for (int " + index + "= 0; " + index + " < " + propShape[i] + "; " + index + "++) {";
+                            indexString += "[" + index + "]";
+                            post_parens += "}";
+                        }
+                        if (!is_scalar_property && propType.properties.addressSpace === "__global") {
+                            s += " (" + getPointerCast(0, propShapeLength, propType.OpenCLType) + "(retVal" + "->" + idx + "))" + indexString + " = "
+                                + propResultContainer + "[_src_idx++]";
+                        } else {
+                            s += " (retVal" + "->" + idx + ")" + indexString + " = "
+                                + "((" + propType.OpenCLType + ")" +  propResultContainer + ")" + indexString;
+                        }
+                        s += ";" + post_parens;
                         s += "}"; // End block scope for declarations of result containers
                     }
                 }
                 else {
+                    var source = rhs;
+                    var sourceType = source.typeInfo;
+                    var sourceShape = sourceType.getOpenCLShape();
+                    var maxDepth = sourceShape.length;
+                    var i; var idx; var indexString = ""; var post_parens = "";
+
                     // We might be returning a global (possibly nested array).
                     // Do the appropriate copy: Global arrays are always flat,
                     // local nested arrays are non-flat.
                     //
-                    var elements = rhs.typeInfo.getOpenCLShape().reduce(function (a,b) { return a*b;});
-                    if(rhs.typeInfo.properties.addressSpace === "__global") {
-                        s = "__global " + rhs.typeInfo.OpenCLType + " tempResult_g = " +  oclExpression(rhs) + ";";
-                        s += " int _idx1; ";
-                        s += "for ( _idx1 = 0; _idx1 < " + elements + "; _idx1++) {"; 
-                        s += " retVal[_idx1] = tempResult_g[_idx1]; }";
-                    }
-                    else {
-                        // arbitrary expression, possibly a nested array identifier
-                        var source = rhs;
-                        var sourceType = source.typeInfo;
-                        var sourceShape = sourceType.getOpenCLShape();
+                    if (sourceType.properties.addressSpace === "__global") {
+                        s = "__global " + sourceType.OpenCLType + " tempResult_g = " +  oclExpression(rhs) + ";";
+                        s += " int _src_idx = 0; ";
+                    } else {
                         s = "tempResult = " + oclExpression(rhs) + ";";
-                        var maxDepth = sourceShape.length;
-                        var i; var idx; var indexString = ""; var post_parens = "";
-                        s += "{ int _writeback_idx = 0 ;";
-                        for(i =0 ;i<maxDepth;i++) {
-                            idx = "_idx" + i;
-                            s += " { int " + idx + "; ";
-                            s += "for (" + idx + "= 0; " + idx + " < " + sourceShape[i] + "; " + idx + "++) {"; 
-                            indexString += "[" + idx + "]";
-                            post_parens += "}}";
-                        }
-                        s += " retVal" + indexString + " = " + "((" + sourceType.OpenCLType + ")tempResult)" + indexString + ";" + post_parens + "}";
                     }
+                    for (i = 0; i < maxDepth; i++) {
+                        idx = "_idx" + i;
+                        s += "for (int " + idx + "= 0; " + idx + " < " + sourceShape[i] + "; " + idx + "++) {";
+                        indexString += "[" + idx + "]";
+                        post_parens += "}";
+                    }
+                    if (sourceType.properties.addressSpace === "__global") {
+                        s += " (" + getPointerCast(0, maxDepth, sourceType.OpenCLType) + "retVal)" + indexString + " = tempResult_g[_src_idx++]";
+                    } else {
+                        s += " retVal" + indexString + " = " + "((" + sourceType.OpenCLType + ")tempResult)" + indexString;
+                    }
+                    s += ";" + post_parens;
                 }
                 s = s + "if (_FAIL) {*_FAILRET = _FAIL;}";
                 s = s + " return retVal; ";

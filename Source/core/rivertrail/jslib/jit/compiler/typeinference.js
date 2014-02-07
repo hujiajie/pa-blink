@@ -1259,6 +1259,24 @@ RiverTrail.Typeinference = function () {
                         }
                         // tie the arguments to the function call
                         ast.callFrame = new FCall(argT, fun.flowFrame, resType.clone(), ast);
+                        // if the return value is an object, it will be copied to the private address space by the generated code
+                        // therefore, we need to rectify the type info at the caller side
+                        if (!ast.callFrame.result.isScalarType()) {
+                            if (ast.callFrame.result.isArrayishType()) { // array
+                                // update the address space and OpenCLType
+                                ast.callFrame.result.setAddressSpace("__private");
+                                ast.callFrame.result.updateOpenCLType();
+                            } else { // inline object
+                                for (var idx in ast.callFrame.result.properties.fields) {
+                                    var field = ast.callFrame.result.properties.fields[idx];
+                                    if (field.isArrayishType()) {
+                                        // update the address space and OpenCLType
+                                        field.setAddressSpace("__private");
+                                        field.updateOpenCLType();
+                                    }
+                                }
+                            }
+                        }
                         argT.forEach(function(arg, idx) {arg.registerParamFlow(new FParam(idx, ast.callFrame))});
                         // remember how often this instance is used
                         fun.flowFrame.uses++;
