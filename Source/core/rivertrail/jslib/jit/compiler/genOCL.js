@@ -1032,61 +1032,28 @@ RiverTrail.compiler.codeGen = (function() {
     function oclExpression(ast) {
         "use strict";
         var s = " ";
-        var i, ii;
-        var arrayOfIndices;
-        var stride;
-        var elemSize;
-        var elemRank;
-        var sourceRank;
-        var indexLen;
         if (ast.type === CAST) {  // deals with adding things like (float *)mumble) to generated code. 
             if (!ast.typeInfo.isScalarType()) {
                 reportError("non-scalar cast encountered", ast);
             }
             s = "((" + ast.typeInfo.OpenCLType + ")" 
                 + oclExpression(ast.children[0]) + ")";
-            //}
-        } else if (ast.type === FLATTEN) {
-            if (ast.typeInfo.getOpenCLShape().length > 1) {
-                reportError("flattening of nested arrays not yet implemented.", ast.children[0]);
-            }
-            s = s + oclExpression(ast.children[0]);
         } else if (ast.type === NUMBER) {
             s = s + toCNumber(ast.value, ast.typeInfo);
         } else if (ast.type === THIS) {
-            s = s + " tempThis ";
-
+            reportError("this not supported", ast);
         } else if (ast.type === CALL) {
             // Deal with some intrinsics if found, otherwise just make the call.
             if (ast.children[0].type === DOT ) {
-                var lhs = ast.children[0].children[0]; // the object
-                var rhs = ast.children[0].children[1]; // the method call
-
-                if (rhs.value === "get") {
-                    s = s + compileSelectionOperation(ast, ast.children[0].children[0], ast.children[1]);
-                } else if ((rhs.value === "getShape") && (lhs.typeInfo.isObjectType("ParallelArray"))) {
-                    // create shape literal
-                    s = s + "(";
-                    var lhsShape = lhs.typeInfo.properties.shape;
-                    for (var rank = 0; rank < lhsShape.length; rank++) {
-                        s = s + "((int*)"+ast.allocatedMem+")["+rank+"]="+lhsShape[rank]+",";
-                    }
-                    s = s + "(int*)"+ast.allocatedMem+")";
-                } else if (lhs.value === "Math") {
+                if (ast.children[0].children[0].value === "Math") {
                     s = s + mathOCLMethod(ast);
-                } else if (lhs.value === "RiverTrailUtils") {
-                    s += "(" + initNestedArrayStructure(ast, true);
-                    s = s + "(" + ast.typeInfo.OpenCLType + ")(" + ast.allocatedMem + ") )";
                 } else {
-                    s = s + " 628 oclExpression not complete probable some sort of method call ";
+                    s = s + "oclExpression not complete probable some sort of method call ";
                 }
             } else { // It is not a method call.
-                var actuals = "";
-                actuals = oclExpression(ast.children[1]);
-                var post_parens = "";
+                var actuals = oclExpression(ast.children[1]);
                 if(ast.typeInfo.name === "InlineObject") {
                     var rootBuffer = ast.memBuffers.__root;
-                    var root_index = 0;
                     s += "(";
                     for(var idx in ast.typeInfo.properties.fields) {
                         var propType = ast.typeInfo.properties.fields[idx];
@@ -1096,8 +1063,7 @@ RiverTrail.compiler.codeGen = (function() {
                         // structure if needed
                         var propShape = propType.getOpenCLShape();
                         var maxDepth = propShape.length;
-                        var post_parens = "";
-                        var redu = 1; var rhs = ""; var lhs = ""; post_parens = ")";
+                        var redu = 1; var rhs = ""; var lhs = "";
                         for(var i = 0 ; i < maxDepth-1; i++) {
                             for(var j = 0; j < propShape[i]*redu; j++) {
                                 lhs = "(" + getPointerCast(i, maxDepth, propType.OpenCLType) +
@@ -1120,14 +1086,13 @@ RiverTrail.compiler.codeGen = (function() {
                     // Create structure if this call is going to return a nested
                     // array
                     s += "(" + initNestedArrayStructure(ast);
-                    post_parens = ")";
                     // NOTE: use renamed dispatch name here!
                     s = s + RENAME(ast.children[0].dispatch) + "( &_FAIL" + (actuals !== "" ? ", " : "") + actuals;
                     if (!(ast.typeInfo.isScalarType())) {
                         s = s + ", (" + ast.typeInfo.OpenCLType + ") " + ast.allocatedMem;
                     }
                     s = s + ")";
-                    s = s + post_parens; // Close the comma list.
+                    s = s + ")"; // Close the comma list.
                 }
                 else {
                     // NOTE: use renamed dispatch name here!
@@ -1136,13 +1101,11 @@ RiverTrail.compiler.codeGen = (function() {
                         s = s + ", (" + ast.typeInfo.OpenCLType + ") " + ast.allocatedMem;
                     }
                     s = s + ")";
-                    s = s + post_parens;
                 }
             }
         } else {
             // Everything else can be dealt with according to the more straight forward translation.
             s = oclStatement(ast);
-
         }
 
         return s;
