@@ -1040,8 +1040,6 @@ RiverTrail.compiler.codeGen = (function() {
                 + oclExpression(ast.children[0]) + ")";
         } else if (ast.type === NUMBER) {
             s = s + toCNumber(ast.value, ast.typeInfo);
-        } else if (ast.type === THIS) {
-            reportError("this not supported", ast);
         } else if (ast.type === CALL) {
             // Deal with some intrinsics if found, otherwise just make the call.
             if (ast.children[0].type === DOT ) {
@@ -1182,13 +1180,6 @@ RiverTrail.compiler.codeGen = (function() {
             s += "(";
         }
 
-
-        // From SEH There is a whole lot of code in here that has not be changed over to the genOCL code but at this point
-        // it only compiles the default loader program below.
-        // Using combine for a combinator.
-        // var pa = new ParallelArray([1,2,3]);
-        // var foo = function foo(iv) { return this.get(iv); };
-
         switch (ast.type) {
             case SCRIPT:
                 s=s+"SCRIPT TBD ";
@@ -1275,8 +1266,6 @@ RiverTrail.compiler.codeGen = (function() {
                     case IDENTIFIER:
                         // simple case of a = expr
                         if (ast.allocatedMem) {
-                            //console.log(ast.children[0].type, ast.children[0].value);
-                            //throw new Error("a memcopy would be required to compile this code.");
                             s += generateCopyExpression(RENAME(ast.children[0].value), ast);
                         } else {
                             s = s + "(" + RENAME(ast.children[0].value) + (ast.assignOp ? tokens[ast.assignOp] : "") + "= " + oclExpression(ast.children[1]) + ")"; // no ; because ASSIGN is an expression!
@@ -1308,7 +1297,6 @@ RiverTrail.compiler.codeGen = (function() {
                         reportBug("unhandled lhs in assignment");
                         break;
                 }
-                // leave the last type in the accu. Assignments can be expressions :)
                 break;
 
                 // 
@@ -1408,9 +1396,6 @@ RiverTrail.compiler.codeGen = (function() {
             case IDENTIFIER:
                 s = s + RENAME(ast.value);
                 break;
-            case THIS:
-                s = s + " tempThis ";
-                break;
             case DOT:
                 if (ast.children[0].typeInfo.isObjectType("InlineObject")) {
                     // TypeInference would have checked if this property selection
@@ -1426,7 +1411,6 @@ RiverTrail.compiler.codeGen = (function() {
                 break;
 
             case CAST:
-            case FLATTEN:
             case NUMBER:
                 s += oclExpression(ast);
                 break;
@@ -1439,7 +1423,7 @@ RiverTrail.compiler.codeGen = (function() {
 
                 // array operations
             case INDEX:
-                s += compileSelectionOperation(ast, ast.children[0], ast.children[1], true);
+                s += compileSelectionOperation(ast, ast.children[0], ast.children[1]);
                 break;
 
             case ARRAY_INIT:
@@ -1454,7 +1438,6 @@ RiverTrail.compiler.codeGen = (function() {
                     s += ", ";
                 }
                 s = s + "((" + ast.typeInfo.OpenCLType + ") " + ast.allocatedMem + "))";
-                //}
                 break;
 
                 // function application
@@ -1533,6 +1516,9 @@ RiverTrail.compiler.codeGen = (function() {
                 break;
 
                 // unsupported literals
+        case THIS:
+                reportError("this not yet implemented", ast);
+                break;
         case NULL:
                 reportError("null not yet implemented", ast);
                 break;
