@@ -1125,8 +1125,7 @@ RiverTrail.compiler.codeGen = (function() {
             s_tmp += "(";
             tempVars.push("/* Copying Assignment */ " + sourceAddressSpace + " " + sourceType + " " + source_tmp_name);
             s_tmp += source_tmp_name + " = " + oclExpression(ast.children[1]) + "," ;
-            var post_parens = ""; 
-            var redu = 1; var rhs = ""; var lhs = ""; post_parens = ")";
+            var redu = 1; var rhs = ""; var lhs = "";
             for(var i = 0 ; i < maxDepth; i++) {
                 for(var j = 0; j < sourceShape[i]*redu; j++) {
                     if(i===maxDepth-1) {
@@ -1163,13 +1162,6 @@ RiverTrail.compiler.codeGen = (function() {
         }
         return s_tmp;
     }
-
-    function pp(n, d, inLetHead) {
-        "use strict";
-        console.log("Get rid of this call line 1750.");
-        return oclStatement(n);
-    }
-
 
     //
     // This case statement uses Stephans...
