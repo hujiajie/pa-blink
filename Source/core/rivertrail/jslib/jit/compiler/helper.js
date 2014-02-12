@@ -64,7 +64,7 @@ RiverTrail.Helper = function () {
     }
 
     //
-    // Function and helpers to infer the type of a Parallel Array
+    // Function and helpers to infer the type of a Typed Array
     //
     // https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html
     // gives the following Equivalent C types
@@ -113,22 +113,10 @@ RiverTrail.Helper = function () {
             // SAH: I fail here as we do not know the type of this typed array. If it had
             //      a homogeneous type, the constructor would have converted it to a 
             //      typed array.
-            throw new TypeError("Cannot infer type for given Parallel Array data container.");
+            throw new TypeError("Cannot infer type for given data container.");
         } 
         return elementalType;
     };
-
-    function inferPAType(pa) {
-        var dimSize = pa.getShape();
-        var elementalType;
-        //
-        // if we already have type information, we return it.
-        // 
-        if (pa.elementalType === undefined) {
-            pa.elementalType = inferTypedArrayType(pa.data);
-        }
-        return {"dimSize": dimSize, "inferredType" : pa.elementalType};
-    }; 
 
     function stripToBaseType(s) {
         const regExp = /([a-zA-Z ]|\/\*|\*\/)*/;
@@ -169,11 +157,6 @@ RiverTrail.Helper = function () {
             return 8;
         }
     }
-    
-    var Integer = function Integer(value) {
-        this.value = value;
-        return this;
-    };
 
     // Returns a flat copy of a potentially nested JS Array "src"
     // We essentially do a depth first traversal of the nested array structure
@@ -282,13 +265,6 @@ RiverTrail.Helper = function () {
         return this;
     };
 
-    var compareObjectFields = function(f1, f2) {
-        if((f2.hasOwnProperty(idx) && f1[idx].equals(f2[idx]))) {
-            return true;
-        }
-        return false;
-    };
-
     // helper function that throws an exception and logs it if verboseDebug is on
     var debugThrow = function (e) {
         if (RiverTrail.compiler.verboseDebug) {
@@ -347,15 +323,6 @@ RiverTrail.Helper = function () {
         if (!ast.name) ast.name = "nameless";
         return ast;
     };
-
-    //
-    // helper to clone the AST for function specialisation. We do not aim to deep clone here, just the 
-    // structure of the spine as created by Narcissus. All extra annotations are discarded.
-    //
-    var cloneAST = function (ast) {
-        var funAsString = wrappedPP(ast);
-        return parseFunction(funAsString);
-    }
 
     //
     // tree copying --- can copy the AST up until after type inference
@@ -509,29 +476,11 @@ RiverTrail.Helper = function () {
                  ast.children.every(function (x) { return (x.type === IDENTIFIER) || isArrayLiteral(x);})));
     };
 
-    // allocate an aligned Typed Array
-    function allocateAlignedTA(template, length) {
-        if(!RiverTrail.compiler){
-            return new template(length);
-        }
-        var alignment = RiverTrail.compiler.openCLContext.alignmentSize;
-        if (!alignment) {
-            // old extension, do not align
-            return undefined;
-            return new constructor(size);
-        }
-        var buffer = new ArrayBuffer(length * template.BYTES_PER_ELEMENT + alignment);
-        var offset = RiverTrail.compiler.openCLContext.getAlignmentOffset(buffer);
-        return new template(buffer, offset, length);
-    };
-
     return { "traverseAst" : traverseAst,
              "wrappedPP" : wrappedPP,
-             "inferPAType" : inferPAType,
              "elementalTypeToConstructor" : elementalTypeToConstructor,
              "stripToBaseType" : stripToBaseType,
              "getOpenCLSize" : getOpenCLSize,
-             "Integer" : Integer,
              "FlatArray" : FlatArray,
              "debugThrow" : debugThrow,
              "isTypedArray" : isTypedArray,
@@ -542,9 +491,7 @@ RiverTrail.Helper = function () {
              "reportError" : reportError,
              "reportBug" : reportBug,
              "findSelectionRoot" : findSelectionRoot,
-             "isArrayLiteral" : isArrayLiteral,
-             "compareObjectFields" : compareObjectFields,
-             "allocateAlignedTA" : allocateAlignedTA
+             "isArrayLiteral" : isArrayLiteral
     };
 
 }();
