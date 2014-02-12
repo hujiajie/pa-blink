@@ -103,6 +103,8 @@ RiverTrail.compiler = (function () {
 
         // First convert the source into suitable flat representations that can be passed to
         // the OpenCL side
+        // TODO : consider allocating an aligned Typed Array. An 'offset'
+        // property could be added and passed as a kernel argument.
 
         var flatSource = new RiverTrail.Helper.FlatArray( lowPrecision ? Float32Array : Float64Array, source);
 
