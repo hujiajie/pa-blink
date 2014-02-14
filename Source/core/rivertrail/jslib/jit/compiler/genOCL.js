@@ -450,7 +450,7 @@ RiverTrail.compiler.codeGen = (function() {
 
             if (construct === "mapPar") {
                 // add source formal parameter
-                s = s + " __global " + RiverTrail.Helper.stripToBaseType(funDecl.typeInfo.parameters[0]) + "* _source, ";
+                s = s + " __global " + RiverTrail.Helper.stripToBaseType(funDecl.typeInfo.parameters[0].OpenCLType) + "* _source, ";
 
                 // Dump the standard output parameters.
                 // Note that result.openCLType is the type of the result of a single iteration!
