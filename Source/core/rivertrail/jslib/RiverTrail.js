@@ -28,6 +28,8 @@
 "use strict";
 
 (function () {
+    var enableFallback = false;
+
     var ua = navigator.userAgent.toLowerCase();
     var firefox = (ua.match(/firefox\/([\d.]+)/)) ? true : false;
     var chrome = (ua.match(/chrome\/([\d.]+)/)) ? true : false;
@@ -127,10 +129,12 @@
                 result = RiverTrail.compiler.compileAndGo(this, f, "mapPar", enable64BitFloatingPoint);
             } catch (e) {
                 console.log(e);
-                // Try to execute 'f' in sequential.
-                result = this.map(f);
+                if (enableFallback) {
+                    // Try to execute 'f' in sequential.
+                    result = this.map(f);
+                }
             }
-        } else {
+        } else if (enableFallback) {
             result = this.map(f);
         }
 
