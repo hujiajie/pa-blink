@@ -1,6 +1,6 @@
-var RT_P_MASK = 255;
-var RT_P_SIZE = 256;
-var RT_P = [151,160,137,91,90,15,
+var PJS_P_MASK = 255;
+var PJS_P_SIZE = 256;
+var PJS_P = [151,160,137,91,90,15,
   131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
   190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
   88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -28,10 +28,10 @@ var RT_P = [151,160,137,91,90,15,
   138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,
   ];
 
-var RT_G_MASK = 15;
-var RT_G_SIZE = 16;
-var RT_G_VECSIZE = 4;
-var RT_G = [
+var PJS_G_MASK = 15;
+var PJS_G_SIZE = 16;
+var PJS_G_VECSIZE = 4;
+var PJS_G = [
 	 +1.0, +1.0, +0.0, 0.0 ,
 	 -1.0, +1.0, +0.0, 0.0 ,
 	 +1.0, -1.0, +0.0, 0.0 ,
@@ -50,45 +50,38 @@ var RT_G = [
 	 +0.0, -1.0, -1.0, 0.0
 ];
 
-function RT_add4(a, b)
+function PJS_add4(a, b)
 {
 	return [ a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3] ];
 }
 
-function RT_sub4(a, b)
+function PJS_sub4(a, b)
 {
 	return [ a[0]-b[0], a[1]-b[1], a[2]-b[2], a[3]-b[3] ];
 }
 
-function RT_mul4(v, s)
+function PJS_mul4(v, s)
 {
 	return [ s*v[0], s*v[1], s*v[2], s*v[3] ];
 }
 
-function RT_div4(v, s)
+function PJS_div4(v, s)
 {
 	return [ v[0]/s, v[1]/s, v[2]/s, v[3]/s ];
 }
 
-function RT_dot4(a, b)
+function PJS_dot4(a, b)
 {
 	return (a[0]*b[0]) + (a[1]*b[1]) + (a[2]*b[2]) + (a[3]*b[3]);
 }
 
-// Note: Three vertices are xyz
-function RT_vload4(index, ar, NUM_VERTEX_COMPONENTS)
-{
-	var i = index * NUM_VERTEX_COMPONENTS;
-	return [ ar[i], ar[i+1], ar[i+2], 1.0 ];
-}
-
-function RT_clamp(x, minval, maxval)
+function PJS_clamp(x, minval, maxval)
 {
 	var mx = (x > minval) ? x : minval;
 	return (mx < maxval) ? mx : maxval;
 }
 
-function RT_mix1d(a, b, t)
+function PJS_mix1d(a, b, t)
 {
 	var ba = b - a;
 	var tba = t * ba;
@@ -96,7 +89,7 @@ function RT_mix1d(a, b, t)
 	return atba;
 }
 
-function RT_mix2d(a, b, t)
+function PJS_mix2d(a, b, t)
 {
 	var ba   = [0, 0];
 	var tba  = [0, 0];
@@ -110,7 +103,7 @@ function RT_mix2d(a, b, t)
 	return atba;
 }
 
-function RT_mix3d(a, b, t)
+function PJS_mix3d(a, b, t)
 {
 	var ba   = [0, 0, 0, 0];
 	var tba  = [0, 0, 0, 0];
@@ -130,24 +123,24 @@ function RT_mix3d(a, b, t)
 	return atba;
 }
 
-function RT_smooth(t)
+function PJS_smooth(t)
 {
 	return t*t*t*(t*(t*6.0-15.0)+10.0);
 }
 
-function RT_lattice3d(i, P)
+function PJS_lattice3d(i)
 {
 	return P[i[0] + P[i[1] + P[i[2]]]];
 }
 
-function RT_gradient3d(i, v, P, G, G_MASK, G_VECSIZE)
+function PJS_gradient3d(i, v)
 {
-	var index = (RT_lattice3d(i, P) & G_MASK) * G_VECSIZE;
-	var g = [ G[index + 0], G[index + 1], G[index + 2], 1.0 ];
-	return RT_dot4(v, g);
+	var index = (PJS_lattice3d(i) & PJS_G_MASK) * PJS_G_VECSIZE;
+	var g = [ PJS_G[index + 0], PJS_G[index + 1], PJS_G[index + 2], 1.0 ];
+	return PJS_dot4(v, g);
 }
 
-function RT_normalized(v)
+function PJS_normalized(v)
 {
 	var d = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 	d = d > 0.0 ? d : 1.0;
@@ -155,18 +148,18 @@ function RT_normalized(v)
 	return result;
 }
 
-function RT_gradient_noise3d(position, P, G, P_MASK, G_MASK, G_VECSIZE)
+function PJS_gradient_noise3d(position)
 {
 
 	var p = position;
 	var pf = [ Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]), Math.floor(p[3]) ];
 	var ip = [ pf[0], pf[1], pf[2], 0 ];
-	var fp = RT_sub4(p, pf);
+	var fp = PJS_sub4(p, pf);
 	
-	ip[0] = ip[0] & P_MASK;
-	ip[1] = ip[1] & P_MASK;
-	ip[2] = ip[2] & P_MASK;
-	ip[3] = ip[3] & P_MASK;
+	ip[0] = ip[0] & PJS_P_MASK;
+	ip[1] = ip[1] & PJS_P_MASK;
+	ip[2] = ip[2] & PJS_P_MASK;
+	ip[3] = ip[3] & PJS_P_MASK;
 
 	var I000 = [0, 0, 0, 0];
 	var I001 = [0, 0, 1, 0];
@@ -186,38 +179,33 @@ function RT_gradient_noise3d(position, P, G, P_MASK, G_MASK, G_VECSIZE)
 	var F110 = [1.0, 1.0, 0.0, 0.0];
 	var F111 = [1.0, 1.0, 1.0, 0.0];
 
-	var n000 = RT_gradient3d(RT_add4(ip, I000), RT_sub4(fp, F000), P, G, G_MASK, G_VECSIZE);
-	var n001 = RT_gradient3d(RT_add4(ip, I001), RT_sub4(fp, F001), P, G, G_MASK, G_VECSIZE);
+	var n000 = PJS_gradient3d(PJS_add4(ip, I000), PJS_sub4(fp, F000));
+	var n001 = PJS_gradient3d(PJS_add4(ip, I001), PJS_sub4(fp, F001));
 
-	var n010 = RT_gradient3d(RT_add4(ip, I010), RT_sub4(fp, F010), P, G, G_MASK, G_VECSIZE);
-	var n011 = RT_gradient3d(RT_add4(ip, I011), RT_sub4(fp, F011), P, G, G_MASK, G_VECSIZE);
+	var n010 = PJS_gradient3d(PJS_add4(ip, I010), PJS_sub4(fp, F010));
+	var n011 = PJS_gradient3d(PJS_add4(ip, I011), PJS_sub4(fp, F011));
 
-	var n100 = RT_gradient3d(RT_add4(ip, I100), RT_sub4(fp, F100), P, G, G_MASK, G_VECSIZE);
-	var n101 = RT_gradient3d(RT_add4(ip, I101), RT_sub4(fp, F101), P, G, G_MASK, G_VECSIZE);
+	var n100 = PJS_gradient3d(PJS_add4(ip, I100), PJS_sub4(fp, F100));
+	var n101 = PJS_gradient3d(PJS_add4(ip, I101), PJS_sub4(fp, F101));
 
-	var n110 = RT_gradient3d(RT_add4(ip, I110), RT_sub4(fp, F110), P, G, G_MASK, G_VECSIZE);
-	var n111 = RT_gradient3d(RT_add4(ip, I111), RT_sub4(fp, F111), P, G, G_MASK, G_VECSIZE);
+	var n110 = PJS_gradient3d(PJS_add4(ip, I110), PJS_sub4(fp, F110));
+	var n111 = PJS_gradient3d(PJS_add4(ip, I111), PJS_sub4(fp, F111));
 
 	var n40 = [n000, n001, n010, n011];
 	var n41 = [n100, n101, n110, n111];
 
-	var n4 = RT_mix3d(n40, n41, RT_smooth(fp[0]));
-	var n2 = RT_mix2d([n4[0], n4[1]], [n4[2], n4[3]], RT_smooth(fp[1]));
-	var n = 0.5 - 0.5 * RT_mix1d(n2[0], n2[1], RT_smooth(fp[2]));
+	var n4 = PJS_mix3d(n40, n41, PJS_smooth(fp[0]));
+	var n2 = PJS_mix2d([n4[0], n4[1]], [n4[2], n4[3]], PJS_smooth(fp[1]));
+	var n = 0.5 - 0.5 * PJS_mix1d(n2[0], n2[1], PJS_smooth(fp[2]));
 	return n;
 }
 
-function RT_ridgedmultifractal3d(
+function PJS_ridgedmultifractal3d(
 	position,
 	frequency,
 	lacunarity,
 	increment,
-	octaves,
-	P,
-	G,
-	P_MASK,
-	G_MASK,
-	G_VECSIZE)
+	octaves)
 {
 	var i = 0;
 	var fi = 0.0;
@@ -230,7 +218,7 @@ function RT_ridgedmultifractal3d(
 	var offset = 1.0;
 	var weight = 1.0;
 
-	var signal = Math.abs( (1.0 - 2.0 * RT_gradient_noise3d(RT_mul4(position, frequency), P, G, P_MASK, G_MASK, G_VECSIZE)) );
+	var signal = Math.abs( (1.0 - 2.0 * PJS_gradient_noise3d(PJS_mul4(position, frequency))) );
 	signal = offset - signal;
 	signal *= signal;
 	value = signal;
@@ -238,8 +226,8 @@ function RT_ridgedmultifractal3d(
 	for ( i = 0; i < iterations; i++ )
 	{
 		frequency *= lacunarity;
-		weight = RT_clamp( signal * threshold, 0.0, 1.0 );
-		signal = Math.abs( (1.0 - 2.0 * RT_gradient_noise3d(RT_mul4(position, frequency), P, G, P_MASK, G_MASK, G_VECSIZE)) );
+		weight = PJS_clamp( signal * threshold, 0.0, 1.0 );
+		signal = Math.abs( (1.0 - 2.0 * PJS_gradient_noise3d(PJS_mul4(position, frequency))) );
 		signal = offset - signal;
 		signal *= signal;
 		signal *= weight;
@@ -248,64 +236,76 @@ function RT_ridgedmultifractal3d(
 	return value;
 }
 
-function RT_displace(
-	index,
-	vertices,
-	frequency,
-	amplitude,
-	phase,
-	lacunarity,
-	increment,
-	octaves,
-	roughness,
-	P,
-	G,
-	P_MASK,
-	G_MASK,
-	G_VECSIZE,
-	NUM_VERTEX_COMPONENTS)
+var PJS_frequency;
+var PJS_amplitude;
+var PJS_phase;
+var PJS_lacunarity;
+var PJS_increment;
+var PJS_octaves;
+var PJS_roughness;
+
+function PJS_displace(p)
 {
-	var position = RT_vload4(index, vertices, NUM_VERTEX_COMPONENTS);
+	var position = [p[0], p[1], p[2], 1.0];
 	var normal = position;
 
-	roughness /= amplitude;
-	var sample = RT_add4(position, [phase + 100.0, phase + 100.0, phase + 100.0, 0.0]);
+	var roughness = PJS_roughness / PJS_amplitude;
+	var sample = PJS_add4(position, [PJS_phase + 100.0, PJS_phase + 100.0, PJS_phase + 100.0, 0.0]);
 
 	var dx = [roughness, 0.0, 0.0, 1.0];
 	var dy = [0.0, roughness, 0.0, 1.0];
 	var dz = [0.0, 0.0, roughness, 1.0];
 
-	var f0 = RT_ridgedmultifractal3d(sample, frequency, lacunarity, increment, octaves, P, G, P_MASK, G_MASK, G_VECSIZE);
-	var f1 = RT_ridgedmultifractal3d(RT_add4(sample, dx), frequency, lacunarity, increment, octaves, P, G, P_MASK, G_MASK, G_VECSIZE);
-	var f2 = RT_ridgedmultifractal3d(RT_add4(sample, dy), frequency, lacunarity, increment, octaves, P, G, P_MASK, G_MASK, G_VECSIZE);
-	var f3 = RT_ridgedmultifractal3d(RT_add4(sample, dz), frequency, lacunarity, increment, octaves, P, G, P_MASK, G_MASK, G_VECSIZE);
+	var f0 = PJS_ridgedmultifractal3d(sample, PJS_frequency, PJS_lacunarity, PJS_increment, PJS_octaves);
+	var f1 = PJS_ridgedmultifractal3d(PJS_add4(sample, dx), PJS_frequency, PJS_lacunarity, PJS_increment, PJS_octaves);
+	var f2 = PJS_ridgedmultifractal3d(PJS_add4(sample, dy), PJS_frequency, PJS_lacunarity, PJS_increment, PJS_octaves);
+	var f3 = PJS_ridgedmultifractal3d(PJS_add4(sample, dz), PJS_frequency, PJS_lacunarity, PJS_increment, PJS_octaves);
 	
 	var displacement = (f0 + f1 + f2 + f3) / 4.0;
 
-	var vertex = RT_add4(position, RT_mul4(normal, amplitude * displacement));
+	var vertex = PJS_add4(position, PJS_mul4(normal, PJS_amplitude * displacement));
 	vertex[3] = 1.0;
 
 	normal[0] -= (f1 - f0);
 	normal[1] -= (f2 - f0);
 	normal[2] -= (f3 - f0);
-	normal = RT_normalized(RT_div4(normal, roughness));
+	normal = PJS_normalized(PJS_div4(normal, roughness));
 
 	return {pos : [vertex[0], vertex[1], vertex[2]], nor : [normal[0], normal[1], normal[2]]};
 }
 
-function SimulateRT() {
+function SimulatePJS() {
+	// TODO : The following code still needs to be optimized. For example, is it
+	// possible to map the flat vertices array without converting it to a nested
+	// array in the loop below? And what about splitting the result of mapPar
+	// with the filter method before they are converted to typed array objects?
+
 	var nVertices	= userData.nVertices;
-	var initPos		= userData.initPos;
-    
-	var curPosAndNor = new ParallelArray(nVertices, RT_displace, initPos, userData.frequency, userData.amplitude, userData.phase, userData.lacunarity, userData.increment, userData.octaves, userData.roughness, RT_P, RT_G, RT_P_MASK, RT_G_MASK, RT_G_VECSIZE, NUM_VERTEX_COMPONENTS).unzip(); // unzip() is undocumented
-	if(curPosAndNor.pos.data instanceof Float64Array) { // ParallelArray is hacked here
-		userData.curPos = new Float32Array(curPosAndNor.pos.data);
-		userData.curNor = new Float32Array(curPosAndNor.nor.data);
+	var initPos		= new Array(nVertices);
+	for(var i=0, j=0; i<nVertices; i++, j+=NUM_VERTEX_COMPONENTS) {
+		initPos[i] = [userData.initPos[j],
+					  userData.initPos[j+1],
+					  userData.initPos[j+2]];
 	}
-	else {
-		userData.curPos = curPosAndNor.pos.data;
-		userData.curNor = curPosAndNor.nor.data;
+
+	PJS_frequency	= userData.frequency;
+	PJS_amplitude	= userData.amplitude;
+	PJS_phase		= userData.phase;
+	PJS_lacunarity	= userData.lacunarity;
+	PJS_increment	= userData.increment;
+	PJS_octaves		= userData.octaves;
+	PJS_roughness	= userData.roughness;
+
+	var curPosAndNor = initPos.mapPar(PJS_displace);
+
+	for(var i=0, j=0; i<nVertices; i++, j+=NUM_VERTEX_COMPONENTS) {
+		userData.curPos[j]		= curPosAndNor[i].pos[0];
+		userData.curPos[j+1]	= curPosAndNor[i].pos[1];
+		userData.curPos[j+2]	= curPosAndNor[i].pos[2];
+		userData.curNor[j]		= curPosAndNor[i].nor[0];
+		userData.curNor[j+1]	= curPosAndNor[i].nor[1];
+		userData.curNor[j+2]	= curPosAndNor[i].nor[2];
 	}
-		
+
 	userData.phase += PHASE_DELTA;
 }

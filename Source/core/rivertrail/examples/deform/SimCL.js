@@ -55,19 +55,19 @@ function getKernel(id) {
 function InitCL() {
     try  {
         if (typeof(webcl) === "undefined" && typeof(WebCL) === "undefined") {
-            console.error("webcl property is not yet to be defined in window.");
+            console.error("webcl property is yet to be defined in window.");
             return null;
         }
 
         var cl;
         if (typeof(webcl) != "undefined") {
-           cl = webcl;
-           webclSolution = 1;
+            cl = webcl;
+            webclSolution = 1;
         }
 
         if (typeof(WebCL) != "undefined") {
-           cl = WebCL;
-           webclSolution = 0;
+            cl = WebCL;
+            webclSolution = 0;
         }
         if (cl === null) {
             console.error("Failed to fetch a webcl instance.");
@@ -83,9 +83,9 @@ function InitCL() {
         platform = platforms[0];
 
         if (webclSolution === 1) {
-	    devices = platform.getDevices(cl.DEVICE_TYPE_GPU);
-	    device = devices[0];
-	    var extension = null;
+            devices = platform.getDevices(cl.DEVICE_TYPE_GPU);
+            device = devices[0];
+            var extension = null;
             if (GLCL_SHARE_MODE) {
                 extension = cl.getExtension("KHR_GL_SHARING");
 
@@ -99,11 +99,11 @@ function InitCL() {
             else
                 context = cl.createContext({platform: platform, devices: devices, deviceType: cl.DEVICE_TYPE_GPU, shareGroup: 0, hint: null});
         } else {
-	    devices = platform.getDevices(cl.CL_DEVICE_TYPE_CPU);
-	    device = devices[0];
-	    context = cl.createContext([cl.CL_CONTEXT_PLATFORM, platform], [device]);
+            devices = platform.getDevices(cl.CL_DEVICE_TYPE_CPU);
+            device = devices[0];
+            context = cl.createContext([cl.CL_CONTEXT_PLATFORM, platform], [device]);
         }
-	if(context === null) {
+        if(context === null) {
             console.error("createContext fails");
             return null;
         }
@@ -119,13 +119,13 @@ function InitCL() {
         }
 
         if (webclSolution === 1)
-	    program = context.createProgram(kernelSource);
+            program = context.createProgram(kernelSource);
         else if (webclSolution === 0)
-	    program = context.createProgramWithSource(kernelSource);
+            program = context.createProgramWithSource(kernelSource);
 
         // Build the program executable
         if (webclSolution === 1) {
-	    program.build(device);
+            program.build(device);
         } else if (webclSolution === 0) {
             program.buildProgram([device], "-cl-fast-relaxed-math -cl-denorms-are-zero");
             var buildLog = program.getProgramBuildInfo(device, cl.CL_PROGRAM_BUILD_LOG);
@@ -182,9 +182,9 @@ function InitCLBuffers(cl) {
         // Get the maximum work group size for executing the kernel on the device
         //
         if (webclSolution === 1)
-	    var workGroupSize = kernel.getWorkGroupInfo(device, cl.KERNEL_WORK_GROUP_SIZE);
+            var workGroupSize = kernel.getWorkGroupInfo(device, cl.KERNEL_WORK_GROUP_SIZE);
         else
-	    var workGroupSize = kernel.getKernelWorkGroupInfo(device, cl.CL_KERNEL_WORK_GROUP_SIZE);
+            var workGroupSize = kernel.getKernelWorkGroupInfo(device, cl.CL_KERNEL_WORK_GROUP_SIZE);
 
         globalWorkSize[0] = 1;
         globalWorkSize[1] = 1;
@@ -208,9 +208,9 @@ function InitCLBuffers(cl) {
 
         // Initial load of initial position data
         if (webclSolution === 0)
-	    queue.enqueueWriteBuffer(initPosBuffer, true, 0, bufferSize, userData.initPos, []);
+            queue.enqueueWriteBuffer(initPosBuffer, true, 0, bufferSize, userData.initPos, []);
         else if (webclSolution === 1)
-	    queue.enqueueWriteBuffer(initPosBuffer, true, 0, bufferSize, userData.initPos);
+            queue.enqueueWriteBuffer(initPosBuffer, true, 0, bufferSize, userData.initPos);
 
         queue.finish();
     }
@@ -231,31 +231,31 @@ function SimulateCL(cl)
     }
 
     if (webclSolution === 1) {
-       var kernelArgType = WebCLKernelArgumentTypes;
-       kernel.setArg(0, initPosBuffer);
-       kernel.setArg(1, curNorBuffer);
-       kernel.setArg(2, curPosBuffer);
-       kernel.setArg(3, userData.frequency, kernelArgType.FLOAT);
-       kernel.setArg(4, userData.amplitude, kernelArgType.FLOAT);
-       kernel.setArg(5, userData.phase, kernelArgType.FLOAT);
-       kernel.setArg(6, userData.lacunarity, kernelArgType.FLOAT);
-       kernel.setArg(7, userData.increment, kernelArgType.FLOAT);
-       kernel.setArg(8, userData.octaves, kernelArgType.FLOAT);
-       kernel.setArg(9, userData.roughness, kernelArgType.FLOAT);
-       kernel.setArg(10, userData.nVertices, kernelArgType.UINT);
+        var kernelArgType = WebCLKernelArgumentTypes;
+        kernel.setArg(0, initPosBuffer);
+        kernel.setArg(1, curNorBuffer);
+        kernel.setArg(2, curPosBuffer);
+        kernel.setArg(3, userData.frequency, kernelArgType.FLOAT);
+        kernel.setArg(4, userData.amplitude, kernelArgType.FLOAT);
+        kernel.setArg(5, userData.phase, kernelArgType.FLOAT);
+        kernel.setArg(6, userData.lacunarity, kernelArgType.FLOAT);
+        kernel.setArg(7, userData.increment, kernelArgType.FLOAT);
+        kernel.setArg(8, userData.octaves, kernelArgType.FLOAT);
+        kernel.setArg(9, userData.roughness, kernelArgType.FLOAT);
+        kernel.setArg(10, userData.nVertices, kernelArgType.UINT);
     } else if (webclSolution === 0) {
-       var kernelArgType = cl.types;
-       kernel.setKernelArg(0, initPosBuffer);
-       kernel.setKernelArg(1, curNorBuffer);
-       kernel.setKernelArg(2, curPosBuffer);
-       kernel.setKernelArg(3, userData.frequency, kernelArgType.FLOAT);
-       kernel.setKernelArg(4, userData.amplitude, kernelArgType.FLOAT);
-       kernel.setKernelArg(5, userData.phase, kernelArgType.FLOAT);
-       kernel.setKernelArg(6, userData.lacunarity, kernelArgType.FLOAT);
-       kernel.setKernelArg(7, userData.increment, kernelArgType.FLOAT);
-       kernel.setKernelArg(8, userData.octaves, kernelArgType.FLOAT);
-       kernel.setKernelArg(9, userData.roughness, kernelArgType.FLOAT);
-       kernel.setKernelArg(10, userData.nVertices, kernelArgType.UINT);
+        var kernelArgType = cl.types;
+        kernel.setKernelArg(0, initPosBuffer);
+        kernel.setKernelArg(1, curNorBuffer);
+        kernel.setKernelArg(2, curPosBuffer);
+        kernel.setKernelArg(3, userData.frequency, kernelArgType.FLOAT);
+        kernel.setKernelArg(4, userData.amplitude, kernelArgType.FLOAT);
+        kernel.setKernelArg(5, userData.phase, kernelArgType.FLOAT);
+        kernel.setKernelArg(6, userData.lacunarity, kernelArgType.FLOAT);
+        kernel.setKernelArg(7, userData.increment, kernelArgType.FLOAT);
+        kernel.setKernelArg(8, userData.octaves, kernelArgType.FLOAT);
+        kernel.setKernelArg(9, userData.roughness, kernelArgType.FLOAT);
+        kernel.setKernelArg(10, userData.nVertices, kernelArgType.UINT);
     }
 
     if (webclSolution === 1)
@@ -274,7 +274,7 @@ function SimulateCL(cl)
           queue.enqueueReadBuffer(curNorBuffer, true, 0, bufferSize, userData.curNor, []);
       } else if (webclSolution === 1) {
           queue.enqueueReadBuffer(curPosBuffer, true, 0, bufferSize, userData.curPos);
-	  queue.enqueueReadBuffer(curNorBuffer, true, 0, bufferSize, userData.curNor);
+          queue.enqueueReadBuffer(curNorBuffer, true, 0, bufferSize, userData.curNor);
       }
     }
   }

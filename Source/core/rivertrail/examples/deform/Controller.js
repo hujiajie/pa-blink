@@ -34,13 +34,13 @@ var SAMPLEPERIOD        = 10;           // calculate fps and sim/draw times over
 var DISPLAYPERIOD       = 400;          // msecs between display updates of fps and sim/draw times
 
 var GLCL_SHARE_MODE     = false;        // shareMode is boolean
-var PHASE_DELTA		= 0.01;         // per cycle change to phase
+var PHASE_DELTA			= 0.01;         // per cycle change to phase
 
 var NO_SIM              = 0;
 var JS_SIM              = 1;
 var CL_SIM              = 2;
-var RT_SIM              = 3;
-var MAX_SIM             = RT_SIM;
+var PJS_SIM             = 3;
+var MAX_SIM             = PJS_SIM;
 
 var intervalId1 = null;
 var intervalId2 = null;
@@ -48,21 +48,21 @@ var intervalId3 = null;
 var intervalId4 = null;
 
 function UserData() {
-    this.nVertices	= null;		// number of vertices
-    this.nFlops		= 0;            // flop estimate per sim cycle
+    this.nVertices		= null;			// number of vertices
+    this.nFlops			= 0;            // flop estimate per sim cycle
 
-    this.initPos	= null;         // initial vertex positions
+    this.initPos		= null;         // initial vertex positions
     this.initNor        = null;         // initial vertex normals (just needed for resetting)
     this.curPos         = null;         // current vertex positions
-    this.curNor		= null;         // current vertex normals
+    this.curNor			= null;         // current vertex normals
 
     this.curPosVBO      = null;         // shared buffer between GL and CL
     this.curNorVBO      = null;         // shared buffer between GL and CL
 
     this.gl             = null;         // handle for GL context
     this.cl             = null;         // handle for CL context
-    this.glLoaded	= false;        // indicates completion of geometry initialization
-    this.clLoaded	= false;        // indicates completion of buffer initialization
+    this.glLoaded		= false;        // indicates completion of geometry initialization
+    this.clLoaded		= false;        // indicates completion of buffer initialization
     this.simMode        = NO_SIM;       // toggles between simulation modes
     this.fpsSampler     = null;         // FPS sampler
     this.simSampler     = null;         // Sim time sampler
@@ -110,13 +110,8 @@ function onLoad() {
 
     if(userData.cl === null)
         alert('WebCL is not supported in your browser!\nDisabling WebCL mode.');
-    try {
-        var pa = new ParallelArray([0]).map(function (x) { return x + 1; });
-        if(pa === undefined || pa.toString() !== '[1]')
-            throw '';
-    } catch (e) {
-        alert('ParallelArray is not supported in your browser!\nDisabling RiverTrail mode.');
-    }
+    if(Array.prototype.mapPar === undefined)
+        alert('Parallel JS is not supported in your browser!\nDisabling Parallel JS mode.');
 
     SetSimButton();
 
@@ -130,7 +125,7 @@ function ShowFLOPS() {
     if(userData.simSampler.ms > 0)
     	flops = (userData.nFlops * 1000) / (userData.simSampler.ms);
 
-    if(userData.simMode === NO_SIM || userData.simMode === CL_SIM || userData.simMode === RT_SIM) {
+    if(userData.simMode === NO_SIM || userData.simMode === CL_SIM || userData.simMode === PJS_SIM) {
         document.getElementById("f1").firstChild.nodeValue = "TEXT:";
         document.getElementById("f2").firstChild.nodeValue = "XX";
         return;
@@ -164,8 +159,8 @@ function MainLoop() {
     else if(userData.simMode === CL_SIM && userData.clLoaded) {
     	SimulateCL(userData.cl);
     }
-    else if(userData.simMode === RT_SIM) {
-        SimulateRT();
+    else if(userData.simMode === PJS_SIM) {
+        SimulatePJS();
     }
     userData.simSampler.endFrame();
 
@@ -180,14 +175,9 @@ function ToggleSim() {
         if(userData.cl === null)
             userData.simMode += 1;
     }
-    if(userData.simMode === RT_SIM) {
-        try {
-            var pa = new ParallelArray([0]).map(function (x) { return x + 1; });
-            if(pa === undefined || pa.toString() !== '[1]')
-                throw '';
-        } catch (e) {
+    if(userData.simMode === PJS_SIM) {
+        if(Array.prototype.mapPar === undefined)
             userData.simMode += 1;
-        }
     }
     if(userData.simMode > MAX_SIM)
         userData.simMode = NO_SIM;
@@ -209,8 +199,8 @@ function SetSimButton() {
     case CL_SIM:
         b1.firstChild.nodeValue = "Toggle Sim Mode (now CL)";
         break;
-    case RT_SIM:
-        b1.firstChild.nodeValue = "Toggle Sim Mode (now RiverTrail)";
+    case PJS_SIM:
+        b1.firstChild.nodeValue = "Toggle Sim Mode (now Parallel JS)";
         break;
     }
 }

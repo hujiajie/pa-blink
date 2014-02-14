@@ -155,8 +155,9 @@ function InitGL() {
 	
 	//webgl.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-        document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-        document.getElementById('btn').addEventListener( 'touchstart', onDocumentTouchStart, false );	
+	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+	document.getElementById('btn').addEventListener( 'touchstart', onDocumentTouchStart, false );
+	
 	return webgl.context;
 }
 
@@ -167,11 +168,11 @@ function onDocumentMouseMove(event) {
 }
 
 function onDocumentTouchMove(event) {
-    
+
     if (event.touches.length == 1) {
         event.preventDefault();
         mouseX = ( event.touches[0].clientX - (WINW / 2) ) * 15;
-        mouseY = ( event.touches[0].clientX - (WINH / 2) ) * 15;
+        mouseY = ( event.touches[0].clientY - (WINH / 2) ) * 15;
     }
 }
 
@@ -221,7 +222,7 @@ function DrawGL(gl) {
 	// if not sharing buffers with WebCL then need to update VBOs
 	//
 	if(userData.glLoaded) {
-		if((userData.simMode === CL_SIM && !GLCL_SHARE_MODE) || userData.simMode === JS_SIM || userData.simMode === RT_SIM) {
+		if((userData.simMode === CL_SIM && !GLCL_SHARE_MODE) || userData.simMode === JS_SIM || userData.simMode === PJS_SIM) {
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, userData.curPosVBO);
 			gl.bufferSubData(gl.ARRAY_BUFFER, 0, userData.curPos);
