@@ -167,6 +167,10 @@ RiverTrail.Helper = function () {
         var ptr = src; var len = 1;
         var pos = 0;
         while (ptr instanceof Array) {
+            // There must be at least one element.
+            if (ptr.length === 0) {
+                throw "Error: Empty array object is not supported.";
+            }
             shape.push(ptr.length);
             len *= ptr.length;
             ptr = ptr[0];
@@ -220,6 +224,10 @@ RiverTrail.Helper = function () {
         var len = 1;
 
         while (ptr instanceof Array) {
+            // there must be at least one element
+            if (ptr.length === 0) {
+                throw "empty array encountered";
+            }
             shape.push(ptr.length);
             len *= ptr.length;
             ptr = ptr[0];

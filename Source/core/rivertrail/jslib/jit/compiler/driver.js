@@ -94,6 +94,12 @@ RiverTrail.compiler = (function () {
     // source -> the source holding the elements
     // f -> function to run
     // construct -> 'mapPar' only so far
+    // TODO : the function could be cached even if the compilation fails. Thus,
+    //        when the function is called again, we can immediately know whether
+    //        it can be compiled. This should improve the performance of the
+    //        fallback sequential mode. And another benefit is that error
+    //        messages will not spam the console if we are in a loop.
+    // TODO : called functions should also be cached and checked.
     var compileAndGo = function compileAndGo (source, f, construct, enable64BitFloatingPoint) {
         var result = null;
         var kernelString;
