@@ -79,6 +79,9 @@
         enable64BitFloatingPoint = (extensions.indexOf("cl_khr_fp64") !== -1);
     }
 
+    // Add the parallel APIs to Array.prototype as properties. To make them non-
+    // enumerable, 'Object.defineProperty' is used here.
+
     // mapPar
     //
     // Synopsis
@@ -111,7 +114,7 @@
     // Example: an identity function
     //     result = myArray.mapPar(function(val){return val;});
     //
-    Array.prototype.mapPar = function (f) {
+    Object.defineProperty(Array.prototype, "mapPar", { value : function (f) {
         var result;
 
         // 1. 'f' needs to be a function.
@@ -139,5 +142,5 @@
         }
 
         return result;
-    }
+    } });
 })();
