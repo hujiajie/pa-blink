@@ -752,11 +752,11 @@ RiverTrail.compiler.codeGen = (function() {
                 if (isArrayLiteral(rhs)) {
                     s = s + "{ int writeidx = 0; " + buildWrite("(retVal + _writeoffset)", "writeidx", rhs) + "}";
                 } else if(rhs.typeInfo.properties.addressSpace === "__global") {
-                    s = "tempResult = " + oclExpression(rhs) + ";";
+                    s = "__global " + rhs.typeInfo.OpenCLType + " tempResult_g = " + oclExpression(rhs) + ";";
                     var elements = rhs.typeInfo.getOpenCLShape().reduce(function (a,b) { return a*b;});
                     s += "{ int _writeback_idx = 0 ;";
                     s += "for (_writeback_idx = 0; _writeback_idx < " + elements + "; " + "_writeback_idx++) {"; 
-                    s += " retVal[_writeoffset + _writeback_idx]  = tempResult[_writeback_idx] ; } }";
+                    s += " retVal[_writeoffset + _writeback_idx]  = tempResult_g[_writeback_idx] ; } }";
                 }
                 else if(rhs.typeInfo.isObjectType("InlineObject")) {
                     var fields = rhs.typeInfo.properties.fields;
@@ -771,20 +771,27 @@ RiverTrail.compiler.codeGen = (function() {
                             continue;
                         }
                         var sourceShape = sourceType.getOpenCLShape();
-                        s += "{" + sourceType.OpenCLType + " tempResult_" + f + " = (" + oclExpression(rhs.children[field_offset-1].children[1]) + ");";
-                        var maxDepth = sourceShape.length;
-                        var i; var idx; var indexString = ""; var post_parens = "";
-                        s += "{ int _writeback_idx_" + f + " = 0 ;";
-                        for(i =0 ;i<maxDepth;i++) {
-                            idx = "_idx" + i;
-                            s += " { int " + idx + ";";
-                            s += "for (" + idx + "= 0; " + idx + " < " + sourceShape[i] + "; " + idx + "++) {"; 
-                            indexString += "[" + idx + "]";
-                            post_parens += "}}";
+                        if (sourceType.properties.addressSpace === "__global") {
+                            s += "{ __global " + sourceType.OpenCLType + " tempResult_" + f + "_g = (" + oclExpression(rhs.children[field_offset-1].children[1]) + ");";
+                            var idx = "_idx_" + f;
+                            s += "for (int " + idx + "= 0; " + idx + " < " + sourceShape.reduce(function (a,b) { return a*b;}) + "; " + idx + "++) {";
+                            s += " retVal_" + f + "[_writeoffset_" + f + " + " + idx + "] = tempResult_" + f + "_g" + "[" + idx + "]; } }";
+                        } else {
+                            s += "{" + sourceType.OpenCLType + " tempResult_" + f + " = (" + oclExpression(rhs.children[field_offset-1].children[1]) + ");";
+                            var maxDepth = sourceShape.length;
+                            var i; var idx; var indexString = ""; var post_parens = "";
+                            s += "{ int _writeback_idx_" + f + " = 0 ;";
+                            for(i =0 ;i<maxDepth;i++) {
+                                idx = "_idx" + i;
+                                s += " { int " + idx + ";";
+                                s += "for (" + idx + "= 0; " + idx + " < " + sourceShape[i] + "; " + idx + "++) {"; 
+                                indexString += "[" + idx + "]";
+                                post_parens += "}}";
+                            }
+                            s += " retVal_" + f + "[_writeoffset_" + f + " + _writeback_idx_" + f + "++]  = " + "((" +
+                                sourceType.OpenCLType + ")" + "tempResult_" + f +
+                                ")" + indexString + ";" + post_parens + "} }";
                         }
-                        s += " retVal_" + f + "[_writeoffset_" + f + " + _writeback_idx_" + f + "++]  = " + "((" +
-                            sourceType.OpenCLType + ")" + "tempResult_" + f +
-                            ")" + indexString + ";" + post_parens + "} }";
                     }
                     //console.log(s);
                 }

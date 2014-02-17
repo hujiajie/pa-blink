@@ -30,7 +30,7 @@
 //
 
 
-var globalInlineObjectTypes = [];
+var globalInlineObjectTypes;
 RiverTrail.Typeinference = function () {
     var stackTrace = [];
 
@@ -1671,6 +1671,12 @@ RiverTrail.Typeinference = function () {
         var tEnv = new TEnv(rootEnvironment, true); // create a new top-level function frame
         var params = ast.params;
         var argT = [];
+
+        // globalInlineObjectTypes should have been local, but it's used
+        // elsewhere in the compiler so we make it global to ease the handling.
+        // To get rid of the affect from the previous type inference, it has to
+        // be reset first.
+        globalInlineObjectTypes = [];
 
         // clear away old stack traces
         (stackTrace.length === 0) || (stackTrace = []);
