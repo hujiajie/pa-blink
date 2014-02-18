@@ -108,10 +108,10 @@
         try {
           var result = item[1].apply();
           verbose += '<b>Result :</b>';
-          verbose += '<pre>' + result + '</pre>';
-          if (result == item[2]) {
+          verbose += '<pre>' + JSON.stringify(result) + '</pre>';
+          if (JSON.stringify(result) === JSON.stringify(item[2])) {
             document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#00c000;font-weight:bold">Passed</div>';
-          } else if (item[3] !== undefined && result == item[3]) {
+          } else if (item[3] !== undefined && JSON.stringify(result) === JSON.stringify(item[3])) {
             document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#c0c000;font-weight:bold">Unsupported</div>';
           } else {
             document.getElementById('group_' + i + '_item_' + (j - 1) + '_status').innerHTML = '<div style="text-align:center;color:#c00000;font-weight:bold">Failed</div>';
