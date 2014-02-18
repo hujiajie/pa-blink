@@ -187,8 +187,8 @@ RiverTrail.compiler = (function () {
             if ((construct === entry.construct) &&
                 (lowPrecision === entry.lowPrecision) &&
                 (entry.source === f) &&
-                (source.inferredType === entry.sourceType.inferredType) &&
-                (equalsShape(source.dimSize, entry.sourceType.dimSize))
+                (RiverTrail.Helper.inferTypedArrayType(source.data) === entry.sourceType.inferredType) &&
+                (equalsShape(source.shape, entry.sourceType.dimSize))
                ) {
                 return f.openCLCache[i];
             }
