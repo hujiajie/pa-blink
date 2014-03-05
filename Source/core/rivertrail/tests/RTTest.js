@@ -359,6 +359,238 @@ function ()
   }
   return source.map(function (val) { return {prop1 : val[1][2][3], prop2 : val}; });
 })()
+],
+[
+'Read global scalar variable in the top-level elemental function',
+function ()
+{
+  global = 1;
+  var result = [1, 2, 3, 4].mapPar(function (val) { return val + global; });
+  delete global;
+  return result;
+},
+[2, 3, 4, 5]
+],
+[
+'Read global vector variable in the top-level elemental function',
+function ()
+{
+  global = [1, 2, 3, 4];
+  var result = [1, 2, 3, 4].mapPar(function (val) { return val + global[3]; });
+  delete global;
+  return result;
+},
+[5, 6, 7, 8]
+],
+[
+'Read nested global array in the top-level elemental function',
+function ()
+{
+  global = [[1, 2, 3], [4, 5, 6]];
+  var result = [1, 2, 3, 4].mapPar(function (val) { return val + global[1][2]; });
+  delete global;
+  return result;
+},
+[7, 8, 9, 10]
+],
+[
+'Read global scalar variable in a called function which is defined in the elemental function',
+function ()
+{
+  global = 1;
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     function f()
+                                     {
+                                       return global;
+                                     }
+                                     return val + f();
+                                   });
+  delete global;
+  return result;
+},
+[2, 3, 4, 5]
+],
+[
+'Read global vector variable in a called function which is defined in the elemental function',
+function ()
+{
+  global = [1, 2, 3, 4];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     function f()
+                                     {
+                                       return global[3];
+                                     }
+                                     return val + f();
+                                   });
+  delete global;
+  return result;
+},
+[5, 6, 7, 8]
+],
+[
+'Read nested global array in a called function which is defined in the elemental function',
+function ()
+{
+  global = [[1, 2, 3], [4, 5, 6]];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     function f()
+                                     {
+                                       return global[1][2];
+                                     }
+                                     return val + f();
+                                   });
+  delete global;
+  return result;
+},
+[7, 8, 9, 10]
+],
+[
+'Read global scalar variable in a called function which is defined outside the elemental function',
+function ()
+{
+  global = 1;
+  f = function () { return global; };
+  var result = [1, 2, 3, 4].mapPar(function (val) { return val + f(); });
+  delete global;
+  delete f;
+  return result;
+},
+[2, 3, 4, 5]
+],
+[
+'Read global vector variable in a called function which is defined outside the elemental function',
+function ()
+{
+  global = [1, 2, 3, 4];
+  f = function () { return global[3]; };
+  var result = [1, 2, 3, 4].mapPar(function (val) { return val + f(); });
+  delete global;
+  delete f;
+  return result;
+},
+[5, 6, 7, 8]
+],
+[
+'Read nested global array in a called function which is defined outside the elemental function',
+function ()
+{
+  global = [[1, 2, 3], [4, 5, 6]];
+  f = function () { return global[1][2]; };
+  var result = [1, 2, 3, 4].mapPar(function (val) { return val + f(); });
+  delete global;
+  delete f;
+  return result;
+},
+[7, 8, 9, 10]
+],
+[
+'A local variable in the called function shares the same name with a local variable in the top-level elemental function',
+function ()
+{
+  f = function () {
+        var x;
+        x = 1;
+        return x;
+      };
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var x;
+                                     x = 2;
+                                     function g()
+                                     {
+                                       var x;
+                                       x = 3;
+                                       return x;
+                                     }
+                                     return val + x + f() + g();
+                                   });
+  delete f;
+  return result;
+},
+[7, 8, 9, 10]
+],
+[
+'A local array in the called function shares the same name with a local scalar variable in the top-level elemental function',
+function ()
+{
+  f = function () {
+        var x;
+        x = [1, 2, 3, 4];
+        return x[3];
+      };
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var x;
+                                     x = 1;
+                                     function g()
+                                     {
+                                       var x;
+                                       x = [[1, 2, 3], [4, 5, 6]];
+                                       return x[1][2];
+                                     }
+                                     return val + x + f() + g();
+                                   });
+  delete f;
+  return result;
+},
+[12, 13, 14, 15]
+],
+[
+'A global variable referenced in the called function shares the same name with a local variable in the top-level elemental function',
+function ()
+{
+  x = 1;
+  f = function () { return x; };
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var x;
+                                     x = 2;
+                                     return val + x + f();
+                                   });
+  delete x;
+  delete f;
+  return result;
+},
+[4, 5, 6, 7]
+],
+[
+'A locally defined function shares the same name with a global function',
+function ()
+{
+  f = function (x) { return x + 1; };
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     function f(x)
+                                     {
+                                       return x - 1;
+                                     }
+                                     return f(val);
+                                   });
+  delete f;
+  return result;
+},
+[0, 1, 2, 3]
+],
+[
+'Call Math.abs in the top-level elemental function',
+function ()
+{
+  return [1, -2, 3, -4].mapPar(function (val) { return Math.abs(val); });
+},
+[1, 2, 3, 4]
+],
+[
+'Call Math.abs in a called function',
+function ()
+{
+  f = function (x) { return Math.abs(x); };
+  var result = [1, -2, 3, -4].mapPar(function (val) {
+                                       function g(x)
+                                       {
+                                         return Math.abs(x);
+                                       }
+                                       return f(val) + g(val);
+                                     });
+  delete f;
+  return result;
+},
+[2, 4, 6, 8]
 ]
 ];
 

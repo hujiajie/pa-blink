@@ -30,17 +30,13 @@
 (function () {
     var enableFallback = false;
 
-    var ua = navigator.userAgent.toLowerCase();
-    var firefox = (ua.match(/firefox\/([\d.]+)/)) ? true : false;
-    var chrome = (ua.match(/chrome\/([\d.]+)/)) ? true : false;
-
     // Check whether the OpenCL interface is available.
     var useFFInterface = false;
     var useCrInterface = false;
     try {
-        if (firefox && Components.interface.dpoIInterface !== undefined) {
+        if (RiverTrail.Helper.hasFirefoxInterface()) {
             useFFInterface = true;
-        } else if (chrome && CInterface !== undefined) {
+        } else if (RiverTrail.Helper.hasChromeInterface()) {
             useCrInterface = true;
         }
     } catch (ignore) {

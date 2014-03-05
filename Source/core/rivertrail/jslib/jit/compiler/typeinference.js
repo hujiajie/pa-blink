@@ -392,21 +392,44 @@ RiverTrail.Typeinference = function () {
         if (functionFrame) {
             this._functionResult = null;
             this._roots = [];
+            // bindings for global variables referenced in this function and
+            // called functions
+            this.extraBindings = {};
+            this.extraBindings.__proto__ = null;
         }
         this.openCLFloatType = env ? env.openCLFloatType : undefined;
     };
     var TEp = TEnv.prototype;
-    TEp.lookup = function (name) {
-        return (this.bindings[name] !== undefined) ? this.bindings[name] : ((this.parent && this.parent.lookup(name)) || undefined);
-    }
-    TEp.getType = function (name) {
-        var entry = this.lookup(name);
-        if (entry) {
-            return entry.type;
-        } else {
-            return undefined;
+    TEp.lookupBinding = function (name) {
+        var binding;
+        binding = this.bindings[name];
+        if (binding === undefined) {
+            if (this.parent) {
+                binding = this.parent.lookupBinding(name);
+            }
         }
-    };
+        return binding;
+    }
+    TEp.lookupExtraBinding = function (name) {
+        var binding;
+        if (this.extraBindings) {
+            binding = this.extraBindings[name];
+            // if 'name' is not found here, we do not look it up in the parent
+            // environment.
+        } else {
+            if (this.parent) {
+                binding = this.parent.lookupExtraBinding(name);
+            }
+        }
+        return binding;
+    }
+    TEp.lookup = function (name) {
+        var binding = this.lookupBinding(name);
+        if (binding === undefined) {
+            binding = this.lookupExtraBinding(name);
+        }
+        return binding;
+    }
     TEp.bind = function (name, duplicates) {
         if (name instanceof Array) {
             name.forEach( this.bind);
@@ -418,21 +441,61 @@ RiverTrail.Typeinference = function () {
             }
         }
     }
-    TEp.update = function (name, type) {
-        var current = this.lookup(name);
-        if (current === undefined) {
-            reportError("variable " + name + " has not been previously declared!");
-        } else if (current.type === null) {
-            var newT = type.clone();
-            newT.registerFlow(type);
-            this.bindings[name] = {initialized : true, type : newT}; // force a new entry in the dataflow graph
-        } else if (!current.type.equals(type)) {
-            reportError("variable " + name + " is polymorphic: " + current.type.toString() + "/" + type.toString());
+    TEp.bindExtra = function (name) {
+        if (this.extraBindings) {
+            this.extraBindings[name] = {initialized : false, type : null};
         } else {
-            // propagate flow information
-            current.type.registerFlow(type);
-            // mark type as initialized
-            current.initialized = true;
+            if (this.parent) {
+                this.parent.bindExtra(name);
+            } else {
+                reportError("variable " + name + " is not in a function scope");
+            }
+        }
+    }
+    TEp.update = function (name, type) {
+        var currentTEnv = this;
+        var currentBinding;
+        var currentBindingIsExtra = false;
+
+        currentBinding = currentTEnv.lookupBinding(name);
+        if (currentBinding === undefined) {
+            while (currentTEnv.extraBindings === undefined) {
+                if (currentTEnv.parent) {
+                    currentTEnv = currentTEnv.parent;
+                } else {
+                    reportError("variable " + name + " is not in a function scope");
+                }
+            }
+            currentBinding = currentTEnv.extraBindings[name];
+            if (currentBinding === undefined) {
+                reportError("variable " + name + " has not been previously declared!");
+            } else {
+                currentBindingIsExtra = true;
+            }
+        }
+
+        if (currentBinding.type === null) {
+            var newT = type.clone();
+            if (currentBindingIsExtra) {
+                currentTEnv.extraBindings[name] = {initialized : true, type : newT};
+                // The address space of a global array is always "__global" and
+                // it should never be changed, so do not register it in the data
+                // flow. newT should be added to the flow roots, but there isn't
+                // a tEnv parameter here, so we have to call addRoot elsewhere.
+            } else {
+                newT.registerFlow(type);
+                this.bindings[name] = {initialized : true, type : newT}; // force a new entry in the dataflow graph
+            }
+        } else if (!currentBinding.type.equals(type)) {
+            reportError("variable " + name + " is polymorphic: " + currentBinding.type.toString() + "/" + type.toString());
+        } else {
+            // do not propagate flow information to a global array
+            if (!currentBindingIsExtra) {
+                // propagate flow information
+                currentBinding.type.registerFlow(type);
+                // mark type as initialized
+                currentBinding.initialized = true;
+            }
         }
     }
     TEp.intersect = function (other) {
@@ -538,21 +601,11 @@ RiverTrail.Typeinference = function () {
         return s;
     };
 
-                    
-
-
-    //
-    // Root environment which models the accesible global scope
-    //
-    var rootEnvironment = new TEnv();
-    rootEnvironment.bind("Math");
-    rootEnvironment.update("Math", new TObject("Math"));
-
     // 
     // Handlers for built in classes
     //
     TOp.registry["Math"] = {
-        methodCall : function (thisType, name, tEnv, fEnv, ast) {
+        methodCall : function (name, tEnv, fEnv, ast) {
             var type;
             // grab argument types first
             ast.children[1] = drive(ast.children[1], tEnv, fEnv);
@@ -635,7 +688,7 @@ RiverTrail.Typeinference = function () {
     };
 
     TOp.registry["InlineObject"] = {
-        methodCall : function(thisType, name, tEnv, fEnv, ast) {
+        methodCall : function(name, tEnv, fEnv, ast) {
             reportError("Methods not supported on Objects");
         },
         propertySelection : function (name, tEnv, fEnv, ast) {
@@ -695,7 +748,7 @@ RiverTrail.Typeinference = function () {
     };
 
     TOp.registry[TObject.ARRAY] = {
-        methodCall : function(thisType, name, tEnv, fEnv, ast) {
+        methodCall : function(name, tEnv, fEnv, ast) {
             switch (name) {
                 // mutators
                 case "pop":
@@ -731,9 +784,14 @@ RiverTrail.Typeinference = function () {
             return type;
         },
         constructor : undefined,
-        constructors : [Float64Array, Float32Array, Uint32Array, Int32Array, 
-                        Uint16Array, Int16Array, Uint8ClampedArray, Uint8Array, Int8Array,
-                        RiverTrail.Helper.FlatArray],
+        constructors : ((typeof(RiverTrail.compiler.openCLContext.canBeMapped) === 'function' &&
+                         RiverTrail.compiler.openCLContext.canBeMapped([0])) ?
+                        [Float64Array, Float32Array, Uint32Array, Int32Array, 
+                         Uint16Array, Int16Array, Uint8ClampedArray, Uint8Array, Int8Array,
+                         RiverTrail.Helper.FlatArray] :
+                        [Float64Array, Float32Array, Uint32Array, Int32Array, 
+                         Uint16Array, Int16Array, Uint8ClampedArray, Uint8Array, Int8Array,
+                         RiverTrail.Helper.FlatArray, Array]),
         makeType : function (val) {
             var type;
             if (typeof(val) === "number") {
@@ -755,6 +813,24 @@ RiverTrail.Typeinference = function () {
                 type.properties.shape = [val.length];
                 type.properties.elements = new TLiteral(TLiteral.NUMBER);
                 type.properties.elements.OpenCLType = RiverTrail.Helper.inferTypedArrayType(val);
+                type.updateOpenCLType();
+            } else if (val instanceof Array) {
+                // We do not check whether the Array object is homogeneous here.
+                // The homogeneity will be checked while converting the Array
+                // object to a FlatArray object. Thus, we always use the first
+                // element in each dimension to infer the shape and the type.
+                // But we do check whether the Array object is empty to ensure
+                // that the shape is valid.
+                if (val.length === 0) {
+                    reportError("empty arrays are not supported yet");
+                }
+                type = new TObject(TObject.ARRAY);
+                type.properties.shape = [val.length];
+                type.properties.elements = this.makeType(val[0]);
+                // This branch is taken only when we are dealing with global
+                // Array objects, so the address space should always be
+                // "__global".
+                type.properties.addressSpace = "__global";
                 type.updateOpenCLType();
             } else {
                 reportError("unsupported array contents encountered");
@@ -798,7 +874,10 @@ RiverTrail.Typeinference = function () {
     TOp.registry[TObject.JSARRAY] = {
         methodCall : TOp.registry[TObject.ARRAY].methodCall,
         propertySelection : TOp.registry[TObject.ARRAY].propertySelection,
-        constructor : Array,
+        constructor : ((typeof(RiverTrail.compiler.openCLContext.canBeMapped) === 'function' &&
+                         RiverTrail.compiler.openCLContext.canBeMapped([0])) ?
+                        Array :
+                        undefined),
         makeType : function (val) {
             var type;
             if (typeof(val) === "number") {
@@ -891,7 +970,7 @@ RiverTrail.Typeinference = function () {
                 // fallthrough!
                 
             case SCRIPT:
-                // create a new type environment for local bindings
+                // create a new type environment for bindings
                 tEnv = new TEnv(tEnv);
                 // add all local variable declarations to environment to shadow old
                 // ones from previous scopes
@@ -986,6 +1065,24 @@ RiverTrail.Typeinference = function () {
                 switch (ast.children[0].type) {
                     case IDENTIFIER:
                         // simple case of a = expr
+                        // If the identifier is a global variable, the type
+                        // binding may be missing at this point. In that case,
+                        // we need to infer the type of the global variable
+                        // first.
+                        var idType = tEnv.lookup(left.value);
+                        if (idType === undefined) {
+                            var global = window.eval(left.value) || reportError("variable " + left.value + " not found", left);
+                            var globalType = typeOracle(global) || reportError("unsupported variable: " + left.value, left);
+                            tEnv.bindExtra(left.value);
+                            tEnv.update(left.value, globalType);
+                            if (globalType.isArrayishType()) {
+                                // The code is a little ugly here. tEnv.update updates the binding for the
+                                // global array with a clone of globalType, but the clone (the type field in the
+                                // binding entry) is not registered in globalType.flowTo, so we do not use
+                                // globalType as the argument.
+                                tEnv.addRoot(tEnv.lookup(left.value).type);
+                            }
+                        }
                         tEnv.update(left.value, tEnv.accu);
                         left = drive(left, tEnv, fEnv);
                         break;
@@ -1117,7 +1214,22 @@ RiverTrail.Typeinference = function () {
 
             // literals
             case IDENTIFIER:
-                var idType = tEnv.lookup(ast.value) || reportError("unbound variable: " + ast.value, ast);
+                var idType = tEnv.lookup(ast.value);
+                if (idType === undefined) {
+                    // ast.value may be a global variable
+                    var global = window.eval(ast.value) || reportError("variable " + ast.value + " not found", ast);
+                    var globalType = typeOracle(global) || reportError("unsupported variable: " + ast.value, ast);
+                    tEnv.bindExtra(ast.value);
+                    tEnv.update(ast.value, globalType);
+                    idType = tEnv.lookup(ast.value);
+                    if (globalType.isArrayishType()) {
+                        // The code is a little ugly here. tEnv.update updates the binding for the
+                        // global array with a clone of globalType, but the clone (the type field in the
+                        // binding entry) is not registered in globalType.flowTo, so we do not use
+                        // globalType as the argument.
+                        tEnv.addRoot(idType.type);
+                    }
+                }
                 idType.initialized || reportError("variable " + ast.value + " might be uninitialized", ast);
                 tEnv.accu = idType.type.clone();
                 tEnv.accu.registerFlow(idType.type);
@@ -1183,7 +1295,7 @@ RiverTrail.Typeinference = function () {
                         var objType = tEnv.accu;
                         objType.isObjectType() || reportError("left hand side of method call not an object", ast);
                         // hand off inference to object handler
-                        tEnv.accu = objType.getHandler().methodCall(objType, dot.children[1].value, tEnv, fEnv, ast);
+                        tEnv.accu = objType.getHandler().methodCall(dot.children[1].value, tEnv, fEnv, ast);
                         break;
                     case IDENTIFIER: // function call
                         // grab argument types
@@ -1202,6 +1314,7 @@ RiverTrail.Typeinference = function () {
                             var obj = eval(fname) || reportError("unknown function `" + fname + "`", ast);
                             (typeof(obj) === 'function') || reportError("not a function `" + fname + "`", ast);
                             fun = RiverTrail.Helper.parseFunction(obj.toString());
+                            fun.isGlobalFunction = true;
                             // if we get here, we can just add the function to the function environment for future use
                             fEnv.add(fun, ast.children[0].value, true);
                         }
@@ -1209,6 +1322,22 @@ RiverTrail.Typeinference = function () {
                         var rootFun = fun;
                         if (fun.typeInfo) {
                             // this function has been called before. Try and find the correct specialisation
+                            // If the called function contains global variables, some extra arguments will
+                            // be added in the generated code to pass these global variables, but we do not
+                            // check the type of these extra arguments based on the following facts :
+                            // 1) The number of the extra parameters will not change because the source of
+                            //    the called function cannot be changed in the elemental function yet. The
+                            //    source may be changed outside the elemental function, but this is another
+                            //    story.
+                            // 2) The type of these extra parameters will not change because we cannot
+                            //    change the type of global variables in the elemental function.
+                            // 3) The generated string for the extra arguments is based on the type of the
+                            //    extra parameters. If the number and type of the extra parameters stay the
+                            //    same, then the generated string will not change.
+                            // 4) If the generated string for the extra parameters is unchanged, then the
+                            //    only factor which may result in a specialisation is the type of the
+                            //    explicit arguments.
+                            // Therefore, only the explicit arguments are compared here.
                             var found;
                             for (var cnt = 0; cnt < fun.specStore.length; cnt++) {
                                 if (argT.every(function(t, idx) { return t.equals(fun.specStore[cnt].typeInfo.parameters[idx], true);})) {
@@ -1230,7 +1359,15 @@ RiverTrail.Typeinference = function () {
                             // the treatment downstream
                             fun.dispatch = nameGen(fun.name);
                             // create a new function frame
-                            var innerTEnv = new TEnv(tEnv, true);
+                            var innerTEnv;
+                            if (fun.isGlobalFunction) {
+                                innerTEnv = new TEnv(null, true);
+                                innerTEnv.openCLFloatType = tEnv.openCLFloatType;
+                            } else {
+                                innerTEnv = new TEnv(tEnv, true);
+                            }
+                            innerTEnv.bindExtra("Math");
+                            innerTEnv.update("Math", new TObject("Math"));
                             // put this call on the stack for tracing
                             stackTrace.push({ast: ast, fun: fun});
                             // add parameter / value type mapping
@@ -1256,6 +1393,22 @@ RiverTrail.Typeinference = function () {
                             fun.flowRoots = innerTEnv.getRoots();
                             fun.symbols = innerTEnv;
                             debug && console.log(fun.name + " has type " + fun.typeInfo.toString());
+                            // merge referenced global variables
+                            for (var name in innerTEnv.extraBindings) {
+                                var globalType = innerTEnv.extraBindings[name];
+                                // don't use tEnv.update here! tEnv may have a
+                                // local variable whose name is the same as the
+                                // global variable registered in innerTEnv.
+                                var currentTEnv = tEnv;
+                                while (currentTEnv.extraBindings === undefined) {
+                                    if (currentTEnv.parent) {
+                                        currentTEnv = currentTEnv.parent;
+                                    } else {
+                                        reportError("not in a function scope while trying to merge extra bindings");
+                                    }
+                                }
+                                currentTEnv.extraBindings[name] = {initialized : globalType.initialized, type : globalType.type.clone()};
+                            }
                         }
                         // tie the arguments to the function call
                         ast.callFrame = new FCall(argT, fun.flowFrame, resType.clone(), ast);
@@ -1588,6 +1741,10 @@ RiverTrail.Typeinference = function () {
                             var match = undefined;
                             if (specs) {
                                 specs.some(function (v) { 
+                                        // we do not consider the address space of global variables.
+                                        // a global variable is either a scalar or an array in the
+                                        // global address space, so there's no need to compare its
+                                        // address space.
                                         if (v.typeInfo.parameters.every(function (v,idx) {
                                                 if (idx === val.number) {
                                                     // current arg
@@ -1668,9 +1825,12 @@ RiverTrail.Typeinference = function () {
     }
 
     function analyze(ast, array, construct, lowPrecision) {
-        var tEnv = new TEnv(rootEnvironment, true); // create a new top-level function frame
+        var tEnv = new TEnv(null, true); // create a new top-level function frame
         var params = ast.params;
         var argT = [];
+
+        tEnv.bindExtra("Math");
+        tEnv.update("Math", new TObject("Math"));
 
         // globalInlineObjectTypes should have been local, but it's used
         // elsewhere in the compiler so we make it global to ease the handling.
@@ -1689,7 +1849,7 @@ RiverTrail.Typeinference = function () {
         // environment, but we will use this to initialise the type of other
         // arguments.
         if (construct === "mapPar") {
-            var thisT = typeOracle(array);
+            var srcT = typeOracle(array);
         } else {
             reportBug(construct + " is not yet implemented.");
         }
@@ -1699,7 +1859,7 @@ RiverTrail.Typeinference = function () {
             // ensure we have enough arguments
             (params.length >= 1 && params.length <= 3) || reportError("number of arguments does not match number of parameters");
             // create type info for current element argument
-            var elemT = thisT.clone();
+            var elemT = srcT.clone();
             elemT = elemT.properties.elements;
             tEnv.bind(params[0]);
             tEnv.update(params[0], elemT);
@@ -1714,7 +1874,7 @@ RiverTrail.Typeinference = function () {
             }
             if (params.length === 3) {
                 // create type info for the source holding the elements
-                var sourceT = thisT.clone();
+                var sourceT = srcT.clone();
                 tEnv.bind(params[2]);
                 tEnv.update(params[2], sourceT);
                 tEnv.addRoot(sourceT);

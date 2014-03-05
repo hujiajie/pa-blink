@@ -484,6 +484,18 @@ RiverTrail.Helper = function () {
                  ast.children.every(function (x) { return (x.type === IDENTIFIER) || isArrayLiteral(x);})));
     };
 
+    function hasFirefoxInterface() {
+        var ua = navigator.userAgent.toLowerCase();
+        return (ua.match(/firefox\/([\d.]+)/) ? true : false) &&
+               (Components.interfaces.dpoIInterface !== undefined);
+    }
+
+    function hasChromeInterface() {
+        var ua = navigator.userAgent.toLowerCase();
+        return (ua.match(/chrome\/([\d.]+)/) ? true : false) &&
+               (CInterface !== undefined);
+    }
+
     return { "traverseAst" : traverseAst,
              "wrappedPP" : wrappedPP,
              "elementalTypeToConstructor" : elementalTypeToConstructor,
@@ -499,7 +511,9 @@ RiverTrail.Helper = function () {
              "reportError" : reportError,
              "reportBug" : reportBug,
              "findSelectionRoot" : findSelectionRoot,
-             "isArrayLiteral" : isArrayLiteral
+             "isArrayLiteral" : isArrayLiteral,
+             "hasFirefoxInterface" : hasFirefoxInterface,
+             "hasChromeInterface" : hasChromeInterface
     };
 
 }();

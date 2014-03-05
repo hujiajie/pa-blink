@@ -59,20 +59,12 @@ RiverTrail.compiler.runOCL = function () {
             throw new Error("Invalid ast: Function expected at top level");
         }
 
-
-        var Sys = {};
-        var ua = navigator.userAgent.toLowerCase();
-        var s;
-        var chrome = false;
-        var firefox = false;
-        (s = ua.match(/firefox\/([\d.]+)/)) ? firefox = true :
-        (s = ua.match(/chrome\/([\d.]+)/)) ? chrome = true : 0;
         var InterfaceData;
         var InterfaceKernel;
-        if (firefox) {
+        if (RiverTrail.Helper.hasFirefoxInterface()) {
             InterfaceData = Components.interfaces.dpoIData;
             InterfaceKernel = Components.interfaces.dpoIKernel;
-        } else if (chrome) {
+        } else if (RiverTrail.Helper.hasChromeInterface()) {
             InterfaceData = CData;
             InterfaceKernel = CKernel;
         }
