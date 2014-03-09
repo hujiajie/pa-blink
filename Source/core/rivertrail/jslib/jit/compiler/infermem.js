@@ -351,22 +351,28 @@ RiverTrail.InferMem = function () {
                         // If <expr> is in the __private address space, then if <a> is an in and out var we have to copy, 
                         // as the memory we have allocated for <expr> could potentially be reused in the next iteration 
                         // of the loop before <a> has been read.
+                        // However, if <a> is in the __global address space, we do not need to allocate extra memory for
+                        // <expr> because the data will be copied to the __global address space.
                         //
                         // case 2:
-                        // If <expr> is in a different address space than <a>, we have to copy, too.
+                        // If <expr> is in the __global address space while <a> is in the __private address space, we
+                        // have to copy, too.
                         //
                         // case 3:
                         // if the lhs and rhs use different floating point representations, we have to copy, too.
-                        if (((ast.children[1].typeInfo.getOpenCLAddressSpace() === "__private") && // case 1
-                            (ins && ins.contains(aVar.value) && outs && outs.contains(aVar.value))) ||
-                            (aVar.typeInfo.getOpenCLAddressSpace() != ast.children[1].typeInfo.getOpenCLAddressSpace()) || // case 2
-                            (!aVar.typeInfo.equals(rhs.typeInfo, true))) { // case 3
+                        if (((ast.children[1].typeInfo.getOpenCLAddressSpace() === "__private"    ) && // case 1
+                             (aVar.typeInfo.getOpenCLAddressSpace()            === "__private"    ) &&
+                             (ins && ins.contains(aVar.value) && outs && outs.contains(aVar.value))) ||
+                            ((aVar.typeInfo.getOpenCLAddressSpace()            === "__private"    ) && // case 2
+                             (ast.children[1].typeInfo.getOpenCLAddressSpace() === "__global"     )) ||
+                            (!aVar.typeInfo.equals(rhs.typeInfo, true)                             )) { // case 3
                             allocationHelper(ast.children[0].value);
                         }
                         break;
                     case INDEX:
                         // case of a[iv] = expr. 
-                        if ((aVar.typeInfo.getOpenCLAddressSpace() != ast.children[1].typeInfo.getOpenCLAddressSpace()) || 
+                        if ((aVar.typeInfo.getOpenCLAddressSpace()            === "__private" &&
+                             ast.children[1].typeInfo.getOpenCLAddressSpace() === "__global") || 
                             (!aVar.typeInfo.equals(rhs.typeInfo, true))) { 
                             allocationHelper("INDEX");
                         }
