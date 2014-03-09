@@ -591,6 +591,551 @@ function ()
   return result;
 },
 [2, 4, 6, 8]
+],
+[
+'Assign a local array to another local array',
+function ()
+{
+  return [1, 2, 3, 4].mapPar(function (val) {
+                               var arr1;
+                               var arr2;
+                               arr1 = [val + 1, val + 2, val + 3, val + 4];
+                               arr2 = [val + 5, val + 6, val + 7, val + 8];
+                               arr2 = arr1;
+                               return arr2;
+                             });
+},
+(function ()
+{
+  return [1, 2, 3, 4].map(function (val) {
+                            var arr1;
+                            var arr2;
+                            arr1 = [val + 1, val + 2, val + 3, val + 4];
+                            arr2 = [val + 5, val + 6, val + 7, val + 8];
+                            arr2 = arr1;
+                            return arr2;
+                          });
+})()
+],
+[
+'Assign a local array to the element of a nested local array',
+function ()
+{
+  return [1, 2, 3, 4].mapPar(function (val) {
+                               var arr1;
+                               var arr2;
+                               arr1 = [val + 7, val + 8, val + 9];
+                               arr2 = [[1, 2, 3], [4, 5, 6]];
+                               arr2[1] = arr1;
+                               return arr2;
+                             });
+},
+(function ()
+{
+  return [1, 2, 3, 4].map(function (val) {
+                            var arr1;
+                            var arr2;
+                            arr1 = [val + 7, val + 8, val + 9];
+                            arr2 = [[1, 2, 3], [4, 5, 6]];
+                            arr2[1] = arr1;
+                            return arr2;
+                          });
+})()
+],
+[
+'Assign a global array to a local array',
+function ()
+{
+  global = [1, 2, 3, 4];
+  var result = [5, 6, 7, 8].mapPar(function (val) {
+                                     var local;
+                                     local = [val + 1, val + 2, val + 3, val + 4];
+                                     local = global;
+                                     return local;
+                                   });
+  delete global;
+  return result;
+},
+(function ()
+{
+  global = [1, 2, 3, 4];
+  var result = [5, 6, 7, 8].map(function (val) {
+                                  var local;
+                                  local = [val + 1, val + 2, val + 3, val + 4];
+                                  local = global;
+                                  return local;
+                                });
+  delete global;
+  return result;
+})()
+],
+[
+'Assign a global array to the element of a nested local array',
+function ()
+{
+  global = [7, 8, 9];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var local;
+                                     local = [[1, 2, 3], [4, 5, 6]];
+                                     local[1] = global;
+                                     return local;
+                                   });
+  delete global;
+  return result;
+},
+(function ()
+{
+  global = [7, 8, 9];
+  var result = [1, 2, 3, 4].map(function (val) {
+                                  var local;
+                                  local = [[1, 2, 3], [4, 5, 6]];
+                                  local[1] = global;
+                                  return local;
+                                });
+  delete global;
+  return result;
+})()
+],
+[
+'Assign a local array to a global array',
+function ()
+{
+  global = [0, 0, 0, 0];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var local;
+                                     local = [5, 6, 7, 8];
+                                     global = local;
+                                     return global;
+                                   });
+  delete global;
+  return result;
+},
+(function ()
+{
+  global = [0, 0, 0, 0];
+  var result = [1, 2, 3, 4].map(function (val) {
+                                  var local;
+                                  local = [5, 6, 7, 8];
+                                  global = local;
+                                  return global;
+                                });
+  delete global;
+  return result;
+})()
+],
+[
+'Assign a local array to the element of a nested global array',
+function ()
+{
+  global = [[1, 2, 3], [4, 5, 6]];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var local;
+                                     local = [7, 8, 9];
+                                     global[1] = local;
+                                     return global;
+                                   });
+  delete global;
+  return result;
+},
+(function ()
+{
+  global = [[1, 2, 3], [4, 5, 6]];
+  var result = [1, 2, 3, 4].map(function (val) {
+                                  var local;
+                                  local = [7, 8, 9];
+                                  global[1] = local;
+                                  return global;
+                                });
+  delete global;
+  return result;
+})()
+],
+[
+'Assign a global array to another global array',
+function ()
+{
+  arr1 = [1, 2, 3, 4];
+  arr2 = [5, 6, 7, 8];
+  var result = [0, 0, 0, 0].mapPar(function (val) {
+                                     arr2 = arr1;
+                                     return arr2;
+                                   });
+  delete arr1;
+  delete arr2;
+  return result;
+},
+(function ()
+{
+  arr1 = [1, 2, 3, 4];
+  arr2 = [5, 6, 7, 8];
+  var result = [0, 0, 0, 0].map(function (val) {
+                                  arr2 = arr1;
+                                  return arr2;
+                                });
+  delete arr1;
+  delete arr2;
+  return result;
+})()
+],
+[
+'Assign a global array to the element of a nested global array',
+function ()
+{
+  arr1 = [[1, 2, 3], [4, 5, 6]];
+  arr2 = [7, 8, 9];
+  var result = [0, 0, 0, 0].mapPar(function (val) {
+                                     arr1[1] = arr2;
+                                     return arr1;
+                                   });
+  delete arr1;
+  delete arr2;
+  return result;
+},
+(function ()
+{
+  arr1 = [[1, 2, 3], [4, 5, 6]];
+  arr2 = [7, 8, 9];
+  var result = [0, 0, 0, 0].map(function (val) {
+                                  arr1[1] = arr2;
+                                  return arr1;
+                                });
+  delete arr1;
+  delete arr2;
+  return result;
+})()
+],
+[
+'Assign an integer array to a double array',
+function ()
+{
+  return [0, 0, 0, 0].mapPar(function (val) {
+                               var arr1;
+                               var arr2;
+                               arr1 = [1, 2, 3, 4];
+                               arr2 = [1.1, 2.2, 3.3, 4.4];
+                               arr2 = arr1;
+                               return arr2;
+                             });
+},
+(function ()
+{
+  return [0, 0, 0, 0].map(function (val) {
+                            var arr1;
+                            var arr2;
+                            arr1 = [1, 2, 3, 4];
+                            arr2 = [1.1, 2.2, 3.3, 4.4];
+                            arr2 = arr1;
+                            return arr2;
+                          });
+})()
+],
+[
+'Assign an unsigned integer array to a double array',
+function ()
+{
+  arr1 = new Uint8ClampedArray([1, 2, 3, 4]);
+  arr2 = new Float64Array([1.1, 2.2, 3.3, 4.4]);
+  var result = [0, 0, 0, 0].mapPar(function (val) {
+                                     var arr3;
+                                     var arr4;
+                                     arr3 = [arr1[0], arr1[1], arr1[2], arr1[3]];
+                                     arr4 = [arr2[0], arr2[1], arr2[2], arr2[3]];
+                                     arr4 = arr3;
+                                     return arr4;
+                                   });
+  delete arr1;
+  delete arr2;
+  return result;
+},
+(function ()
+{
+  arr1 = new Uint8ClampedArray([1, 2, 3, 4]);
+  arr2 = new Float64Array([1.1, 2.2, 3.3, 4.4]);
+  var result = [0, 0, 0, 0].map(function (val) {
+                                  var arr3;
+                                  var arr4;
+                                  arr3 = [arr1[0], arr1[1], arr1[2], arr1[3]];
+                                  arr4 = [arr2[0], arr2[1], arr2[2], arr2[3]];
+                                  arr4 = arr3;
+                                  return arr4;
+                                });
+  delete arr1;
+  delete arr2;
+  return result;
+})()
+],
+[
+'Assign a float array to a double array',
+function ()
+{
+  arr1 = new Float32Array([1.1, 2.2, 3.3, 4.4]);
+  arr2 = new Float64Array([5.5, 6.6, 7.7, 8.8]);
+  var result = [0, 0, 0, 0].mapPar(function (val) {
+                                     var arr3;
+                                     var arr4;
+                                     arr3 = [arr1[0], arr1[1], arr1[2], arr1[3]];
+                                     arr4 = [arr2[0], arr2[1], arr2[2], arr2[3]];
+                                     arr4 = arr3;
+                                     return arr4;
+                                   });
+  delete arr1;
+  delete arr2;
+  return result;
+},
+(function ()
+{
+  arr1 = new Float32Array([1.1, 2.2, 3.3, 4.4]);
+  arr2 = new Float64Array([5.5, 6.6, 7.7, 8.8]);
+  var result = [0, 0, 0, 0].map(function (val) {
+                                  var arr3;
+                                  var arr4;
+                                  arr3 = [arr1[0], arr1[1], arr1[2], arr1[3]];
+                                  arr4 = [arr2[0], arr2[1], arr2[2], arr2[3]];
+                                  arr4 = arr3;
+                                  return arr4;
+                                });
+  delete arr1;
+  delete arr2;
+  return result;
+})()
+],
+[
+'Assign a double array to a float array',
+function ()
+{
+  arr1 = new Float64Array([1.1, 2.2, 3.3, 4.4]);
+  arr2 = new Float32Array([5.5, 6.6, 7.7, 8.8]);
+  var result = [0, 0, 0, 0].mapPar(function (val) {
+                                     var arr3;
+                                     var arr4;
+                                     arr3 = [arr1[0], arr1[1], arr1[2], arr1[3]];
+                                     arr4 = [arr2[0], arr2[1], arr2[2], arr2[3]];
+                                     arr4 = arr3;
+                                     return arr4;
+                                   });
+  delete arr1;
+  delete arr2;
+  return result;
+},
+(function ()
+{
+  arr1 = new Float64Array([1.1, 2.2, 3.3, 4.4]);
+  arr2 = new Float32Array([5.5, 6.6, 7.7, 8.8]);
+  var result = [0, 0, 0, 0].map(function (val) {
+                                  var arr3;
+                                  var arr4;
+                                  arr3 = [arr1[0], arr1[1], arr1[2], arr1[3]];
+                                  arr4 = [arr2[0], arr2[1], arr2[2], arr2[3]];
+                                  arr4 = arr3;
+                                  return arr4;
+                                });
+  delete arr1;
+  delete arr2;
+  return result;
+})()
+],
+[
+'Assign a local array which may be overwrite before it has been read to another local array',
+function ()
+{
+  return [0, 0, 0, 0].mapPar(function (val) {
+                               var arr1;
+                               var arr2;
+                               arr1 = [0, 0, 0, 0];
+                               arr2 = [0, 0, 0, 0];
+                               for (var i = 0; i < 2; i++) {
+                                 if (i === 0) {
+                                   arr1 = [1, 2, 3, 4];
+                                 } else {
+                                   arr2 = [5, 6, 7, 8];
+                                 }
+                               }
+                               return [arr1, arr2];
+                             });
+},
+(function ()
+{
+  return [0, 0, 0, 0].map(function (val) {
+                            var arr1;
+                            var arr2;
+                            arr1 = [0, 0, 0, 0];
+                            arr2 = [0, 0, 0, 0];
+                            for (var i = 0; i < 2; i++) {
+                              if (i === 0) {
+                                arr1 = [1, 2, 3, 4];
+                              } else {
+                                arr2 = [5, 6, 7, 8];
+                              }
+                            }
+                            return [arr1, arr2];
+                          });
+})()
+],
+[
+'Initialize a nested local array with flat local arrays',
+function ()
+{
+  return [1, 2, 3, 4].mapPar(function (val) {
+                               var arr1;
+                               var arr2;
+                               var arr3;
+                               arr1 = [1, 2, 3];
+                               arr2 = [4, 5, 6];
+                               arr3 = [arr1, arr2];
+                               return arr3[1][2];
+                             });
+},
+[6, 6, 6, 6]
+],
+[
+'Initialize a nested local array with a flat local array and a flat global array',
+function ()
+{
+  global = [1, 2, 3];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var arr1;
+                                     var arr2;
+                                     arr1 = [4, 5, 6];
+                                     arr2 = [arr1, global];
+                                     return arr2[1][2];
+                                   });
+  delete global;
+  return result;
+},
+[3, 3, 3, 3]
+],
+[
+'Initialize a nested local array with nested local arrays',
+function ()
+{
+  return [1, 2, 3, 4].mapPar(function (val) {
+                               var arr1;
+                               var arr2;
+                               var arr3;
+                               arr1 = [[1, 2, 3], [ 4,  5,  6]];
+                               arr2 = [[7, 8, 9], [10, 11, 12]];
+                               arr3 = [arr1, arr2];
+                               return arr3[1][1][2];
+                             });
+},
+[12, 12, 12, 12]
+],
+[
+'Initialize a nested local array with a nested local array and a nested global array',
+function ()
+{
+  global = [[1, 2, 3], [4, 5, 6]];
+  var result = [1, 2, 3, 4].mapPar(function (val) {
+                                     var arr1;
+                                     var arr2;
+                                     arr1 = [[7, 8, 9], [10, 11, 12]];
+                                     arr2 = [arr1, global];
+                                     return arr2[1][1][2];
+                                   });
+  delete global;
+  return result;
+},
+[6, 6, 6, 6]
+],
+[
+'Pass Uint8ClampedArray as an argument to the called function',
+function ()
+{
+  global = new Uint8ClampedArray([1, 2, 3, 4]);
+  var result = [0, 0, 0, 0].mapPar(function (val, idx) {
+                                     function f(ta, idx)
+                                     {
+                                       return ta[idx];
+                                     }
+                                     return f(global, idx);
+                                   });
+  delete global;
+  return result;
+},
+[1, 2, 3, 4]
+],
+[
+'Pass Float32Array as an argument to the called function',
+function ()
+{
+  global = new Float32Array([1, 2, 3, 4]);
+  var result = [0, 0, 0, 0].mapPar(function (val, idx) {
+                                     function f(ta, idx)
+                                     {
+                                       return ta[idx];
+                                     }
+                                     return f(global, idx);
+                                   });
+  delete global;
+  return result;
+},
+[1, 2, 3, 4]
+],
+[
+'Pass Float64Array as an argument to the called function',
+function ()
+{
+  global = new Float64Array([1, 2, 3, 4]);
+  var result = [0, 0, 0, 0].mapPar(function (val, idx) {
+                                     function f(ta, idx)
+                                     {
+                                       return ta[idx];
+                                     }
+                                     return f(global, idx);
+                                   });
+  delete global;
+  return result;
+},
+[1, 2, 3, 4]
+],
+[
+'The called function returns a global array',
+function ()
+{
+  global = [1, 2, 3, 4];
+  var result = [0, 0, 0, 0].mapPar(function (val) {
+                                     function f()
+                                     {
+                                       return global;
+                                     }
+                                     var local;
+                                     local = [5, 6, 7, 8];
+                                     local = f();
+                                     return local;
+                                   });
+  delete global;
+  return result;
+},
+(function ()
+{
+  global = [1, 2, 3, 4];
+  var result = [0, 0, 0, 0].map(function (val) {
+                                  function f()
+                                  {
+                                    return global;
+                                  }
+                                  var local;
+                                  local = [5, 6, 7, 8];
+                                  local = f();
+                                  return local;
+                                });
+  delete global;
+  return result;
+})()
+],
+[
+'The called function has no return value',
+function ()
+{
+  return [1, 2, 3, 4].mapPar(function (val) {
+                               function f()
+                               {
+                               }
+                               f();
+                               return val;
+                             });
+},
+[1, 2, 3, 4]
 ]
 ];
 
